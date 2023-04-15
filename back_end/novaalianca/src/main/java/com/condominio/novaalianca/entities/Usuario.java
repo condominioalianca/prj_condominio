@@ -1,26 +1,30 @@
 package com.condominio.novaalianca.entities;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
+@Getter
+@Setter
+@Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "TB_USUARIO")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_USUARIO")
-    private int idUsuario;
+    private Long idUsuario;
 
     @Column(name = "NM_USUARIO")
     private String nomeUsuario;
@@ -49,124 +53,40 @@ public class Usuario {
     @Column(name = "TX_TIPO_PESSOA")
     private String txTipoPessoa;
 
-    @Column(name = "ENVIA_BOLETO")
+    @Column(name = "FL_ENVIA_BOLETO")
     private boolean enviaBoleto;
 
-    @Column(name = "ENVIA_SMS")
+    @Column(name = "FL_ENVIA_SMS")
     private boolean enviaSms;
 
-    @Column(name = "ATIVO")
+    @Column(name = "FL_ATIVO")
     private boolean ativo;
 
-    @OneToMany
-    @JoinColumn(name="ID_ENDERECO")
-    private List<EnderecoUsuario> enderecoUsuarios;
+    @ManyToOne
+    @JoinColumn(name = "ID_UNIDADE")
+    private Unidade unidade;
 
+    @ManyToOne
+    @JoinColumn(name = "ID_ENDERECO")
+    private Endereco endereco;
 
-    public Usuario (){
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Usuario usuario)) return false;
 
-    }
-    public int getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public String getNomeUsuario() {
-        return nomeUsuario;
-    }
-
-    public void setNomeUsuario(String nomeUsuario) {
-        this.nomeUsuario = nomeUsuario;
+        if (getIdUsuario() != null ? !getIdUsuario().equals(usuario.getIdUsuario()) : usuario.getIdUsuario() != null)
+            return false;
+        if (getNrDocumentoCpf() != null ? !getNrDocumentoCpf().equals(usuario.getNrDocumentoCpf()) : usuario.getNrDocumentoCpf() != null)
+            return false;
+        return getNrDocumentoCnpj() != null ? getNrDocumentoCnpj().equals(usuario.getNrDocumentoCnpj()) : usuario.getNrDocumentoCnpj() == null;
     }
 
-    public String getTxEmail() {
-        return txEmail;
-    }
-
-    public void setTxEmail(String txEmail) {
-        this.txEmail = txEmail;
-    }
-
-    public String getNrTelefoneDdd() {
-        return nrTelefoneDdd;
-    }
-
-    public void setNrTelefoneDdd(String nrTelefoneDdd) {
-        this.nrTelefoneDdd = nrTelefoneDdd;
-    }
-
-    public String getNrTelefone() {
-        return nrTelefone;
-    }
-
-    public void setNrTelefone(String nrTelefone) {
-        this.nrTelefone = nrTelefone;
-    }
-
-    public String getNrCelularDdd() {
-        return nrCelularDdd;
-    }
-
-    public void setNrCelularDdd(String nrCelularDdd) {
-        this.nrCelularDdd = nrCelularDdd;
-    }
-
-    public String getNrCelular() {
-        return nrCelular;
-    }
-
-    public void setNrCelular(String nrCelular) {
-        this.nrCelular = nrCelular;
-    }
-
-    public String getNrDocumentoCpf() {
-        return nrDocumentoCpf;
-    }
-
-    public void setNrDocumentoCpf(String nrDocumentoCpf) {
-        this.nrDocumentoCpf = nrDocumentoCpf;
-    }
-
-    public String getNrDocumentoCnpj() {
-        return nrDocumentoCnpj;
-    }
-
-    public void setNrDocumentoCnpj(String nrDocumentoCnpj) {
-        this.nrDocumentoCnpj = nrDocumentoCnpj;
-    }
-
-    public String getTxTipoPessoa() {
-        return txTipoPessoa;
-    }
-
-    public void setTxTipoPessoa(String txTipoPessoa) {
-        this.txTipoPessoa = txTipoPessoa;
-    }
-
-    public boolean isEnviaBoleto() {
-        return enviaBoleto;
-    }
-
-    public void setEnviaBoleto(boolean enviaBoleto) {
-        this.enviaBoleto = enviaBoleto;
-    }
-
-    public boolean isEnviaSms() {
-        return enviaSms;
-    }
-
-    public void setEnviaSms(boolean enviaSms) {
-        this.enviaSms = enviaSms;
-    }
-
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
+    @Override
+    public int hashCode() {
+        int result = getIdUsuario() != null ? getIdUsuario().hashCode() : 0;
+        result = 31 * result + (getNrDocumentoCpf() != null ? getNrDocumentoCpf().hashCode() : 0);
+        result = 31 * result + (getNrDocumentoCnpj() != null ? getNrDocumentoCnpj().hashCode() : 0);
+        return result;
     }
 }

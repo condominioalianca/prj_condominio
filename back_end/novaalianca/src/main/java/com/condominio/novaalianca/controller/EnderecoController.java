@@ -1,7 +1,7 @@
 package com.condominio.novaalianca.controller;
 
-import com.condominio.novaalianca.dto.UsuarioDTO;
-import com.condominio.novaalianca.services.UsuarioService;
+import com.condominio.novaalianca.dto.EnderecoDTO;
+import com.condominio.novaalianca.services.EnderecoService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,21 +11,22 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(value = "/usuarios")
-public class UsuarioController {
+@RequestMapping(value = "/endereco")
+public class EnderecoController {
 
     @Autowired
-    private UsuarioService service;
+    private EnderecoService service;
 
     @GetMapping
-    public ResponseEntity<Page<UsuarioDTO>>findAll(Pageable pageable){
-        Page<UsuarioDTO> list = service.findAllPaged(pageable);
+    public ResponseEntity<Page<EnderecoDTO>>findAll(Pageable pageable){
+        Page<EnderecoDTO> list = service.findAllPaged(pageable);
         return ResponseEntity.ok().body(list);
     }
 
     @PostMapping("/save")
-    public UsuarioDTO usuarioSave(@RequestBody UsuarioDTO usuarioDTO){
-        return service.usuarioSave(usuarioDTO);
+    public EnderecoDTO enderecoSave(@RequestBody EnderecoDTO enderecoDTO){
+
+        return service.enderecoSave(enderecoDTO);
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
@@ -33,10 +34,10 @@ public class UsuarioController {
 
     }
 
-    @DeleteMapping("/delet/{idUsuario}")
+    @DeleteMapping("/delet/{idEndereco}")
     @Transactional
-    public ResponseEntity<Void> usuarioDelete(@PathVariable Long idUsuario){
-        service.deletById(idUsuario);
+    public ResponseEntity<Void> enderecoDelete(@PathVariable Long idEndereco){
+        service.deletById(idEndereco);
         return ResponseEntity.noContent().build();
     }
 }
