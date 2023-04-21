@@ -1,9 +1,10 @@
 package com.condominio.novaalianca.util;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
 
-public class Autenticacao extends Authenticator{
+import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
+
+public class Autenticacao extends Authenticator {
 	
 	private String username;  
 	private String password;

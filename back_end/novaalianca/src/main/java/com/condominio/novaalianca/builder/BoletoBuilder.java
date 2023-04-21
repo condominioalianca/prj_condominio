@@ -5,14 +5,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import com.condominio.novaalianca.TipoDesconto;
-import com.condominio.novaalianca.TipoMora;
-import com.condominio.novaalianca.TipoMulta;
-import com.condominio.novaalianca.TipoPessoa;
-import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+
+import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.util.Feriados;
+import com.inter.boletos.client.dto.boleto.BoletoDTO;
+import com.inter.boletos.client.enums.TipoDesconto;
+import com.inter.boletos.client.enums.TipoMora;
+import com.inter.boletos.client.enums.TipoMulta;
+import com.inter.boletos.client.enums.TipoPessoa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,9 @@ public class BoletoBuilder {
 	@Autowired
 	ParametrosSistemaRepository parametrosSistemaRepository;
 
+	@Autowired
+	private NovaAliancaProperties properties;
+
 	public BoletoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
 		BoletoDTO boleto = new BoletoDTO();
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
@@ -34,8 +39,19 @@ public class BoletoBuilder {
 		Float valorCondominio = Float.parseFloat(valorCOndominio1);
 		Float valorMulta = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MULTA"));
 		Float valorMora = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MORA"));
-		int diaVencimento = Integer
-				.parseInt(parametrosSistemaRepository.findValorParametro("DIA_DE_VENCIMENTO_BOLETO"));
+		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro("DIA_DE_VENCIMENTO_BOLETO"));
+		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+
+
+		boleto.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
+		boleto.setValorNominal(valorCondominio);
+		boleto.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
+		boleto.setNumDiasAgenda(30);
+
+
+
 
 		/* Preenchendo Dados Pagador */
 		boleto.getPagador().setCpfCnpj(Objects.isNull(usuario.getNrDocumentoCpf() )? usuario.getNrDocumentoCnpj() : usuario.getNrDocumentoCpf());
@@ -49,21 +65,11 @@ public class BoletoBuilder {
 		boleto.getPagador().setCidade(usuario.getEndereco().getTxCidade());
 		boleto.getPagador().setUf(usuario.getEndereco().getTxUf());
 		boleto.getPagador().setCep(usuario.getEndereco().getTxCep());
-
-
-
-
 		boleto.getPagador().setDdd(usuario.getNrCelularDdd() == null ? "" : usuario.getNrCelularDdd());
 		boleto.getPagador().setTipoPessoa(TipoPessoa.FISICA.toString());
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		boleto.setDataEmissao(LocalDate.now().format(formatter));
 
-		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
-		//boleto.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
-		boleto.setDataLimite("TRINTA");
 
-		boleto.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
 
 		/* Preenchendo Mensagens */
 		// boleto.getMensagem().setLinha1("JUROS(MORA) - TAXA MENSAL - 1 DIA apos DO
@@ -90,8 +96,7 @@ public class BoletoBuilder {
 		boleto.getDesconto3().setValor(0.0);
 		boleto.getDesconto3().setData("");
 
-		boleto.setValorNominal(valorCondominio);
-		boleto.setValorAbatimento(0F);
+
 
 		/* Preenchendo Multa */
 		boleto.getMulta().setCodigoMulta(TipoMulta.VALORFIXO.toString());
@@ -105,8 +110,16 @@ public class BoletoBuilder {
 		boleto.getMora().setTaxa(valorMora);
 		boleto.getMora().setValor(0F);
 
-		boleto.setCnpjCPFBeneficiario("07890271000109");
-		boleto.setNumDiasAgenda("TRINTA");
+		boleto.getBeneficiarioDTO().setNome("Condominio Nova Alianca");
+		boleto.getBeneficiarioDTO().setCpfCnpj(properties.getCnpjCpfBenificiario());
+		boleto.getBeneficiarioDTO().setTipoPessoa(TipoPessoa.JURIDICA.toString());
+		boleto.getBeneficiarioDTO().setCep("09894205");
+		boleto.getBeneficiarioDTO().setEndereco("RUA ARNALDO MARGONARI");
+		boleto.getBeneficiarioDTO().setBairro("JORDANOPOLIS");
+		boleto.getBeneficiarioDTO().setCidade("SAO BERNARDO DO CAMPO");
+		boleto.getBeneficiarioDTO().setUf("SP");
+
+
 
 		return boleto;
 	}
