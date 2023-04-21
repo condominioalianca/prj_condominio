@@ -11,12 +11,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "TB_PARAMETROS_SISTEMA")
 public class ParametrosSitema {
 	
@@ -39,11 +41,11 @@ public class ParametrosSitema {
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_USUARIO_CRIACAO")
-	private Usuario idUsuarioCriacao;
+	private Usuario usuarioCriacao;
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_USUARIO_ALTERACAO")
-	private Usuario idUsuarioAlteracao;
+	private Usuario usuarioAlteracao;
 	
 	@Column(name = "FL_ATIVO")
 	private Boolean ativo;
