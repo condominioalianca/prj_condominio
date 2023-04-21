@@ -45,10 +45,10 @@ public class TestesAleatorios {
     @Autowired
     private EmailService emailService;
 
-    @GetMapping("/token")
-    public TokenResponseDTO testeTokenClient() {
-        return BoletoService.getInstance().devolvetoken(builder.requestBoleto("boleto-cobranca.read"));
-    }
+//    @GetMapping("/token")
+//    public TokenResponseDTO testeTokenClient() {
+//        return BoletoService.getInstance().devolvetoken(builder.requestBoleto("boleto-cobranca.read"));
+//    }
 
 
     @GetMapping("/geraboleto")
