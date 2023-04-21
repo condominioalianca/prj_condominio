@@ -1,32 +1,40 @@
-package com.condominio.novaalianca.dto.boleto;
+package com.inter.boletos.client.dto.boleto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @Getter
 @Setter
+@ToString
 public class BoletoDTO implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
-	
-	private PagadorDTO pagador;
-	private String dataEmissao;
+
 	private String seuNumero;
-	private String dataLimite;
+
+	private Float valorNominal;
+
 	private String dataVencimento;
+
+	@JsonProperty("numDiasAgenda")
+	private Integer numDiasAgenda;
+
+	private PagadorDTO pagador;
 	private MensagemDTO mensagem;
 	private DescontoDTO desconto1;
 	private DescontoDTO desconto2;
 	private DescontoDTO desconto3;
-	private Float valorNominal;
-	private Float valorAbatimento;
+
 	private MultaDTO multa;
 	private MoraDTO mora;
-	private String cnpjCPFBeneficiario;
-	private String numDiasAgenda;
-	
+	@JsonProperty("beneficiarioFinal")
+	private BeneficiarioDTO beneficiarioDTO;
+
+
 	
 	public BoletoDTO() {
 		pagador = new PagadorDTO();
@@ -36,6 +44,7 @@ public class BoletoDTO implements Serializable{
 		desconto3 = new DescontoDTO();
 		multa = new MultaDTO();
 		mora = new MoraDTO();
+		beneficiarioDTO = new BeneficiarioDTO();
 		
 	}
 	
