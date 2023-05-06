@@ -1,15 +1,19 @@
 package com.condominio.novaalianca.builder;
 
 import com.condominio.novaalianca.dto.UsuarioDTO;
+import com.condominio.novaalianca.dto.UsuarioInsertDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import com.condominio.novaalianca.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class UsuarioBuilder {
@@ -19,6 +23,12 @@ public class UsuarioBuilder {
 
     @Autowired
     private EnderecoBuilder enderecoBuilder;
+
+    @Autowired
+    private PerfilBuilder perfilBuilder;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UsuarioDTO entityToDto (Usuario usuario){
 
@@ -38,6 +48,10 @@ public class UsuarioBuilder {
                 .enviaSms(usuario.isEnviaSms())
                 .unidadeDTO(unidadeBuilder.entityToDto(usuario.getUnidade()))
                 .enderecoDTO(enderecoBuilder.entityToDto(usuario.getEndereco()))
+                .listPerfis(Objects.isNull(usuario.getListPerfis()) ? null : usuario.getListPerfis()
+                        .stream()
+                        .map(perfil -> perfilBuilder.entityToDto(perfil))
+                        .collect(Collectors.toSet()))
                 .build();
     }
 
@@ -59,6 +73,11 @@ public class UsuarioBuilder {
                 .enviaSms(dto.isEnviaSms())
                 .unidade(unidadeBuilder.dtoToEntity(dto.getUnidadeDTO()))
                 .endereco(enderecoBuilder.dtoToEntity(dto.getEnderecoDTO()))
+                .listPerfis((Objects.isNull(dto.getListPerfis()) ? null : dto.getListPerfis()
+                        .stream()
+                        .map(perfil -> perfilBuilder.dtoToEntity(perfil))
+                        .collect(Collectors.toSet())))
                 .build();
     }
+
 }
