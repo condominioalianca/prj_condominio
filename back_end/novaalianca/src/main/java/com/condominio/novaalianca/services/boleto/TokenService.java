@@ -14,19 +14,14 @@ import org.springframework.stereotype.Service;
 public class TokenService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
-    private static final TokenService INSTANCE = new TokenService();
-
-     public static TokenService getInstance() {
-        return INSTANCE;
-    }
 
     public TokenResponseDTO getToken (RequestBoleto requestBoleto){
         Gson gson = new Gson();
         String caminhoArquivo = getClass().getResource("../").toString();
 
-        String webDir = "client-boleto-inter/";
+        String webDir = "novaalianca/";
         caminhoArquivo = caminhoArquivo.substring(6, caminhoArquivo.indexOf(webDir)+webDir.length());
-//        LOGGER.info("Caminho do certificado {}", requestBoleto.getCaminhoCertificado());
+        LOGGER.info("Caminho do certificado {}", requestBoleto.getCaminhoCertificado());
         caminhoArquivo = caminhoArquivo + requestBoleto.getCaminhoCertificado();
 
         caminhoArquivo = caminhoArquivo.replace("/", "//");

@@ -43,6 +43,9 @@ public class TestesAleatorios {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private BoletoService boletoService;
+
 //    @GetMapping("/token")
 //    public TokenResponseDTO testeTokenClient() {
 //        return BoletoService.getInstance().devolvetoken(builder.requestBoleto("boleto-cobranca.read"));
@@ -57,7 +60,7 @@ public class TestesAleatorios {
 
         for (Usuario usuario: listUsuarios ) {
             BoletoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
-            listResponse.add(BoletoService.getInstance().geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
+            listResponse.add(boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
         }
 
         return ResponseEntity.ok().body( listResponse);
@@ -68,28 +71,28 @@ public class TestesAleatorios {
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> listBoletos(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().listaBoletos(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.listaBoletos(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/boletoDetalhe")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> boletoDetalhe(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().boletoDetalhado(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.boletoDetalhado(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/downloadPDF")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> downloadPdf(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/cancelaBoleto")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> cancelaBoleto(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().cancelaBoleto(filtro, builder.requestBoleto("boleto-cobranca.write")));
+        return ResponseEntity.ok().body( boletoService.cancelaBoleto(filtro, builder.requestBoleto("boleto-cobranca.write")));
     }
 
     @GetMapping("/enviaEmail")
@@ -98,7 +101,7 @@ public class TestesAleatorios {
 
         EmailDTO emailDTO = new EmailDTO();
 
-        byte[] decoder = Base64.getDecoder().decode(BoletoService.getInstance().downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")).getPdf());
+        byte[] decoder = Base64.getDecoder().decode(boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")).getPdf());
 
 
         DateTimeFormatter formatterReferencia = DateTimeFormatter.ofPattern("MM-yyyy");

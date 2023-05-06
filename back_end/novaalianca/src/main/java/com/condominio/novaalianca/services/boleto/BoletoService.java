@@ -13,33 +13,29 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 import java.util.Objects;
 
+@Service
 public class BoletoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BoletoService.class);
-    private static final BoletoService INSTANCE = new BoletoService();
+
+    @Autowired
+    private TokenService tokenService;
 
 
-
-
-    private BoletoService() {
-
-    }
-
-    public static BoletoService getInstance() {
-        return INSTANCE;
-    }
 
 
     public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto){
-        return TokenService.getInstance().getToken(requestBoleto);
+        return tokenService.getToken(requestBoleto);
     }
 
     public ResponseListagemBoletosDTO listaBoletos(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-        TokenResponseDTO token = TokenService.getInstance().getToken( requestBoleto);
+        TokenResponseDTO token = tokenService.getToken( requestBoleto);
         LOGGER.info("TESTE DETALHE  URL: {} ", requestBoleto.getUrlBancoInterBoleto());
         LOGGER.info("TESTE DETALHE  Token: {} ", "Bearer " + token.getAccess_token());
         LOGGER.info("TESTE DETALHE  Data Inicial: {} ", filtro.getDataInicial());
@@ -58,7 +54,7 @@ public class BoletoService {
     }
 
     public ResponseBoletoDetalheDTO boletoDetalhado(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-        TokenResponseDTO token = TokenService.getInstance().getToken( requestBoleto);
+        TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}";
         LOGGER.info("TESTE DETALHE  URL: {} ", url);
 
@@ -76,9 +72,11 @@ public class BoletoService {
 
     public ResponseBoletoDTO geraBoleto(RequestBoleto requestBoleto, BoletoDTO boletoDTO) throws Exception {
         TokenResponseDTO token = new TokenResponseDTO();
-
-        while (Objects.isNull(token.getAccess_token())){
-            token = TokenService.getInstance().getToken( requestBoleto);
+        boolean execute = false;
+        int count = 0;
+        while (Objects.isNull(token.getAccess_token()) &&  count < 15){
+            token = tokenService.getToken( requestBoleto);
+            count++;
         }
         String url = requestBoleto.getUrlBancoInterBoleto();
         LOGGER.info("TESTE DETALHE  URL: {} ", url);
@@ -95,7 +93,7 @@ public class BoletoService {
     }
 
     public String cancelaBoleto(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-        TokenResponseDTO token = TokenService.getInstance().getToken( requestBoleto);
+        TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/cancelar";
         LOGGER.info("TESTE DETALHE  URL: {} ", url);
         HttpResponse<String> response = Unirest.post(url)
@@ -114,7 +112,7 @@ public class BoletoService {
     }
 
     public BoletoPDFDto downloadPDF(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-        TokenResponseDTO token = TokenService.getInstance().getToken( requestBoleto);
+        TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/pdf";
         LOGGER.info("TESTE DETALHE  URL: {} ", url);
         HttpResponse<BoletoPDFDto> response = Unirest.get(url)

@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.application;
+package com.condominio.novaalianca;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
