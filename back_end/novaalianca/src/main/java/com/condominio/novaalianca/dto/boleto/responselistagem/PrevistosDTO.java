@@ -1,14 +1,14 @@
-package com.inter.boletos.client.dto.boleto.responselistagem;
+package com.condominio.novaalianca.dto.boleto.responselistagem;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
-public class RecebidosDTO {
-
+public class PrevistosDTO {
+	
 	private Integer quantidade;
 	private Integer valor;
 }

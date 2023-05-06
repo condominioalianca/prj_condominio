@@ -1,4 +1,4 @@
-package com.inter.boletos.client.dto.boleto;
+package com.condominio.novaalianca.dto.boleto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,14 +11,14 @@ import java.io.Serializable;
 @Setter
 @ToString
 @NoArgsConstructor
-public class DescontoDTO implements Serializable{
+public class MoraDTO implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
-	private String codigoDesconto;
-	private Double taxa;
-	private Double valor;
+	private String codigoMora;
 	private String data;
-	
+	private Float valor;
+	private Float taxa;
+
 	
 }

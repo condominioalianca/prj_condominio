@@ -1,4 +1,4 @@
-package com.inter.boletos.client.dto.boleto.responselistagem;
+package com.condominio.novaalianca.dto.boleto.responselistagem;
 
 import lombok.Getter;
 import lombok.Setter;

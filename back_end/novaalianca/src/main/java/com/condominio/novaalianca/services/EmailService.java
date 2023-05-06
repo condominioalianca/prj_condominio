@@ -4,7 +4,7 @@ import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.util.Autenticacao;
 import com.condominio.novaalianca.util.TemplateEmail;
-import com.inter.boletos.client.dto.boleto.BoletoPDFDto;
+import com.condominio.novaalianca.dto.boleto.BoletoPDFDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

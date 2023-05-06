@@ -1,8 +1,9 @@
-package com.inter.boletos.client.service;
+package com.condominio.novaalianca.services.boleto;
 
+import com.condominio.novaalianca.dto.boleto.RequestBoleto;
+import com.condominio.novaalianca.dto.token.TokenResponseDTO;
 import com.google.gson.Gson;
-import com.inter.boletos.client.dto.boleto.RequestBoleto;
-import com.inter.boletos.client.dto.token.TokenResponseDTO;
+
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.inter.boletos.client.dto.boleto;
+package com.condominio.novaalianca.dto.boleto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

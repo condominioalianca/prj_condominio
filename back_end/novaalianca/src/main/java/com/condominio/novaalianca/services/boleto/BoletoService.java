@@ -1,12 +1,19 @@
-package com.inter.boletos.client.service;
+package com.condominio.novaalianca.services.boleto;
 
-import com.inter.boletos.client.dto.FiltroListagemBoletoDTO;
-import com.inter.boletos.client.dto.boleto.*;
-import com.inter.boletos.client.dto.token.TokenResponseDTO;
+
+import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoPDFDto;
+import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
+import com.condominio.novaalianca.dto.boleto.RequestBoleto;
+import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
+import com.condominio.novaalianca.dto.boleto.ResponseBoletoDetalheDTO;
+import com.condominio.novaalianca.dto.boleto.ResponseListagemBoletosDTO;
+import com.condominio.novaalianca.dto.token.TokenResponseDTO;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import java.util.Objects;
 
@@ -28,7 +35,7 @@ public class BoletoService {
 
 
     public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto){
-        return TokenService.getInstance().getToken( requestBoleto);
+        return TokenService.getInstance().getToken(requestBoleto);
     }
 
     public ResponseListagemBoletosDTO listaBoletos(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {

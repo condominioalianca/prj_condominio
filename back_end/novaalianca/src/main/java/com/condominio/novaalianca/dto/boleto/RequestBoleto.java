@@ -1,4 +1,4 @@
-package com.inter.boletos.client.dto.boleto;
+package com.condominio.novaalianca.dto.boleto;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.inter.boletos.client.dto;
+package com.condominio.novaalianca.dto.boleto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
