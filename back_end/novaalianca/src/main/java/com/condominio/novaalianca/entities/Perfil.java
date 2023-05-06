@@ -13,28 +13,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
 @Getter
 @Setter
-@Entity
 @Builder
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TB_UNIDADE")
-public class Unidade {
+@Table(name = "TB_PERFIL")
+public class Perfil {
     @Id
-    @Column(name = "ID_UNIDADE")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idUnidade;
-
-    @Column(name = "TX_NUMERO_UNIDADE")
-    private String numeroUnidade;
-
-    @Column(name = "TX_ANDAR")
-    private String andarUnidade;
-
-    @Column(name = "TX_BLOCO")
-    private String blocoUnidade;
+    @Column(name = "ID_PERFIL")
+    private Long id;
+    @Column(name = "TX_DESC_PERFIL")
+    private String nomePerfil;
 
 
 }

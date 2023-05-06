@@ -1,13 +1,15 @@
 package com.condominio.novaalianca.controller;
 
 import com.condominio.novaalianca.dto.UsuarioDTO;
+import com.condominio.novaalianca.dto.UsuarioInsertDTO;
 import com.condominio.novaalianca.services.UsuarioService;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 
 @RestController
@@ -24,8 +26,8 @@ public class UsuarioController {
     }
 
     @PostMapping("/save")
-    public UsuarioDTO usuarioSave(@RequestBody UsuarioDTO usuarioDTO){
-        return service.usuarioSave(usuarioDTO);
+    public UsuarioDTO usuarioSave(@Valid @RequestBody UsuarioInsertDTO usuarioInsertDTO){
+        return service.usuarioSave(usuarioInsertDTO);
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
@@ -34,7 +36,6 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/delet/{idUsuario}")
-    @Transactional
     public ResponseEntity<Void> usuarioDelete(@PathVariable Long idUsuario){
         service.deletById(idUsuario);
         return ResponseEntity.noContent().build();

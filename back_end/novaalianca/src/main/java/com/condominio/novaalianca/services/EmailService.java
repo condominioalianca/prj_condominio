@@ -4,30 +4,31 @@ import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.util.Autenticacao;
 import com.condominio.novaalianca.util.TemplateEmail;
-
 import com.inter.boletos.client.dto.boleto.BoletoPDFDto;
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
-import jakarta.mail.util.ByteArrayDataSource;
-import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -172,7 +173,7 @@ public class EmailService {
             //final ByteArrayOutputStream document = createInMemoryDocument("body");
             //final InputStream inputStream = new ByteArrayInputStream(document.toByteArray());
             //final DataSource attachment = new ByteArrayDataSource(inputStream, "application/octet-stream");
-            mimeMessageHelper.addAttachment("Boleto Cobranca - AP " + mailDetail.getNumeroUnidade() + ".pdf",resource);
+            mimeMessageHelper.addAttachment("Boleto Cobranca - AP " + mailDetail.getNumeroUnidade() + ".pdf", resource);
 
             log.info("Passou");
             // Sending the email with attachment

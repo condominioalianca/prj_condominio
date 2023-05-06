@@ -1,6 +1,16 @@
 package com.condominio.novaalianca.dto;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import javax.validation.constraints.NotBlank;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -12,7 +22,7 @@ public class UsuarioDTO {
 
 
     private Long idUsuario;
-
+    @NotBlank(message = "Nome requerido")
     private String nomeUsuario;
 
     private String txEmail;
@@ -34,6 +44,9 @@ public class UsuarioDTO {
     private boolean enviaBoleto;
 
     private boolean enviaSms;
+
+    @Setter(AccessLevel.NONE)
+    private Set<PerfilDTO> listPerfis = new HashSet<>();
 
 
     private boolean ativo;

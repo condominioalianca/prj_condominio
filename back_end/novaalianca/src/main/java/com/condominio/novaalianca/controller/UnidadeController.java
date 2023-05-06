@@ -3,7 +3,6 @@ package com.condominio.novaalianca.controller;
 
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.services.UnidadeService;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,6 @@ public class UnidadeController {
     }
 
     @DeleteMapping("/delet/{idUnidade}")
-    @Transactional
     public ResponseEntity<Void> enderecoDelet(@PathVariable Long idUnidade){
         service.deletById(idUnidade);
         return ResponseEntity.noContent().build();

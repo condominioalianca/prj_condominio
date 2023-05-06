@@ -15,8 +15,6 @@ public class NovaAliancaProperties {
     @Value("${banco.inter.url.boleto}")
     private String bancoInterUrlBoleto;
 
-
-
     @Value("${banco.inter.caminho.certificado}")
     private String caminhoCertificado;
 
@@ -38,16 +36,28 @@ public class NovaAliancaProperties {
 
     //Propriedades dos Emails
     @Value("${mail.smtp.host}")
-    private String host = "smtp.gmail.com";
+    private String host;
 
     @Value("${mail.smtp.port}")
-    private String port = "465";
+    private String port;
 
     @Value("${mail.smtp.username}")
     private String usernameMail;
 
     @Value("${mail.smtp.password}")
     private String senhaMail;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${security.oauth2.client.client-id}")
+    private String clientIdOauth2;
+
+    @Value("${security.oauth2.client.client-secret}")
+    private  String clientSecretOauth2;
+
+    @Value("${jwt.duration}")
+    private Integer jwtDuration;
 
 
 }

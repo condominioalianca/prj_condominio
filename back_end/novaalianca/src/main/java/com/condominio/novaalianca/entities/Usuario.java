@@ -1,16 +1,31 @@
 package com.condominio.novaalianca.entities;
 
 
-import jakarta.persistence.*;
-
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -19,7 +34,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "TB_USUARIO")
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +44,7 @@ public class Usuario {
     @Column(name = "NM_USUARIO")
     private String nomeUsuario;
 
-    @Column(name = "TX_EMAIL")
+    @Column(name = "TX_EMAIL", unique = true)
     private String txEmail;
 
     @Column(name = "NR_TELEFONE_DDD")
@@ -62,6 +77,9 @@ public class Usuario {
     @Column(name = "FL_ATIVO")
     private boolean ativo;
 
+    @Column(name = "TX_PASSWORD")
+    private String password;
+
     @ManyToOne
     @JoinColumn(name = "ID_UNIDADE")
     private Unidade unidade;
@@ -70,23 +88,42 @@ public class Usuario {
     @JoinColumn(name = "ID_ENDERECO")
     private Endereco endereco;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Usuario usuario)) return false;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "TB_USUARIO_PERFIL",
+            joinColumns = @JoinColumn(name = "ID_USUARIO"),
+            inverseJoinColumns = @JoinColumn(name = "ID_PERFIL"))
+    @Setter(AccessLevel.NONE)
+    private Set<Perfil> listPerfis = new HashSet<>();
 
-        if (getIdUsuario() != null ? !getIdUsuario().equals(usuario.getIdUsuario()) : usuario.getIdUsuario() != null)
-            return false;
-        if (getNrDocumentoCpf() != null ? !getNrDocumentoCpf().equals(usuario.getNrDocumentoCpf()) : usuario.getNrDocumentoCpf() != null)
-            return false;
-        return getNrDocumentoCnpj() != null ? getNrDocumentoCnpj().equals(usuario.getNrDocumentoCnpj()) : usuario.getNrDocumentoCnpj() == null;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return listPerfis.stream().map(perfil -> new SimpleGrantedAuthority(perfil.getNomePerfil())).collect(Collectors.toList());
     }
 
     @Override
-    public int hashCode() {
-        int result = getIdUsuario() != null ? getIdUsuario().hashCode() : 0;
-        result = 31 * result + (getNrDocumentoCpf() != null ? getNrDocumentoCpf().hashCode() : 0);
-        result = 31 * result + (getNrDocumentoCnpj() != null ? getNrDocumentoCnpj().hashCode() : 0);
-        return result;
+    public String getUsername() {
+        return txEmail;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
