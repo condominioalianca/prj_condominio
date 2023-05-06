@@ -8,13 +8,13 @@ import java.util.Objects;
 
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.entities.Usuario;
+import com.condominio.novaalianca.enums.TipoDesconto;
+import com.condominio.novaalianca.enums.TipoMora;
+import com.condominio.novaalianca.enums.TipoMulta;
+import com.condominio.novaalianca.enums.TipoPessoa;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.util.Feriados;
-import com.inter.boletos.client.dto.boleto.BoletoDTO;
-import com.inter.boletos.client.enums.TipoDesconto;
-import com.inter.boletos.client.enums.TipoMora;
-import com.inter.boletos.client.enums.TipoMulta;
-import com.inter.boletos.client.enums.TipoPessoa;
+import com.condominio.novaalianca.dto.boleto.BoletoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -122,8 +122,6 @@ public class BoletoBuilder {
 
 		return boleto;
 	}
-	
-	
 	
 
 	public LocalDate verificaFeriado(Integer diaVencimento) throws ParseException {

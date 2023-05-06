@@ -7,11 +7,10 @@ import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.EmailService;
-import com.inter.boletos.client.dto.FiltroListagemBoletoDTO;
-import com.inter.boletos.client.dto.boleto.BoletoDTO;
-import com.inter.boletos.client.dto.boleto.ResponseBoletoDTO;
-import com.inter.boletos.client.dto.token.TokenResponseDTO;
-import com.inter.boletos.client.service.BoletoService;
+import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
+import com.condominio.novaalianca.services.boleto.BoletoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,6 +43,9 @@ public class TestesAleatorios {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private BoletoService boletoService;
+
 //    @GetMapping("/token")
 //    public TokenResponseDTO testeTokenClient() {
 //        return BoletoService.getInstance().devolvetoken(builder.requestBoleto("boleto-cobranca.read"));
@@ -59,7 +60,7 @@ public class TestesAleatorios {
 
         for (Usuario usuario: listUsuarios ) {
             BoletoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
-            listResponse.add(BoletoService.getInstance().geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
+            listResponse.add(boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
         }
 
         return ResponseEntity.ok().body( listResponse);
@@ -70,28 +71,28 @@ public class TestesAleatorios {
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> listBoletos(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().listaBoletos(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.listaBoletos(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/boletoDetalhe")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> boletoDetalhe(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().boletoDetalhado(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.boletoDetalhado(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/downloadPDF")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> downloadPdf(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/cancelaBoleto")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> cancelaBoleto(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( BoletoService.getInstance().cancelaBoleto(filtro, builder.requestBoleto("boleto-cobranca.write")));
+        return ResponseEntity.ok().body( boletoService.cancelaBoleto(filtro, builder.requestBoleto("boleto-cobranca.write")));
     }
 
     @GetMapping("/enviaEmail")
@@ -100,7 +101,7 @@ public class TestesAleatorios {
 
         EmailDTO emailDTO = new EmailDTO();
 
-        byte[] decoder = Base64.getDecoder().decode(BoletoService.getInstance().downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")).getPdf());
+        byte[] decoder = Base64.getDecoder().decode(boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")).getPdf());
 
 
         DateTimeFormatter formatterReferencia = DateTimeFormatter.ofPattern("MM-yyyy");

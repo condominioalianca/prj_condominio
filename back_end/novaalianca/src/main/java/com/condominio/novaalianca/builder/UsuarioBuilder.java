@@ -5,7 +5,7 @@ import com.condominio.novaalianca.dto.UsuarioInsertDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import com.condominio.novaalianca.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,8 +27,8 @@ public class UsuarioBuilder {
     @Autowired
     private PerfilBuilder perfilBuilder;
 
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+//    @Autowired
+//    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UsuarioDTO entityToDto (Usuario usuario){
 

@@ -1,7 +1,7 @@
 package com.condominio.novaalianca.builder;
 
 import com.condominio.novaalianca.config.NovaAliancaProperties;
-import com.inter.boletos.client.dto.boleto.RequestBoleto;
+import com.condominio.novaalianca.dto.boleto.RequestBoleto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
