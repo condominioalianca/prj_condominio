@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "TB_ENDERECO")
+@Table(name = "tb_endereco")
 public class Endereco {
 
     @Id

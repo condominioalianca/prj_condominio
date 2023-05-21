@@ -10,10 +10,10 @@ import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Service
 
-public class UsuarioService //implements UserDetailsService
+public class UsuarioService implements UserDetailsService
 {
 
     @Autowired
@@ -34,8 +34,8 @@ public class UsuarioService //implements UserDetailsService
     @Autowired
     private UsuarioBuilder usuarioBuilder;
 
-//    @Autowired
-//    private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
 
     @Transactional
@@ -54,7 +54,7 @@ public class UsuarioService //implements UserDetailsService
     public UsuarioDTO usuarioSave(UsuarioInsertDTO dto) {
 
         Usuario usuario = usuarioBuilder.dtoToEntity(dto);
-        //usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
         usuario = usuarioRepository.save(usuario);
 
         return usuarioBuilder.entityToDto(usuario);
@@ -67,12 +67,12 @@ public class UsuarioService //implements UserDetailsService
     }
 
 
-//    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        Usuario usuario = usuarioRepository.findByTxEmail(username);
-//        if (Objects.isNull(usuario.getTxEmail())) {
-//            throw new UsernameNotFoundException("Email não Encontrado");
-//        }
-//        return usuario;
-//    }
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByTxEmail(username);
+        if (Objects.isNull(usuario.getTxEmail())) {
+            throw new UsernameNotFoundException("Email não Encontrado");
+        }
+        return usuario;
+    }
 }

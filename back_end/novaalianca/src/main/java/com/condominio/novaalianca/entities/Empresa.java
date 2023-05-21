@@ -22,7 +22,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "TB_EMPRESA")
+@Table(name = "tb_empresa")
 public class Empresa {
 
     @Id

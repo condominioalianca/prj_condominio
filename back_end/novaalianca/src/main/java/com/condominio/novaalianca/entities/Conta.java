@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TB_CONTA")
+@Table(name = "tb_conta")
 public class Conta {
 
     @Id

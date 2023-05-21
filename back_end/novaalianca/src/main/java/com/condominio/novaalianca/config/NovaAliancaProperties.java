@@ -60,4 +60,8 @@ public class NovaAliancaProperties {
     private Integer jwtDuration;
 
 
+    @Value("${cors.origins}")
+    private String corsOrigins;
+
+
 }

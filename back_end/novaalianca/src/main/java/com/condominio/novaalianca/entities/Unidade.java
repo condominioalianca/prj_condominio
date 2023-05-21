@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TB_UNIDADE")
+@Table(name = "tb_unidade")
 public class Unidade {
     @Id
     @Column(name = "ID_UNIDADE")

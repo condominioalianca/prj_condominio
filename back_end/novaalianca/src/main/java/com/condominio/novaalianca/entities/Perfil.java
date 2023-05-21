@@ -19,7 +19,7 @@ import javax.persistence.Table;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TB_PERFIL")
+@Table(name = "tb_perfil")
 public class Perfil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -22,7 +22,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "TB_PARAMETROS_SISTEMA")
+@Table(name = "tb_parametros_sistema")
 public class ParametrosSitema {
 
     @Id
