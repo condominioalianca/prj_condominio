@@ -2,6 +2,7 @@ package com.condominio.novaalianca.services;
 
 import com.condominio.novaalianca.builder.EnderecoBuilder;
 import com.condominio.novaalianca.dto.EnderecoDTO;
+import com.condominio.novaalianca.dto.UsuarioDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import com.condominio.novaalianca.repositories.EnderecoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,13 @@ public class EnderecoService {
         enderecoRepository.deleteById(idEndereco);
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public Endereco newEndereco(UsuarioDTO dto){
+        Endereco endereco = enderecoBuilder.dtoToEntity(dto.getEnderecoDTO());
+        endereco = enderecoRepository.save(endereco);
+
+        return endereco;
+
+    }
 
 }

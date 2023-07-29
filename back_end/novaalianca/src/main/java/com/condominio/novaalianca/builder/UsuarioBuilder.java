@@ -1,18 +1,15 @@
 package com.condominio.novaalianca.builder;
 
 import com.condominio.novaalianca.dto.UsuarioDTO;
-import com.condominio.novaalianca.dto.UsuarioInsertDTO;
 import com.condominio.novaalianca.entities.Endereco;
+import com.condominio.novaalianca.entities.Unidade;
 import com.condominio.novaalianca.entities.Usuario;
+import com.condominio.novaalianca.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,6 +23,9 @@ public class UsuarioBuilder {
 
     @Autowired
     private PerfilBuilder perfilBuilder;
+
+    @Autowired
+    private UsuarioRepository repository;
 
 //    @Autowired
 //    private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -79,5 +79,35 @@ public class UsuarioBuilder {
                         .collect(Collectors.toSet())))
                 .build();
     }
+
+    public Usuario byCPF (String cpf){
+
+        return repository.findByNrDocumentoCpf(cpf);
+    }
+
+//    public Usuario dtoToEntityNew(UsuarioDTO dto, Endereco endereco, Unidade unidade) {
+//
+//        return Usuario.builder()
+//                .idUsuario(dto.getIdUsuario())
+//                .nomeUsuario(dto.getNomeUsuario())
+//                .txEmail(dto.getTxEmail())
+//                .nrCelularDdd(dto.getNrCelularDdd())
+//                .nrCelular(dto.getNrCelular())
+//                .nrTelefoneDdd(dto.getNrTelefoneDdd())
+//                .nrTelefone(dto.getNrTelefone())
+//                .nrDocumentoCpf(dto.getNrDocumentoCpf())
+//                .nrDocumentoCnpj(dto.getNrDocumentoCnpj())
+//                .txTipoPessoa(dto.getTxTipoPessoa())
+//                .ativo(dto.isAtivo())
+//                .enviaBoleto(dto.isEnviaBoleto())
+//                .enviaSms(dto.isEnviaSms())
+//                .unidade(unidade)
+//                .endereco(endereco)
+//                .listPerfis((Objects.isNull(dto.getListPerfis()) ? null : dto.getListPerfis()
+//                        .stream()
+//                        .map(perfil -> perfilBuilder.dtoToEntity(perfil))
+//                        .collect(Collectors.toSet())))
+//                .build();
+//    }
 
 }

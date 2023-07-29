@@ -1,7 +1,6 @@
 package com.condominio.novaalianca.controller;
 
 import com.condominio.novaalianca.dto.UsuarioDTO;
-import com.condominio.novaalianca.dto.UsuarioInsertDTO;
 import com.condominio.novaalianca.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,16 +23,24 @@ public class UsuarioController {
         Page<UsuarioDTO> list = service.findAllPaged(pageable);
         return ResponseEntity.ok().body(list);
     }
-
-    @PostMapping("/save")
-    public UsuarioDTO usuarioSave(@Valid @RequestBody UsuarioInsertDTO usuarioInsertDTO){
-        return service.usuarioSave(usuarioInsertDTO);
-    }
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         return ResponseEntity.ok().body(service.findByID(id));
 
     }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> usuarioSave(@Valid @RequestBody UsuarioDTO usuarioInsertDTO){
+        return ResponseEntity.ok().body(service.usuarioSave(usuarioInsertDTO));
+
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<Void> usuarioUpdate(@Valid @RequestBody UsuarioDTO usuarioInsertDTO){
+        service.usuarioUpdate(usuarioInsertDTO);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @DeleteMapping("/delet/{idUsuario}")
     public ResponseEntity<Void> usuarioDelete(@PathVariable Long idUsuario){

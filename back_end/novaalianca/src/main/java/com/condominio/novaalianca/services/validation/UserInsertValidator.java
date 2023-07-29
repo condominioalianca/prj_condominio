@@ -2,7 +2,7 @@ package com.condominio.novaalianca.services.validation;
 
 
 import com.condominio.novaalianca.controller.exeptions.FieldMessage;
-import com.condominio.novaalianca.dto.UsuarioInsertDTO;
+import com.condominio.novaalianca.dto.UsuarioChangPasswordtDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserInsertValidator implements ConstraintValidator<UserInsertValid, UsuarioInsertDTO> {
+public class UserInsertValidator implements ConstraintValidator<UserInsertValid, UsuarioChangPasswordtDTO> {
 
     @Autowired
     private UsuarioRepository userRepository;
@@ -24,7 +24,7 @@ public class UserInsertValidator implements ConstraintValidator<UserInsertValid,
     }
 
     @Override
-    public boolean isValid(UsuarioInsertDTO dto, ConstraintValidatorContext context) {
+    public boolean isValid(UsuarioChangPasswordtDTO dto, ConstraintValidatorContext context) {
 
         List<FieldMessage> list = new ArrayList<>();
 

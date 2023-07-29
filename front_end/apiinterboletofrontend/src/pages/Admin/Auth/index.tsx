@@ -7,7 +7,7 @@ const Auth =() =>{
         <div className={"auth-container"}>
             <div className={"auth-banner-container"}>
                 <h1>Acompanhe as Novidades do Condominio</h1>
-                <p>Recupere Boleos, valide o financeiro do Condominio e da sua unidade</p>
+                <p>Recupere Boletos, valide o financeiro do Condominio e da sua unidade</p>
                 <AuthImage/>
             </div>
             <div className={"auth-form-container"}>

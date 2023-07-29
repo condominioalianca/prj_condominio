@@ -1,11 +1,20 @@
 import './assets/styles/custom.scss'
-//import logo from './logo.svg';
 import './App.css';
 import Routes from "./Routes";
+import {useState} from "react";
+import {AuthContext, AuthContextData} from "./AuthContext";
 
 function App() {
-  return (
+
+
+    const [authContextData, setAuthContextData] = useState<AuthContextData>({
+        authenticated: false
+    });
+    return (
+        // Provisionanto o Contexto Global
+        <AuthContext.Provider value={{authContextData, setAuthContextData}}>
   <Routes/>
+        </AuthContext.Provider>
     );
 }
 

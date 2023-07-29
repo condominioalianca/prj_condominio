@@ -34,6 +34,13 @@ public class UnidadeController {
 
     }
 
+    @PutMapping("/update}")
+    public ResponseEntity<?> updateUnidade(@RequestBody UnidadeDTO unidadeDTO) {
+        service.unidadeUpdate(unidadeDTO);
+        return ResponseEntity.noContent().build();
+
+    }
+
     @DeleteMapping("/delet/{idUnidade}")
     public ResponseEntity<Void> enderecoDelet(@PathVariable Long idUnidade){
         service.deletById(idUnidade);

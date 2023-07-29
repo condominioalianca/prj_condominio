@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UnidadeRepository extends JpaRepository<Unidade, Long> {
 
+    Unidade findByNumeroUnidade(String numeroUnidade);
 }

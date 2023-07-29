@@ -1,12 +1,12 @@
 export type Endereco =  {
 
-    idEndereco: number;
-    txBairro: string;
-    txCep: string;
-    // cpfUsuario: string;
-    // rgUsuario: string;
-    // telefoneCelularDDD: number;
-    // telefoneCelular: number;
+    "txEndereco": string,
+    "txEnderecoNumero": string,
+    "txEnderecoComplemento": string,
+    "txBairro": string,
+    "txCidade": string,
+    "txUf": string,
+    "txCep": string
 
 
 }

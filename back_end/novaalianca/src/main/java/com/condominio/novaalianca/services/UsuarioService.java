@@ -2,11 +2,14 @@ package com.condominio.novaalianca.services;
 
 import com.condominio.novaalianca.builder.UsuarioBuilder;
 import com.condominio.novaalianca.dto.UsuarioDTO;
-import com.condominio.novaalianca.dto.UsuarioInsertDTO;
+import com.condominio.novaalianca.entities.Endereco;
+import com.condominio.novaalianca.entities.Unidade;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.EnderecoRepository;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ import java.util.Optional;
 
 public class UsuarioService implements UserDetailsService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioService.class);
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -33,6 +37,12 @@ public class UsuarioService implements UserDetailsService
 
     @Autowired
     private UsuarioBuilder usuarioBuilder;
+
+    @Autowired
+    private EnderecoService enderecoService;
+
+    @Autowired
+    private UnidadeService unidadeService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -51,10 +61,11 @@ public class UsuarioService implements UserDetailsService
     }
 
     @Transactional
-    public UsuarioDTO usuarioSave(UsuarioInsertDTO dto) {
+    public UsuarioDTO usuarioSave(UsuarioDTO dto) {
+        LOGGER.info("dto = {}", dto);
 
         Usuario usuario = usuarioBuilder.dtoToEntity(dto);
-        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+       // usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
         usuario = usuarioRepository.save(usuario);
 
         return usuarioBuilder.entityToDto(usuario);
@@ -67,6 +78,8 @@ public class UsuarioService implements UserDetailsService
     }
 
 
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByTxEmail(username);
@@ -74,5 +87,11 @@ public class UsuarioService implements UserDetailsService
             throw new UsernameNotFoundException("Email não Encontrado");
         }
         return usuario;
+    }
+
+    public void usuarioUpdate(UsuarioDTO usuarioDTO) {
+        Usuario usuario = usuarioBuilder.dtoToEntity(usuarioDTO);
+        usuarioRepository.save(usuario);
+
     }
 }

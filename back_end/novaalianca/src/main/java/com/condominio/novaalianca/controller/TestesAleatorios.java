@@ -4,11 +4,12 @@ package com.condominio.novaalianca.controller;
 import com.condominio.novaalianca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.dto.EmailDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.EmailService;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
-import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoTESTEOLDDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
 import com.condominio.novaalianca.services.boleto.BoletoService;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,7 +61,7 @@ public class TestesAleatorios {
         List<ResponseBoletoDTO> listResponse = new ArrayList<>();
 
         for (Usuario usuario: listUsuarios ) {
-            BoletoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
+            BoletoEmissaoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
             listResponse.add(boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
         }
 
@@ -95,6 +97,14 @@ public class TestesAleatorios {
         return ResponseEntity.ok().body( boletoService.cancelaBoleto(filtro, builder.requestBoleto("boleto-cobranca.write")));
     }
 
+
+    @GetMapping("/cargabanco/{dataInicio}/{datafim}")
+    // @Scheduled(cron="* */2 * * * *")
+    public ResponseEntity<?> cargaBanco(@PathVariable String dataInicio , @PathVariable String datafim ) throws Exception {
+
+        return ResponseEntity.ok().body( boletoService.cargaBoleo(dataInicio, datafim, builder.requestBoleto("boleto-cobranca.read")));
+    }
+
     @GetMapping("/enviaEmail")
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> enviaEmail(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
@@ -112,12 +122,12 @@ public class TestesAleatorios {
         emailDTO.setFrom("condominionovaaliancasbc@gmail.com");
         emailDTO.setSubject("Cobrança Condomínio - " + LocalDate.now().format(formatterReferencia).toString());
         emailDTO.setValorBoleto("3522");
-        emailDTO.setDtVencimento("25*/05/2014");
+        emailDTO.setDtVencimento("25/05/2014");
         emailDTO.setBody("TESTE EMAIL");
         emailDTO.setContent("teste");
         emailService.sendMailWithAttachment(emailDTO);
 
-        return ResponseEntity.ok().body( "TESTE");
+        return ResponseEntity.ok().body("TESTE");
     }
 
 

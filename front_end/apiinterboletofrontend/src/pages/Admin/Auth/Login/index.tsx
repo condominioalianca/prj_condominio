@@ -23,9 +23,9 @@ const Login = () => {
 
     const  location = useLocation<LocationState>();
 
-    const {from} = location.state || {from : {pathname: '/admim'}};
+    const {from} = location.state || {from : {pathname: '/admin'}};
+    const {authContextData, setAuthContextData} = useContext(AuthContext)
 
-    const {setAuthContextData} =useContext(AuthContext);
 
     const [hasError, setHasError] = useState(false);
 
@@ -38,7 +38,6 @@ const Login = () => {
             .then(response => {
                 setHasError(false);
                 saveAuthData(response.data);
-                const token = getAuthData().access_token;
 
                 //CASO DER CERTO O LOGIN ATUALIZAR O ESTADO GLOBAL DA AUTENTICACAO
                 setAuthContextData({

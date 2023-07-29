@@ -1,13 +1,20 @@
 import {Endereco} from "./endereco";
+import {Unidade} from "./unidade";
 
-export type Usuario =  {
+export type Usuario = {
 
-    idUsuario: number;
+    id: number;
     nomeUsuario: string;
-    txEmail: string;
-     nrDocumentoCpf: string;
-    // rgUsuario: string;
+    email: string;
+    cpf: string;
     nrCelularDdd: number;
     nrCelular: number;
-    endereco : Endereco
+    enviaBoleto: boolean;
+    enviaSms: boolean;
+    ativo: boolean;
+    endereco: Endereco;
+
+    unidade: Unidade;
+
+    tipoPessoa: string;
 }

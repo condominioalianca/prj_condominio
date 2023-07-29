@@ -1,5 +1,6 @@
 import qs from "qs";
 import axios, {AxiosRequestConfig} from "axios";
+import {getAuthData} from "./storage";
 
 type LoginResponse =
     {
@@ -41,6 +42,7 @@ export const requestBackendLogin = (loginData: LoginData) => {
     })
 }
 
+
 export const requestBackend = (config : AxiosRequestConfig) => {
     const headers = config.withCredentials ? {
         ...config.headers,   // para pegar os header ja passado na chamada e acrescentar o cod abaixo
@@ -51,14 +53,6 @@ export const requestBackend = (config : AxiosRequestConfig) => {
 
 }
 
-export const saveAuthData = (loginResponse: LoginResponse) => {
-    localStorage.setItem(tokenKey, JSON.stringify(loginResponse));
-}
 
-export  const getAuthData = () =>{
-    const str = localStorage.getItem(tokenKey) ?? '{}'; // ?? se for nulo ou undifenid devolve um obj precisa estar em aspas simples pois a const é do tipo string
-    const loginResponse = JSON.parse(str);
 
-    return loginResponse as LoginResponse; //para garantir a resposta seja LoginResponse
-}
 

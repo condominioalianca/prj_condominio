@@ -45,5 +45,17 @@ public class UnidadeService {
         repository.deleteById(idUnidade);
     }
 
+    public Unidade findByIDEntity(Long id) {
+        return repository.findById(id).get();
+    }
 
+
+    public Unidade findByNumero(String numeroUnidade) {
+        return repository.findByNumeroUnidade(numeroUnidade);
+
+    }
+
+    public void unidadeUpdate(UnidadeDTO unidadeDTO) {
+        repository.save(builder.dtoToEntity(unidadeDTO));
+    }
 }

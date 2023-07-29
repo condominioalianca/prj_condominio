@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.builder;
 
 import com.condominio.novaalianca.dto.EnderecoDTO;
+import com.condominio.novaalianca.dto.UsuarioDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import org.springframework.stereotype.Component;
 
@@ -33,4 +34,6 @@ public class EnderecoBuilder {
                 .txCep(dto.getTxCep())
                 .build();
     }
+
+
 }

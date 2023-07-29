@@ -1,22 +1,35 @@
 package com.condominio.novaalianca.services.boleto;
 
 
+import com.condominio.novaalianca.builder.BoletoBuilder;
+import com.condominio.novaalianca.builder.UsuarioBuilder;
 import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoTESTEOLDDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoPDFDto;
+import com.condominio.novaalianca.dto.boleto.ContentDTO;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
 import com.condominio.novaalianca.dto.boleto.RequestBoleto;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDetalheDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseListagemBoletosDTO;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
+import com.condominio.novaalianca.entities.Boleto;
+import com.condominio.novaalianca.entities.Usuario;
+import com.condominio.novaalianca.repositories.BoletoRepository;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Service
@@ -26,6 +39,16 @@ public class BoletoService {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private UsuarioBuilder usuarioBuilder;
+
+    @Autowired
+    private BoletoRepository boletoRepository;
+
+
+    @Autowired
+    private BoletoBuilder boletoBuilder;
 
 
 
@@ -70,7 +93,7 @@ public class BoletoService {
         return response.getBody();
     }
 
-    public ResponseBoletoDTO geraBoleto(RequestBoleto requestBoleto, BoletoDTO boletoDTO) throws Exception {
+    public ResponseBoletoDTO geraBoleto(RequestBoleto requestBoleto, BoletoEmissaoDTO boletoDTO) throws Exception {
         TokenResponseDTO token = new TokenResponseDTO();
         boolean execute = false;
         int count = 0;
@@ -129,4 +152,48 @@ public class BoletoService {
         return response.getBody();
     }
 
+    public String cargaBoleo(String dataInicio, String datafim, RequestBoleto requestBoleto) throws Exception {
+        FiltroListagemBoletoDTO filtro = new FiltroListagemBoletoDTO();
+        filtro.setDataInicial(dataInicio);
+        filtro.setDataFinal(datafim);
+        ResponseListagemBoletosDTO responseListagemBoletosDTO = this.listaBoletos(filtro, requestBoleto);
+        DateTimeFormatter formatterDataHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatterData = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (ContentDTO dto : responseListagemBoletosDTO.getContent()){
+            Usuario usuario = usuarioBuilder.byCPF(dto.getPagador().getCpfCnpj());
+            Boleto boleto = new Boleto();
+            boleto.setDhSituacao(LocalDateTime.parse(dto.getDataHoraSituacao(),formatterDataHora));
+            boleto.setDtBaixa(null);
+            boleto.setDtEmissao(dto.getDataEmissao());
+            boleto.setDtEnvio(null);
+            boleto.setDtLimitePagamento(dto.getDataLimite());
+            boleto.setDtPagamento(LocalDate.parse(dto.getDataHoraSituacao(), formatterDataHora));
+            boleto.setDtVencimento(dto.getDataVencimento());
+            boleto.setMesReferencia(dto.getDataEmissao().getMonth().toString());
+            boleto.setMotivoBaixa(null);
+            boleto.setNossoNumero(dto.getNossoNumero());
+            boleto.setSeuNumero(dto.getSeuNumero());
+            boleto.setTxCancelamento(null);
+            boleto.setTxCodBarras(dto.getCodigoBarras());
+            boleto.setTxEspecie(dto.getCodigoEspecie());
+            boleto.setTxLinhaDigitavel(dto.getLinhaDigitavel());
+            boleto.setTxOrigem(dto.getOrigem());
+            boleto.setTxSituacao(dto.getSituacao());
+            boleto.setValor(dto.getValorNominal().doubleValue());
+            boleto.setValorPagamento(Objects.isNull(dto.getValorTotalRecebimento())? 0 : dto.getValorTotalRecebimento().doubleValue());
+            boleto.setEmpresa(null);
+            boleto.setIdUnidade(usuario.getUnidade());
+            boleto.setUsuario(usuario);
+            boletoRepository.save(boleto);
+            LOGGER.info("Boleto Salvo, Inquilino {}, Mes {}", usuario.getNomeUsuario(), dto.getDataEmissao().getMonth().toString());
+
+        }
+        return "Deu Bom";
+    }
+
+    public Page<BoletoDTO> findAllPaged(Pageable pageable) {
+        Page<Boleto> list = boletoRepository.findAll(pageable);
+        return list.map(x -> boletoBuilder.entityToDTO(x));
+    }
 }

@@ -3,6 +3,7 @@ import {ReactComponent as MainImage} from 'assets/images/main-image.svg';
 import {Link} from 'react-router-dom';
 
 import './styles.css';
+import ButtonIcon from "../../components/ButtonIcon";
 
 const Home = () => {
     return (
@@ -10,15 +11,15 @@ const Home = () => {
             <div className={"base-card home-card"}>
                 <div className={"home-content-container"}>
                     <div>
-                        <h1>Conheça o Melhor Catálogo de Conteudos</h1>
-                        <p>Ajudaremos você a encontrar os melhores produtos no mercado</p>
+                        <h1>DEPOIS TROCAR</h1>
+                        <p>Dashboard , Emissão De Boletos, e Prestação de Contas</p>
                     </div>
-                    {/*<div>*/}
-                    {/*    <Link to={"/products"}>*/}
-                    {/*        <ButtonIcon tituloBotao = "Inicia Agora Sua Busca " />*/}
-                    {/*    </Link>*/}
+                    <div>
+                        <Link to={"/admin/auth/login"}>
+                            <ButtonIcon tituloBotao = "Entrar " />
+                        </Link>
 
-                    {/*</div>*/}
+                    </div>
                 </div>
                 {/*<div className={"home-image-container"}>*/}
                 {/*    <MainImage/>*/}

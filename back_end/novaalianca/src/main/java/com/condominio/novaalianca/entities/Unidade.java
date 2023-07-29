@@ -25,7 +25,7 @@ public class Unidade {
     @Id
     @Column(name = "ID_UNIDADE")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idUnidade;
+    private Long idUnidade;
 
     @Column(name = "TX_NUMERO_UNIDADE")
     private String numeroUnidade;

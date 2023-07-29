@@ -7,6 +7,8 @@ import java.util.Objects;
 
 
 import com.condominio.novaalianca.config.NovaAliancaProperties;
+import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.entities.Boleto;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.enums.TipoDesconto;
 import com.condominio.novaalianca.enums.TipoMora;
@@ -14,7 +16,7 @@ import com.condominio.novaalianca.enums.TipoMulta;
 import com.condominio.novaalianca.enums.TipoPessoa;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.util.Feriados;
-import com.condominio.novaalianca.dto.boleto.BoletoDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,12 @@ public class BoletoBuilder {
 	
 	@Autowired
 	Feriados feriados;
+
+	@Autowired
+	private UnidadeBuilder unidadeBuilder;
+
+	@Autowired
+	private UsuarioBuilder usuarioBuilder;
 	
 	@Autowired
 	ParametrosSistemaRepository parametrosSistemaRepository;
@@ -31,8 +39,8 @@ public class BoletoBuilder {
 	@Autowired
 	private NovaAliancaProperties properties;
 
-	public BoletoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
-		BoletoDTO boleto = new BoletoDTO();
+	public BoletoEmissaoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
+		BoletoEmissaoDTO boleto = new BoletoEmissaoDTO();
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		String valorCOndominio1 =(parametrosSistemaRepository.findValorParametro("VALOR_CONDOMINIO_" + LocalDate.now().format(formatterYear)));
 		Float valorCondominio = Float.parseFloat(valorCOndominio1);
@@ -121,6 +129,33 @@ public class BoletoBuilder {
 
 
 		return boleto;
+	}
+
+
+	public BoletoDTO entityToDTO (Boleto boleto){
+		return BoletoDTO.builder()
+				.dtLimitePagamento(boleto.getDtLimitePagamento())
+				.dtEmissao(boleto.getDtEmissao())
+				.txSituacao(boleto.getTxSituacao())
+				.dtVencimento(boleto.getDtVencimento())
+				.valor(boleto.getValor())
+				.valorPagamento(boleto.getValorPagamento())
+				.id(boleto.getId())
+				.seuNumero(boleto.getSeuNumero())
+				.ativo(boleto.getAtivo())
+				.dhSituacao(boleto.getDhSituacao())
+				.dtBaixa(boleto.getDtBaixa())
+				.dtEnvio(boleto.getDtEnvio())
+				.dtPagamento(boleto.getDtPagamento())
+				.mesReferencia(boleto.getMesReferencia())
+				.motivoBaixa(boleto.getMotivoBaixa())
+				.nossoNumero(boleto.getNossoNumero())
+				.txCancelamento(boleto.getTxCancelamento())
+				.txCodBarras(boleto.getTxCodBarras())
+				.txEspecie(boleto.getTxEspecie())
+				.unidade(unidadeBuilder.entityToDto(boleto.getIdUnidade()))
+				.usuario(usuarioBuilder.entityToDto(boleto.getUsuario()))
+				.build();
 	}
 	
 

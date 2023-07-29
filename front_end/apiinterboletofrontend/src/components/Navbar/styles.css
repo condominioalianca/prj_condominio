@@ -1,5 +1,5 @@
 
-.main-nav{
+.main-nav {
     padding-left: 40px;
     min-height: 70px;
 }
@@ -12,7 +12,7 @@
     color: #FFF;
 }
 
-.main-menu{
+.main-menu {
     display: flex;
     font-size: 18px;
     width: 380px;
@@ -20,7 +20,7 @@
 }
 
 .main-menu a {
-    color: rgba(255,255,255, 0.5);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .main-menu a:hover {
@@ -31,4 +31,13 @@
 .main-menu a.active {
     color: #FFF;
     font-weight: 700;
+}
+
+.nav-login-logout {
+    color: #FFFFFF;
+    margin-right: 40px;
+}
+
+.nav-user-name {
+    margin-right: 20px;
 }

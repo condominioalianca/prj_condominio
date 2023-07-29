@@ -1,18 +1,19 @@
 package com.condominio.novaalianca.dto;
 
-import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.services.validation.UserInsertValid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @UserInsertValid
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class UsuarioInsertDTO extends UsuarioDTO {
+@ToString
+public class UsuarioChangPasswordtDTO extends UsuarioDTO {
 	
 	private String password;
 
