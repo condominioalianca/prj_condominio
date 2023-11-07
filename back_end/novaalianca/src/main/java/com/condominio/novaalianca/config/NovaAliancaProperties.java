@@ -35,17 +35,21 @@ public class NovaAliancaProperties {
     private String cnpjCpfBenificiario;
 
     //Propriedades dos Emails
-    @Value("${mail.smtp.host}")
-    private String host;
+//    @Value("${mail.smtp.host}")
+//    private String host;
 
-    @Value("${mail.smtp.port}")
-    private String port;
+//    @Value("${mail.smtp.port}")
+//    private String port;
+//
+//    @Value("${mail.smtp.username}")
+//    private String usernameMail;
+//
+//    @Value("${mail.smtp.password}")
+//    private String senhaMail;
 
-    @Value("${mail.smtp.username}")
-    private String usernameMail;
+    @Value("${mail.from}")
+    private String mailFrom;
 
-    @Value("${mail.smtp.password}")
-    private String senhaMail;
 
     @Value("${jwt.secret}")
     private String jwtSecret;

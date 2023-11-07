@@ -4,6 +4,7 @@ package com.condominio.novaalianca.controller;
 import com.condominio.novaalianca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.dto.EmailDTO;
+import com.condominio.novaalianca.dto.boleto.BoletoDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
@@ -62,7 +63,14 @@ public class TestesAleatorios {
 
         for (Usuario usuario: listUsuarios ) {
             BoletoEmissaoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
-            listResponse.add(boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO));
+            ResponseBoletoDTO responseBoletoDTO = boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO);
+            listResponse.add(responseBoletoDTO);
+            EmailDTO emailDTO = new EmailDTO();
+            emailDTO.setNumeroUnidade(usuario.getUnidade().getNumeroUnidade());
+            emailDTO.setTo(usuario.getTxEmail());
+            emailDTO.setNossoNumero(responseBoletoDTO.getNossoNumero());
+            emailService.sendMail(emailDTO);
+
         }
 
         return ResponseEntity.ok().body( listResponse);
@@ -87,7 +95,7 @@ public class TestesAleatorios {
     // @Scheduled(cron="* */2 * * * *")
     public ResponseEntity<?> downloadPdf(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
-        return ResponseEntity.ok().body( boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")));
+        return ResponseEntity.ok().body( boletoService.downloadPDF(filtro.getNossoNumero(), builder.requestBoleto("boleto-cobranca.read")));
     }
 
     @GetMapping("/cancelaBoleto")
@@ -110,24 +118,14 @@ public class TestesAleatorios {
     public ResponseEntity<?> enviaEmail(@RequestBody FiltroListagemBoletoDTO filtro) throws Exception {
 
         EmailDTO emailDTO = new EmailDTO();
+        emailDTO.setNossoNumero(filtro.getNossoNumero());
+        BoletoDTO boletoDTO = boletoService.findByNossoNumero (filtro.getNossoNumero());
 
-        byte[] decoder = Base64.getDecoder().decode(boletoService.downloadPDF(filtro, builder.requestBoleto("boleto-cobranca.read")).getPdf());
+        emailDTO.setNumeroUnidade(boletoDTO.getUnidade().getNumeroUnidade());
+        emailDTO.setTo(boletoDTO.getUsuario().getTxEmail());
 
 
-        DateTimeFormatter formatterReferencia = DateTimeFormatter.ofPattern("MM-yyyy");
-
-        emailDTO.setAnexo(decoder);
-        emailDTO.setNumeroUnidade("05");
-        emailDTO.setTo("patrickmoura@gmail.com");
-        emailDTO.setFrom("condominionovaaliancasbc@gmail.com");
-        emailDTO.setSubject("Cobrança Condomínio - " + LocalDate.now().format(formatterReferencia).toString());
-        emailDTO.setValorBoleto("3522");
-        emailDTO.setDtVencimento("25/05/2014");
-        emailDTO.setBody("TESTE EMAIL");
-        emailDTO.setContent("teste");
-        emailService.sendMailWithAttachment(emailDTO);
-
-        return ResponseEntity.ok().body("TESTE");
+        return ResponseEntity.ok().body(emailService.sendMail(emailDTO));
     }
 
 

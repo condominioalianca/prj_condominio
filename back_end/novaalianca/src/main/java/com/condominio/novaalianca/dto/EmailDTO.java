@@ -17,8 +17,9 @@ public class EmailDTO {
 	private String content;
 	private String body;
 	private String numeroUnidade;
-	private String valorBoleto;
 	private String dtVencimento;
+
+	private String nossoNumero;
 	private byte[] anexo;
 	
 }

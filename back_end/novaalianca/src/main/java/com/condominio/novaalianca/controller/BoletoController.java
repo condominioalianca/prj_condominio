@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +22,12 @@ public class BoletoController {
     @GetMapping
     public ResponseEntity<Page<BoletoDTO>> findAll(Pageable pageable){
         Page<BoletoDTO> list = boletoService.findAllPaged(pageable);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/{idUsuario}")
+    public ResponseEntity<Page<BoletoDTO>> findAllbyId(Pageable pageable, @PathVariable Long idUsuario){
+        Page<BoletoDTO> list = boletoService.findAllPagedByIdUsuario(pageable,idUsuario);
         return ResponseEntity.ok().body(list);
     }
 }

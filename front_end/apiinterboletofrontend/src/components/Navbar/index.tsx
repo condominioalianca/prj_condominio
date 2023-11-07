@@ -62,7 +62,7 @@ const Navbar = () => {
                             <NavLink to="/" activeClassName={"active"} exact>HOME</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/boletos" activeClassName={"active"}> BOLETOS </NavLink>
+                            <NavLink to="/boleto" activeClassName={"active"}> BOLETOS </NavLink>
                         </li>
                         <li>
                             <NavLink to="/admin" activeClassName={"active"}>ADMIN</NavLink>

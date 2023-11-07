@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Builder
 @AllArgsConstructor
@@ -93,9 +95,6 @@ public class Boleto {
 
     @Column(name = "DT_ENVIO")
     private LocalDate dtEnvio;
-
-    @Column(name = "TX_MES_REFERENCIA")
-    private String mesReferencia;
 
     @ManyToOne
     @JoinColumn(name = "ID_UNIDADE")

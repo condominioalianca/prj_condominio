@@ -3,6 +3,8 @@ package com.condominio.novaalianca.builder;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -23,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BoletoBuilder {
-	
+
 	@Autowired
 	Feriados feriados;
 
@@ -39,7 +41,11 @@ public class BoletoBuilder {
 	@Autowired
 	private NovaAliancaProperties properties;
 
+	Locale BRASILLOCALE = new Locale("pt","BR");
+
 	public BoletoEmissaoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
+
+
 		BoletoEmissaoDTO boleto = new BoletoEmissaoDTO();
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		String valorCOndominio1 =(parametrosSistemaRepository.findValorParametro("VALOR_CONDOMINIO_" + LocalDate.now().format(formatterYear)));
@@ -147,7 +153,8 @@ public class BoletoBuilder {
 				.dtBaixa(boleto.getDtBaixa())
 				.dtEnvio(boleto.getDtEnvio())
 				.dtPagamento(boleto.getDtPagamento())
-				.mesReferencia(boleto.getMesReferencia())
+				.mesReferencia(boleto.getDtEmissao().getMonth().getDisplayName(TextStyle.FULL, BRASILLOCALE).toUpperCase())
+				.anoReferencia(boleto.getDtEmissao().getYear())
 				.motivoBaixa(boleto.getMotivoBaixa())
 				.nossoNumero(boleto.getNossoNumero())
 				.txCancelamento(boleto.getTxCancelamento())

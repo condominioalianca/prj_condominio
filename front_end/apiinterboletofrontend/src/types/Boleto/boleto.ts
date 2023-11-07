@@ -52,6 +52,8 @@ export type Boleto =  {
 
      mesReferencia : string;
 
+    anoReferencia : number;
+
 
      unidade : Unidade;
 

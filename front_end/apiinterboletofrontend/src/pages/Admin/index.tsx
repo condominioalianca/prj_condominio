@@ -40,7 +40,7 @@ const Admin = () => {
                     <UsuariosEdit/>
                 </PrivateRoute>
 
-                <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/boletos"} exact={true}>
+                <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/boleto"} exact={true}>
                     <Boletos/>
                 </PrivateRoute>
 

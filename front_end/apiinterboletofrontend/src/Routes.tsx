@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Boletos from "./pages/Admin/Boletos";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Admin/Auth";
+import BoletoHome from "./pages/Home/BoletoHome";
 
 const Routes = () => {
     return (
@@ -14,6 +15,10 @@ const Routes = () => {
                 <Route path={"/"} exact>
                     <Home/>
                 </Route>
+                <Route path={"/boleto"} exact={true}>
+                    <BoletoHome/>
+                </Route>
+
 
                 <Route path={"/admin/auth"}>
                     <Auth/>

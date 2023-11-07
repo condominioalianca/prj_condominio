@@ -24,7 +24,7 @@ const Navbar = () => {
                 }
                 {hasAnyRoles(['USUARIO', 'SINDICO']) && (
                     <li>
-                        <NavLink to={"/admin/boletos"} className={"admin-nav-item"}>
+                        <NavLink to={"/admin/boleto"} className={"admin-nav-item"}>
                             <p>Boleto</p>
                         </NavLink>
                     </li>)

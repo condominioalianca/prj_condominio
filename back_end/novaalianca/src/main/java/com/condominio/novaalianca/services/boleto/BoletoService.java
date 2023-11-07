@@ -29,7 +29,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
@@ -134,7 +137,7 @@ public class BoletoService {
         return response.getBody();
     }
 
-    public BoletoPDFDto downloadPDF(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
+    public BoletoPDFDto downloadPDF(String nossoNumero, RequestBoleto requestBoleto) throws Exception {
         TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/pdf";
         LOGGER.info("TESTE DETALHE  URL: {} ", url);
@@ -144,7 +147,7 @@ public class BoletoService {
                 .header("Content-Type", "application/json" )
                 .header("Authorization", "Bearer " + token.getAccess_token())
                 //.header("x-conta-corrente", filtro.getNumConta())
-                .routeParam("nossoNumero", filtro.getNossoNumero())
+                .routeParam("nossoNumero", nossoNumero)
                // .asString();
         .asObject(BoletoPDFDto.class);
 
@@ -159,18 +162,21 @@ public class BoletoService {
         ResponseListagemBoletosDTO responseListagemBoletosDTO = this.listaBoletos(filtro, requestBoleto);
         DateTimeFormatter formatterDataHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         DateTimeFormatter formatterData = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatterDataHora1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        DateTimeFormatter formatterData1 = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         for (ContentDTO dto : responseListagemBoletosDTO.getContent()){
+
             Usuario usuario = usuarioBuilder.byCPF(dto.getPagador().getCpfCnpj());
             Boleto boleto = new Boleto();
-            boleto.setDhSituacao(LocalDateTime.parse(dto.getDataHoraSituacao(),formatterDataHora));
+            LOGGER.info("dthoRA {}",dto.getDataHoraSituacao());
+            boleto.setDhSituacao(LocalDateTime.parse(dto.getDataHoraSituacao(),formatterDataHora1));
             boleto.setDtBaixa(null);
-            boleto.setDtEmissao(dto.getDataEmissao());
+            boleto.setDtEmissao(LocalDate.parse(dto.getDataEmissao().format(formatterData1),formatterData1));
             boleto.setDtEnvio(null);
             boleto.setDtLimitePagamento(dto.getDataLimite());
-            boleto.setDtPagamento(LocalDate.parse(dto.getDataHoraSituacao(), formatterDataHora));
-            boleto.setDtVencimento(dto.getDataVencimento());
-            boleto.setMesReferencia(dto.getDataEmissao().getMonth().toString());
+            boleto.setDtPagamento(LocalDate.parse(dto.getDataHoraSituacao(), formatterDataHora1));
+            boleto.setDtVencimento(LocalDate.parse(dto.getDataVencimento().format(formatterData1),formatterData1));
             boleto.setMotivoBaixa(null);
             boleto.setNossoNumero(dto.getNossoNumero());
             boleto.setSeuNumero(dto.getSeuNumero());
@@ -185,6 +191,7 @@ public class BoletoService {
             boleto.setEmpresa(null);
             boleto.setIdUnidade(usuario.getUnidade());
             boleto.setUsuario(usuario);
+            LOGGER.info("Boleto {}", boleto.toString());
             boletoRepository.save(boleto);
             LOGGER.info("Boleto Salvo, Inquilino {}, Mes {}", usuario.getNomeUsuario(), dto.getDataEmissao().getMonth().toString());
 
@@ -194,6 +201,23 @@ public class BoletoService {
 
     public Page<BoletoDTO> findAllPaged(Pageable pageable) {
         Page<Boleto> list = boletoRepository.findAll(pageable);
+        return list.map(x -> boletoBuilder.entityToDTO(x));
+    }
+
+    public BoletoDTO findByNossoNumero(String nossoNumero) {
+        Boleto boleto = boletoRepository.findByNossoNumero(nossoNumero);
+        return boletoBuilder
+                .entityToDTO(boleto);
+
+    }
+
+    public Page<BoletoDTO> findAllPagedByCpfUsuario(Pageable pageable, String cpfUsuario) {
+        Page<Boleto> list = boletoRepository.findAllbyCpfUsuario(pageable,cpfUsuario);
+        return list.map(x -> boletoBuilder.entityToDTO(x));
+    }
+
+    public Page<BoletoDTO> findAllPagedByIdUsuario(Pageable pageable, Long idUsuario) {
+        Page<Boleto> list = boletoRepository.findAllbyIdUsuario(pageable,idUsuario);
         return list.map(x -> boletoBuilder.entityToDTO(x));
     }
 }

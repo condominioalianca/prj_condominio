@@ -53,6 +53,19 @@ export const requestBackend = (config : AxiosRequestConfig) => {
 
 }
 
+export const requestBackendbyUser = (config : AxiosRequestConfig) => {
+    const headers = config.withCredentials ? {
+        ...config.headers,   // para pegar os header ja passado na chamada e acrescentar o cod abaixo
+        'Authorization': 'Bearer ' + getAuthData().access_token
+    } : config.headers
+
+    const url = config.url + '/' + getAuthData().userId
+
+
+    return axios({...config, url : url, baseURL : BASE_URL , headers: headers}); //... spred opaator para desconstruir o obj
+
+}
+
 
 
 

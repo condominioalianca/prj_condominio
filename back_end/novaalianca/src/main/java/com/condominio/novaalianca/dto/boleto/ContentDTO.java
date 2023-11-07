@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 @Getter
@@ -37,5 +39,10 @@ public class ContentDTO {
 	private DescontoDTO desconto3;
 	private MultaDTO multa;
 	private MoraDTO mora;
-	
+
+	public String getDataHoraSituacao() {
+		DateTimeFormatter formatterDataHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+		DateTimeFormatter formatterDataHora1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+		return LocalDateTime.parse(dataHoraSituacao,formatterDataHora).format(formatterDataHora1);
+	}
 }
