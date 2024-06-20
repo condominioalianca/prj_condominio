@@ -27,20 +27,20 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Autowired
-    private BoletoService boletoService;
-
-    @Autowired
-    private RequestBoletoBuilder builder;
+//    @Autowired
+//    private BoletoService boletoService;
+//
+//    @Autowired
+//    private RequestBoletoBuilder builder;
 
     public String sendMail(EmailDTO emailDTO) throws Exception {
 
         log.info("Email: {} numero unidade {}", emailDTO.getTo(), emailDTO.getNumeroUnidade() );
 
         DateTimeFormatter formatterReferencia = DateTimeFormatter.ofPattern("MM-yyyy");
-        byte[] decoder = Base64.getDecoder().decode(boletoService.downloadPDF(emailDTO.getNossoNumero(), builder.requestBoleto("boleto-cobranca.read")).getPdf());
-
-        emailDTO.setAnexo(decoder);
+//        byte[] decoder = Base64.getDecoder().decode(boletoService.downloadPDF(emailDTO.getNossoNumero(), builder.requestBoleto("boleto-cobranca.read")).getPdf());
+//
+//        emailDTO.setAnexo(decoder);
         emailDTO.setSubject("Cobrança Condomínio - " + LocalDate.now().format(formatterReferencia).toString());
         String mesReferencia = LocalDate.now().format(formatterReferencia).toString();
 

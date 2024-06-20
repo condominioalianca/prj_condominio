@@ -81,11 +81,11 @@ public class Usuario implements UserDetails {
     @Column(name = "TX_PASSWORD")
     private String password;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_UNIDADE")
     private Unidade unidade;
 
-    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_ENDERECO")
     private Endereco endereco;
 

@@ -13,6 +13,13 @@ ul {
 }
 
 
+.list-container{
+    border-radius: 5px;
+    border: #0c63e4;
+    border: 1px;
+}
+
+
 .admin-nav-item {
     display: flex;
     justify-content: center;

@@ -2,10 +2,11 @@ package com.condominio.novaalianca.services.boleto;
 
 
 import com.condominio.novaalianca.builder.BoletoBuilder;
+import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.builder.UsuarioBuilder;
+import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
-import com.condominio.novaalianca.dto.boleto.BoletoTESTEOLDDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoPDFDto;
 import com.condominio.novaalianca.dto.boleto.ContentDTO;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
@@ -14,26 +15,34 @@ import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDetalheDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseListagemBoletosDTO;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
-import com.condominio.novaalianca.entities.Boleto;
+import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.BoletoRepository;
+import com.condominio.novaalianca.services.EmailService;
+import com.condominio.novaalianca.services.UsuarioService;
+import com.condominio.novaalianca.util.DateUtils;
+import inter.cobranca.model.Boleto;
+import inter.cobranca.model.BoletoDetalhado;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
+import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
-import java.util.Locale;
+import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class BoletoService {
@@ -52,6 +61,14 @@ public class BoletoService {
 
     @Autowired
     private BoletoBuilder boletoBuilder;
+    @Autowired
+    private DateUtils dateUtils;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private RequestBoletoBuilder builder;
 
 
 
@@ -82,7 +99,6 @@ public class BoletoService {
     public ResponseBoletoDetalheDTO boletoDetalhado(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
         TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}";
-        LOGGER.info("TESTE DETALHE  URL: {} ", url);
 
         HttpResponse<ResponseBoletoDetalheDTO> response = Unirest.get(url)
                 .header("Accept", "application/json")
@@ -105,7 +121,6 @@ public class BoletoService {
             count++;
         }
         String url = requestBoleto.getUrlBancoInterBoleto();
-        LOGGER.info("TESTE DETALHE  URL: {} ", url);
         HttpResponse<ResponseBoletoDTO> response = Unirest.post(url)
                 .header("Accept", "application/json")
                 .header("Host","cdpj.partners.bancointer.com.br")
@@ -121,7 +136,6 @@ public class BoletoService {
     public String cancelaBoleto(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
         TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/cancelar";
-        LOGGER.info("TESTE DETALHE  URL: {} ", url);
         HttpResponse<String> response = Unirest.post(url)
                 .header("Accept", "application/json")
                 .header("Host","cdpj.partners.bancointer.com.br")
@@ -140,7 +154,6 @@ public class BoletoService {
     public BoletoPDFDto downloadPDF(String nossoNumero, RequestBoleto requestBoleto) throws Exception {
         TokenResponseDTO token = tokenService.getToken( requestBoleto);
         String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/pdf";
-        LOGGER.info("TESTE DETALHE  URL: {} ", url);
         HttpResponse<BoletoPDFDto> response = Unirest.get(url)
                 .header("Accept", "application/json")
                 .header("Host","cdpj.partners.bancointer.com.br")
@@ -160,64 +173,93 @@ public class BoletoService {
         filtro.setDataInicial(dataInicio);
         filtro.setDataFinal(datafim);
         ResponseListagemBoletosDTO responseListagemBoletosDTO = this.listaBoletos(filtro, requestBoleto);
-        DateTimeFormatter formatterDataHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        DateTimeFormatter formatterData = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter formatterDataHora1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        DateTimeFormatter formatterData1 = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        if(Objects.isNull(responseListagemBoletosDTO.getContent()) || responseListagemBoletosDTO.getContent().isEmpty()){
+            LOGGER.info("Lista Vazia");
 
-        for (ContentDTO dto : responseListagemBoletosDTO.getContent()){
+            return "Lista Vazia";
+        }
+        List<ContentDTO> listContentDTO = responseListagemBoletosDTO.getContent().stream().collect(Collectors.toList());
 
-            Usuario usuario = usuarioBuilder.byCPF(dto.getPagador().getCpfCnpj());
-            Boleto boleto = new Boleto();
-            LOGGER.info("dthoRA {}",dto.getDataHoraSituacao());
-            boleto.setDhSituacao(LocalDateTime.parse(dto.getDataHoraSituacao(),formatterDataHora1));
-            boleto.setDtBaixa(null);
-            boleto.setDtEmissao(LocalDate.parse(dto.getDataEmissao().format(formatterData1),formatterData1));
-            boleto.setDtEnvio(null);
-            boleto.setDtLimitePagamento(dto.getDataLimite());
-            boleto.setDtPagamento(LocalDate.parse(dto.getDataHoraSituacao(), formatterDataHora1));
-            boleto.setDtVencimento(LocalDate.parse(dto.getDataVencimento().format(formatterData1),formatterData1));
-            boleto.setMotivoBaixa(null);
-            boleto.setNossoNumero(dto.getNossoNumero());
-            boleto.setSeuNumero(dto.getSeuNumero());
-            boleto.setTxCancelamento(null);
-            boleto.setTxCodBarras(dto.getCodigoBarras());
-            boleto.setTxEspecie(dto.getCodigoEspecie());
-            boleto.setTxLinhaDigitavel(dto.getLinhaDigitavel());
-            boleto.setTxOrigem(dto.getOrigem());
-            boleto.setTxSituacao(dto.getSituacao());
-            boleto.setValor(dto.getValorNominal().doubleValue());
-            boleto.setValorPagamento(Objects.isNull(dto.getValorTotalRecebimento())? 0 : dto.getValorTotalRecebimento().doubleValue());
-            boleto.setEmpresa(null);
-            boleto.setIdUnidade(usuario.getUnidade());
-            boleto.setUsuario(usuario);
-            LOGGER.info("Boleto {}", boleto.toString());
-            boletoRepository.save(boleto);
-            LOGGER.info("Boleto Salvo, Inquilino {}, Mes {}", usuario.getNomeUsuario(), dto.getDataEmissao().getMonth().toString());
+        for (ContentDTO contentDTO : responseListagemBoletosDTO.getContent().stream().collect(Collectors.toList())){
+            BoletoNovaAlianca boletoEntity = boletoRepository.findByTxCodBarras(contentDTO.getCodigoBarras());
+            if(!Objects.isNull(boletoEntity) && boletoEntity.getTxCodBarras().equals(contentDTO.getCodigoBarras())
+                    && (!contentDTO.getSituacao().equals(boletoEntity.getTxSituacao()))){
+                boletoRepository.save(boletoBuilder.updateBoletoCarga(boletoEntity,contentDTO));
+            }else if(Objects.isNull(boletoEntity)){
 
+                boletoRepository.save((boletoBuilder.newBoletoCarga(contentDTO)));
+
+
+            }
+        }
+
+        if(Boolean.TRUE){
+            return "deu bom";
         }
         return "Deu Bom";
     }
 
     public Page<BoletoDTO> findAllPaged(Pageable pageable) {
-        Page<Boleto> list = boletoRepository.findAll(pageable);
+        Page<BoletoNovaAlianca> list = boletoRepository.findAll(pageable);
         return list.map(x -> boletoBuilder.entityToDTO(x));
     }
 
     public BoletoDTO findByNossoNumero(String nossoNumero) {
-        Boleto boleto = boletoRepository.findByNossoNumero(nossoNumero);
+        BoletoNovaAlianca boletoNovaAlianca = boletoRepository.findByNossoNumero(nossoNumero);
         return boletoBuilder
-                .entityToDTO(boleto);
+                .entityToDTO(boletoNovaAlianca);
 
     }
 
     public Page<BoletoDTO> findAllPagedByCpfUsuario(Pageable pageable, String cpfUsuario) {
-        Page<Boleto> list = boletoRepository.findAllbyCpfUsuario(pageable,cpfUsuario);
+        Page<BoletoNovaAlianca> list = boletoRepository.findAllbyCpfUsuario(pageable,cpfUsuario);
         return list.map(x -> boletoBuilder.entityToDTO(x));
     }
 
     public Page<BoletoDTO> findAllPagedByIdUsuario(Pageable pageable, Long idUsuario) {
-        Page<Boleto> list = boletoRepository.findAllbyIdUsuario(pageable,idUsuario);
+        Page<BoletoNovaAlianca> list = boletoRepository.findAllbyIdUsuario(pageable,idUsuario);
         return list.map(x -> boletoBuilder.entityToDTO(x));
+    }
+
+    public List<BoletoNovaAlianca> validaBoletosEnviadosMes(String month) {
+        return boletoRepository.findAllByMesEmissao(month);
+    }
+
+    public Boleto builderBoletoInter(Usuario usuario) throws ParseException {
+        return boletoBuilder.boletoInter(usuario);
+    }
+
+    public void save(BoletoDetalhado boleto) {
+
+        boletoRepository.save(boletoBuilder.entityInterToEntityNovaAlianca(boleto));
+    }
+
+    public void enviaBoletosPorEmail(LocalDate dtInicio, LocalDate dtFim) throws Exception {
+
+        LOGGER.info("MES ATUAL {}", dateUtils.mesAtual());
+        List<BoletoNovaAlianca> list = boletoRepository.findAllByMesEmissaoAndNaoEnviadoByEmail(dtInicio,dtFim);
+
+        if(list.size()>0){
+            EmailDTO emailDTO = new EmailDTO();
+            LOGGER.info("Enviando Boleto Para {}" , list.get(0).getUsuario().getNomeUsuario());
+            emailDTO.setNossoNumero(list.get(0).getNossoNumero());
+            byte[] decoder = Base64.getDecoder().decode(this.downloadPDF(emailDTO.getNossoNumero(), builder.requestBoleto("boleto-cobranca.read")).getPdf());
+
+            emailDTO.setAnexo(decoder);
+
+            emailDTO.setNumeroUnidade(list.get(0).getUsuario().getUnidade().getNumeroUnidade());
+            emailDTO.setTo(list.get(0).getUsuario().getTxEmail());
+            emailService.sendMail(emailDTO);
+
+            list.get(0).setEmailEnviado(Boolean.TRUE);
+            boletoRepository.save(list.get(0));
+            LOGGER.info("Boleto enviado Para {}" , list.get(0).getUsuario().getNomeUsuario());
+
+        }else {
+            LOGGER.info("Sem Emails para Enviar");
+
+        }
+
+
     }
 }

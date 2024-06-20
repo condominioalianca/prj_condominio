@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.entities;
+package com.condominio.novaalianca.job.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -69,7 +69,7 @@ const Usuarios = () => {
     // }
 
     return (
-
+    <div className={"container-base"}>
         <div className={"list-container"}>
             <div className={"list-crud-card-buttons-search"}>
                 <Link to={"/admin/users/create"}>
@@ -79,7 +79,7 @@ const Usuarios = () => {
             </div>
 
             <div >
-                <table className="table table-hover admin-container-table">
+                <table className="base-card table table-hover admin-container-table">
                     <thead>
                     <tr>
                         <th scope="col">Id Usuario</th>
@@ -114,11 +114,8 @@ const Usuarios = () => {
                     </tbody>
                 </table>
             </div>
-
-
-
         </div>
-
+    </div>
 
     );
 };

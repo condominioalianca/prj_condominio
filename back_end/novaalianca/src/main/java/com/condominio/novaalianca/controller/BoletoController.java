@@ -30,4 +30,7 @@ public class BoletoController {
         Page<BoletoDTO> list = boletoService.findAllPagedByIdUsuario(pageable,idUsuario);
         return ResponseEntity.ok().body(list);
     }
+
+   // @PostMapping("/emitir/{id}")
+    
 }

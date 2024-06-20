@@ -67,5 +67,7 @@ public class NovaAliancaProperties {
     @Value("${cors.origins}")
     private String corsOrigins;
 
+    @Value("${boleto.numerocontacorrente}")
+    private String numeroContaCorrente;
 
 }

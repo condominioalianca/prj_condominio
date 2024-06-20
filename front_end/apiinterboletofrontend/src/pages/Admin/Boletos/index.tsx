@@ -28,7 +28,7 @@ const Boletos = () => {
                 <div className={ "base-card list-bar-container"}>Serch Bar</div>
             </div>
             <div >
-                <table className="table table-hover admin-container-table">
+                <table className="base-card table table-hover admin-container-table">
                     <thead>
                     <tr>
                         <th scope="col">Situacao</th>

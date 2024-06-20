@@ -21,7 +21,6 @@ public class TokenService {
 
         String webDir = "novaalianca/";
         caminhoArquivo = caminhoArquivo.substring(6, caminhoArquivo.indexOf(webDir)+webDir.length());
-        LOGGER.info("Caminho do certificado {}", requestBoleto.getCaminhoCertificado());
         caminhoArquivo = caminhoArquivo + requestBoleto.getCaminhoCertificado();
 
         caminhoArquivo = caminhoArquivo.replace("/", "//");

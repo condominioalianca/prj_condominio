@@ -7,12 +7,14 @@ import com.condominio.novaalianca.entities.Unidade;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.EnderecoRepository;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
+import com.condominio.novaalianca.repositories.UsuarioSpecification;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -94,4 +98,20 @@ public class UsuarioService implements UserDetailsService
         usuarioRepository.save(usuario);
 
     }
+
+    public List<Usuario> findByAtivosAndEnviaBoleto() {
+        return usuarioRepository.findByAtivosAndEnviaBoleto();
+    }
+
+    public Usuario findFirstByAtivosAndEnviaBoletoAndSemBoleto(LocalDate dtInicio, LocalDate dtFim) {
+        List<Usuario> list = usuarioRepository.findFirstByAtivosAndEnviaBoletoAndSemBoleto(dtInicio, dtFim );
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public Usuario findByIdSpecification (Long idUnidade){
+        Specification specification = UsuarioSpecification.findByIdUnidade(idUnidade);
+        List<Usuario> usuarios = usuarioRepository.findAll(specification);
+        return usuarios.get(0);
+    }
+
 }
