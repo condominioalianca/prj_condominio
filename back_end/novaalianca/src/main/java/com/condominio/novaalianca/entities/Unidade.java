@@ -36,5 +36,8 @@ public class Unidade {
     @Column(name = "TX_BLOCO")
     private String blocoUnidade;
 
+    @Column(name = "QT_MORADOR")
+    private Long qtMorador;
+
 
 }

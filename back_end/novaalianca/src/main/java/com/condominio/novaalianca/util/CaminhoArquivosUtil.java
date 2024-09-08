@@ -15,14 +15,22 @@ public class CaminhoArquivosUtil {
     private NovaAliancaProperties properties;
 
     public String caminhoCertificado() {
+        String caminhoArquivo;
+        if(!properties.isDocker()){
 
-        String caminhoArquivo = getClass().getResource("../").toString();
+            caminhoArquivo = getClass().getResource("../").toString();
+            LOGGER.info("Caminho do class loader{}", caminhoArquivo);
+            String webDir = "novaalianca/";
+            caminhoArquivo = caminhoArquivo.substring(6, caminhoArquivo.indexOf(webDir)+webDir.length());
+            LOGGER.info("Caminho do certificado properties {}", properties.getCaminhoCertificado());
+            caminhoArquivo = caminhoArquivo + properties.getCaminhoCertificado();
+            LOGGER.info("Caminho do certificado maquina local{}", caminhoArquivo);
 
-        String webDir = "novaalianca/";
-        caminhoArquivo = caminhoArquivo.substring(6, caminhoArquivo.indexOf(webDir)+webDir.length());
-        LOGGER.info("Caminho do certificado {}", properties.getCaminhoCertificado());
-        caminhoArquivo = caminhoArquivo + properties.getCaminhoCertificado();
-
-        return caminhoArquivo = caminhoArquivo.replace("/", "//");
-            }
+        }else{
+            caminhoArquivo = "/etc/certs/CONDOMINIONOVAALIANCA.pfx";
+            caminhoArquivo = caminhoArquivo.replace("/", "//");
+            LOGGER.info("Caminho do certificado docker{}", caminhoArquivo);
+        }
+        return caminhoArquivo;
+    }
 }

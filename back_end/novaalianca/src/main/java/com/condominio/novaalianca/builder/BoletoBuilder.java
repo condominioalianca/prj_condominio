@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.builder;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,10 +16,7 @@ import com.condominio.novaalianca.dto.boleto.BoletoDTO;
 import com.condominio.novaalianca.dto.boleto.ContentDTO;
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.Usuario;
-import com.condominio.novaalianca.enums.TipoDesconto;
-import com.condominio.novaalianca.enums.TipoMora;
-import com.condominio.novaalianca.enums.TipoMulta;
-import com.condominio.novaalianca.enums.TipoPessoa;
+import com.condominio.novaalianca.enums.*;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.util.Feriados;
@@ -60,99 +58,99 @@ public class BoletoBuilder {
 
 	Locale BRASILLOCALE = new Locale("pt","BR");
 
-	public BoletoEmissaoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
-
-
-		BoletoEmissaoDTO boleto = new BoletoEmissaoDTO();
-		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
-		String valorCOndominio1 =(parametrosSistemaRepository.findValorParametro("VALOR_CONDOMINIO_" + LocalDate.now().format(formatterYear)));
-		Float valorCondominio = Float.parseFloat(valorCOndominio1);
-		Float valorMulta = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MULTA"));
-		Float valorMora = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MORA"));
-		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro("DIA_DE_VENCIMENTO_BOLETO"));
-		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-
-
-		boleto.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
-		boleto.setValorNominal(valorCondominio);
-		boleto.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
-		boleto.setNumDiasAgenda(30);
-
-
-
-
-		/* Preenchendo Dados Pagador */
-		boleto.getPagador().setCpfCnpj(Objects.isNull(usuario.getNrDocumentoCpf() )? usuario.getNrDocumentoCnpj() : usuario.getNrDocumentoCpf());
-		boleto.getPagador().setNome(usuario.getNomeUsuario());
-		boleto.getPagador().setEmail(usuario.getTxEmail());
-		boleto.getPagador().setTelefone(Objects.isNull(usuario.getNrCelular() ) ? "" : usuario.getNrCelular());
-		boleto.getPagador().setEndereco(usuario.getEndereco().getTxEndereco());
-		boleto.getPagador().setNumero(usuario.getEndereco().getTxEnderecoNumero());
-		boleto.getPagador().setComplemento(usuario.getEndereco().getTxEnderecoComplemento());
-		boleto.getPagador().setBairro(usuario.getEndereco().getTxBairro());
-		boleto.getPagador().setCidade(usuario.getEndereco().getTxCidade());
-		boleto.getPagador().setUf(usuario.getEndereco().getTxUf());
-		boleto.getPagador().setCep(usuario.getEndereco().getTxCep());
-		boleto.getPagador().setDdd(usuario.getNrCelularDdd() == null ? "" : usuario.getNrCelularDdd());
-		boleto.getPagador().setTipoPessoa(TipoPessoa.FISICA.toString());
-
-
-
-
-		/* Preenchendo Mensagens */
-		// boleto.getMensagem().setLinha1("JUROS(MORA) - TAXA MENSAL - 1 DIA apos DO
-		// VENCIMENTO - PERCENTUAL 2%");
-		// boleto.getMensagem().setLinha2("MULTA - VALOR FIXO - 1 DIA após DO VENCIMENTO
-		// - VALOR 5,40");
-		boleto.getMensagem().setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
-
-		/* Preenchendo Desconto 1 */
-		boleto.getDesconto1().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
-		boleto.getDesconto1().setTaxa(0.0);
-		boleto.getDesconto1().setValor(0.0);
-		boleto.getDesconto1().setData("");
-
-		/* Preenchendo Desconto 2 */
-		boleto.getDesconto2().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
-		boleto.getDesconto2().setTaxa(0.0);
-		boleto.getDesconto2().setValor(0.0);
-		boleto.getDesconto2().setData("");
-
-		/* Preenchendo Desconto 3 */
-		boleto.getDesconto3().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
-		boleto.getDesconto3().setTaxa(0.0);
-		boleto.getDesconto3().setValor(0.0);
-		boleto.getDesconto3().setData("");
-
-
-
-		/* Preenchendo Multa */
-		boleto.getMulta().setCodigoMulta(TipoMulta.VALORFIXO.toString());
-		boleto.getMulta().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
-		boleto.getMulta().setValor(valorMulta);
-		boleto.getMulta().setTaxa(0F);
-
-		/* Preenchendo Mora */
-		boleto.getMora().setCodigoMora(TipoMora.TAXAMENSAL.toString());
-		boleto.getMora().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
-		boleto.getMora().setTaxa(valorMora);
-		boleto.getMora().setValor(0F);
-
-		boleto.getBeneficiarioDTO().setNome("Condominio Nova Alianca");
-		boleto.getBeneficiarioDTO().setCpfCnpj(properties.getCnpjCpfBenificiario());
-		boleto.getBeneficiarioDTO().setTipoPessoa(TipoPessoa.JURIDICA.toString());
-		boleto.getBeneficiarioDTO().setCep("09894205");
-		boleto.getBeneficiarioDTO().setEndereco("RUA ARNALDO MARGONARI");
-		boleto.getBeneficiarioDTO().setBairro("JORDANOPOLIS");
-		boleto.getBeneficiarioDTO().setCidade("SAO BERNARDO DO CAMPO");
-		boleto.getBeneficiarioDTO().setUf("SP");
-
-
-
-		return boleto;
-	}
+//	public BoletoEmissaoDTO carregaDadosEmissao(Usuario usuario) throws ParseException {
+//
+//
+//		BoletoEmissaoDTO boleto = new BoletoEmissaoDTO();
+//		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
+//		String valorCOndominio1 =(parametrosSistemaRepository.findValorParametro("VALOR_CONDOMINIO_" + LocalDate.now().format(formatterYear)));
+//		Float valorCondominio = Float.parseFloat(valorCOndominio1);
+//		Float valorMulta = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MULTA"));
+//		Float valorMora = Float.parseFloat(parametrosSistemaRepository.findValorParametro("VALOR_MORA"));
+//		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro("DIA_DE_VENCIMENTO_BOLETO"));
+//		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//
+//
+//
+//		boleto.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
+//		boleto.setValorNominal(valorCondominio);
+//		boleto.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
+//		boleto.setNumDiasAgenda(30);
+//
+//
+//
+//
+//		/* Preenchendo Dados Pagador */
+//		boleto.getPagador().setCpfCnpj(Objects.isNull(usuario.getNrDocumentoCpf() )? usuario.getNrDocumentoCnpj() : usuario.getNrDocumentoCpf());
+//		boleto.getPagador().setNome(usuario.getNomeUsuario());
+//		boleto.getPagador().setEmail(usuario.getTxEmail());
+//		boleto.getPagador().setTelefone(Objects.isNull(usuario.getNrCelular() ) ? "" : usuario.getNrCelular());
+//		boleto.getPagador().setEndereco(usuario.getEndereco().getTxEndereco());
+//		boleto.getPagador().setNumero(usuario.getEndereco().getTxEnderecoNumero());
+//		boleto.getPagador().setComplemento(usuario.getEndereco().getTxEnderecoComplemento());
+//		boleto.getPagador().setBairro(usuario.getEndereco().getTxBairro());
+//		boleto.getPagador().setCidade(usuario.getEndereco().getTxCidade());
+//		boleto.getPagador().setUf(usuario.getEndereco().getTxUf());
+//		boleto.getPagador().setCep(usuario.getEndereco().getTxCep());
+//		boleto.getPagador().setDdd(usuario.getNrCelularDdd() == null ? "" : usuario.getNrCelularDdd());
+//		boleto.getPagador().setTipoPessoa(TipoPessoa.FISICA.toString());
+//
+//
+//
+//
+//		/* Preenchendo Mensagens */
+//		// boleto.getMensagem().setLinha1("JUROS(MORA) - TAXA MENSAL - 1 DIA apos DO
+//		// VENCIMENTO - PERCENTUAL 2%");
+//		// boleto.getMensagem().setLinha2("MULTA - VALOR FIXO - 1 DIA após DO VENCIMENTO
+//		// - VALOR 5,40");
+//		boleto.getMensagem().setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
+//
+//		/* Preenchendo Desconto 1 */
+//		boleto.getDesconto1().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
+//		boleto.getDesconto1().setTaxa(0.0);
+//		boleto.getDesconto1().setValor(0.0);
+//		boleto.getDesconto1().setData("");
+//
+//		/* Preenchendo Desconto 2 */
+//		boleto.getDesconto2().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
+//		boleto.getDesconto2().setTaxa(0.0);
+//		boleto.getDesconto2().setValor(0.0);
+//		boleto.getDesconto2().setData("");
+//
+//		/* Preenchendo Desconto 3 */
+//		boleto.getDesconto3().setCodigoDesconto(TipoDesconto.NAOTEMDESCONTO.toString());
+//		boleto.getDesconto3().setTaxa(0.0);
+//		boleto.getDesconto3().setValor(0.0);
+//		boleto.getDesconto3().setData("");
+//
+//
+//
+//		/* Preenchendo Multa */
+//		boleto.getMulta().setCodigoMulta(TipoMulta.VALORFIXO.toString());
+//		boleto.getMulta().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
+//		boleto.getMulta().setValor(valorMulta);
+//		boleto.getMulta().setTaxa(0F);
+//
+//		/* Preenchendo Mora */
+//		boleto.getMora().setCodigoMora(TipoMora.TAXAMENSAL.toString());
+//		boleto.getMora().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
+//		boleto.getMora().setTaxa(valorMora);
+//		boleto.getMora().setValor(0F);
+//
+//		boleto.getBeneficiarioDTO().setNome("Condominio Nova Alianca");
+//		boleto.getBeneficiarioDTO().setCpfCnpj(properties.getCnpjCpfBenificiario());
+//		boleto.getBeneficiarioDTO().setTipoPessoa(TipoPessoa.JURIDICA.toString());
+//		boleto.getBeneficiarioDTO().setCep("09894205");
+//		boleto.getBeneficiarioDTO().setEndereco("RUA ARNALDO MARGONARI");
+//		boleto.getBeneficiarioDTO().setBairro("JORDANOPOLIS");
+//		boleto.getBeneficiarioDTO().setCidade("SAO BERNARDO DO CAMPO");
+//		boleto.getBeneficiarioDTO().setUf("SP");
+//
+//
+//
+//		return boleto;
+//	}
 
 	public BoletoDTO entityToDTO (BoletoNovaAlianca boletoNovaAlianca){
 		return BoletoDTO.builder()
@@ -185,22 +183,52 @@ public class BoletoBuilder {
 
 
 	public Boleto boletoInter (Usuario usuario) throws ParseException {
+		Locale ptBr = new Locale("pt", "BR");
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
-		BigDecimal valorCondominio = BigDecimal.valueOf(Double.valueOf(parametrosSistemaRepository.findValorParametro("VALOR_CONDOMINIO_" + LocalDate.now().format(formatterYear))));
-		BigDecimal valorMulta = BigDecimal.valueOf(Double.valueOf(parametrosSistemaRepository.findValorParametro("VALOR_MULTA")));
-		BigDecimal valorMora = BigDecimal.valueOf(Double.valueOf(parametrosSistemaRepository.findValorParametro("VALOR_MORA")));
-		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro("DIA_DE_VENCIMENTO_BOLETO"));
+		Double valorCondominio = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_CONDOMINIO.toString() +"_"+ LocalDate.now().format(formatterYear))));
+		Double valorTaxaMinAgua = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_TAXA_MIN_AGUA.toString())));
+		Double TAXA_ACRESCIMO_AGUA = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.TAXA_ACRESCIMO_AGUA.toString())));
+		Double valorMulta = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_MULTA.toString())));
+		Double valorMora = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_MORA.toString())));
+		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro(ParametrosSistema.DIA_DE_VENCIMENTO_BOLETO.toString()));
+		double valorTaxaAguaAcrescimoSetentaPorCento = valorTaxaMinAgua * 0.7;
+		double valorCondominio1Morador = valorCondominio+valorTaxaMinAgua;
+		double valoraguaMaisMorador = valorTaxaMinAgua+valorTaxaAguaAcrescimoSetentaPorCento;
+		double valorCondominioMaisMorador = valorCondominio+valoraguaMaisMorador;
 		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+		/* Preenchendo Mensagens */
+		// boleto.getMensagem().setLinha1("JUROS(MORA) - TAXA MENSAL - 1 DIA apos DO
+		// VENCIMENTO - PERCENTUAL 2%");
+		// boleto.getMensagem().setLinha2("MULTA - VALOR FIXO - 1 DIA após DO VENCIMENTO
+		// - VALOR 5,40");
+		Mensagem mensagem = new Mensagem();
+		mensagem.setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
+		mensagem.setLinha2("TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio));
+		mensagem.setLinha3("TAXA MIN AGUA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaMinAgua));
+
+
+
+
 		Boleto boletoInter = new inter.cobranca.model.Boleto();
 		boletoInter.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
-		boletoInter.setValorNominal(valorCondominio);
 		boletoInter.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
 		boletoInter.setNumDiasAgenda(30);
 
-		//inter.cobranca.model.pe
+		if(usuario.getUnidade().getQtMorador()>1){
+			mensagem.setLinha4("ACRESCIMO 70% DA TAXA MIN (UNIDADE COM MAIS DE 1 MORADOR) = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaAguaAcrescimoSetentaPorCento));
+			mensagem.setLinha5("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominioMaisMorador));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2,BigDecimal.ROUND_HALF_EVEN));
 
+		}else{
+			mensagem.setLinha4("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio1Morador));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, BigDecimal.ROUND_HALF_EVEN));
+
+
+		}
+
+		boletoInter.setMensagem(mensagem);
 
 		Pessoa pagador = new Pessoa();
 		/* Preenchendo Dados Pagador */
@@ -221,13 +249,7 @@ public class BoletoBuilder {
 		boletoInter.setPagador(pagador);
 
 
-		/* Preenchendo Mensagens */
-		// boleto.getMensagem().setLinha1("JUROS(MORA) - TAXA MENSAL - 1 DIA apos DO
-		// VENCIMENTO - PERCENTUAL 2%");
-		// boleto.getMensagem().setLinha2("MULTA - VALOR FIXO - 1 DIA após DO VENCIMENTO
-		// - VALOR 5,40");
-		Mensagem mensagem = new Mensagem();
-		mensagem.setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
+
 
 		Desconto desconto = new Desconto();
 		/* Preenchendo Desconto 1 */
@@ -248,7 +270,7 @@ public class BoletoBuilder {
 		/* Preenchendo Multa */
 		boletoInter.getMulta().setCodigoMulta(CodigoMulta.VALORFIXO);
 		boletoInter.getMulta().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
-		boletoInter.getMulta().setValor(valorMulta);
+		boletoInter.getMulta().setValor(BigDecimal.valueOf(valorMulta));
 		boletoInter.getMulta().setTaxa(BigDecimal.ZERO);
 		Mora mora = new Mora();
 		boletoInter.setMora(mora);
@@ -256,7 +278,7 @@ public class BoletoBuilder {
 		/* Preenchendo Mora */
 		boletoInter.getMora().setCodigoMora(CodigoMora.TAXAMENSAL);
 		boletoInter.getMora().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
-		boletoInter.getMora().setTaxa(valorMora);
+		boletoInter.getMora().setTaxa(BigDecimal.valueOf(valorMora));
 		boletoInter.getMora().setValor(BigDecimal.ZERO);
 
 		Pessoa beneficiarioFinal = new Pessoa();

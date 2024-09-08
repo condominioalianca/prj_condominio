@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,7 +74,7 @@ public class BoletoService {
 
 
 
-    public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto){
+    public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto) throws IOException {
         return tokenService.getToken(requestBoleto);
     }
 

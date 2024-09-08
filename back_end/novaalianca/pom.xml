@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.condominio</groupId>
     <artifactId>novaalianca</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>novaalianca</name>
     <description>BackEnd Da estrutura do Software para Administrar um Condominio</description>
 

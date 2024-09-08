@@ -5,36 +5,32 @@ import com.condominio.novaalianca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.dto.boleto.BoletoDTO;
-import com.condominio.novaalianca.dto.boleto.BoletoEmissaoDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.EmailService;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
-import com.condominio.novaalianca.dto.boleto.BoletoTESTEOLDDTO;
-import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
+import com.condominio.novaalianca.services.InterSDKService;
 import com.condominio.novaalianca.services.boleto.BoletoService;
+import inter.cobranca.model.Boleto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/testes")
-public class TestesAleatorios {
+public class TestesAleatoriosController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestesAleatorios.class);
+    private static final Logger log = LoggerFactory.getLogger(TestesAleatoriosController.class);
 
     @Autowired
     private RequestBoletoBuilder builder;
@@ -50,21 +46,28 @@ public class TestesAleatorios {
     @Autowired
     private BoletoService boletoService;
 
+    @Autowired
+    private InterSDKService interSDKService;
+
     @GetMapping("/geraboleto")
  //   @Scheduled(cron="1 22 13 * * *")    //Segundo Minuto Hora dia-do-mes mes  dia-da-semana
     public ResponseEntity<?> geraBoleto() throws Exception {
         List<Usuario> listUsuarios  = usuarioRepository.listUsuariosGeraBoleto();
-        List<ResponseBoletoDTO> listResponse = new ArrayList<>();
+        List<Boleto> listResponse = new ArrayList<>();
 
         for (Usuario usuario: listUsuarios ) {
-            BoletoEmissaoDTO boletoDTO = boletoBuilder.carregaDadosEmissao(usuario);
-            ResponseBoletoDTO responseBoletoDTO = boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO);
-            listResponse.add(responseBoletoDTO);
-            EmailDTO emailDTO = new EmailDTO();
-            emailDTO.setNumeroUnidade(usuario.getUnidade().getNumeroUnidade());
-            emailDTO.setTo(usuario.getTxEmail());
-            emailDTO.setNossoNumero(responseBoletoDTO.getNossoNumero());
-            emailService.sendMail(emailDTO);
+            Boleto boleto = boletoBuilder.boletoInter(usuario);
+//            ResponseBoletoDTO responseBoletoDTO = boletoService.geraBoleto(builder.requestBoleto("boleto-cobranca.write"), boletoDTO);
+            listResponse.add(boleto);
+//            EmailDTO emailDTO = new EmailDTO();
+//            emailDTO.setNumeroUnidade(usuario.getUnidade().getNumeroUnidade());
+//            emailDTO.setTo(usuario.getTxEmail());
+//            emailDTO.setNossoNumero(responseBoletoDTO.getNossoNumero());
+//            emailService.sendMail(emailDTO);
+            if (!Objects.isNull(usuario) && usuario.getIdUsuario().equals(5L)){
+                log.info("Usuarios sem Boleto Enviado {}", usuario.getNomeUsuario());
+                interSDKService.emitirBoleto(boleto);
+            }
 
         }
 
