@@ -1,9 +1,7 @@
 package com.condominio.novaalianca.services;
 
-import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.EmailDTO;
-import com.condominio.novaalianca.services.boleto.BoletoService;
 import com.condominio.novaalianca.util.TemplateEmail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 
 @Service
 @Slf4j

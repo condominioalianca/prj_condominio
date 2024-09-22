@@ -141,7 +141,7 @@
         <dependency>
             <groupId>inter</groupId>
             <artifactId>inter-sdk-java</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.3</version>
             <scope>compile</scope>
         </dependency>
 

@@ -3,7 +3,6 @@ package com.condominio.novaalianca.services;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.util.CaminhoArquivosUtil;
 import inter.InterSdk;
-import inter.banking.model.ExtratoEnriquecido;
 import inter.banking.model.FiltroConsultarExtratoEnriquecido;
 import inter.banking.model.TransacaoEnriquecida;
 import inter.cobranca.model.Boleto;

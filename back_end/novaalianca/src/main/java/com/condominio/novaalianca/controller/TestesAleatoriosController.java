@@ -10,7 +10,7 @@ import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.EmailService;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
 import com.condominio.novaalianca.services.InterSDKService;
-import com.condominio.novaalianca.services.boleto.BoletoService;
+import com.condominio.novaalianca.cobranca.services.BoletoService;
 import inter.cobranca.model.Boleto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

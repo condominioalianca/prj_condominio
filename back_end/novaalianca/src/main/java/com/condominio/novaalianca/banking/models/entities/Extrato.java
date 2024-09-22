@@ -49,4 +49,7 @@ public class Extrato {
 
     @Column(name = "DOCUMENTO_PAGADOR")
     private String documentePagador;
+
+    @Column(name = "ID_BOLETO")
+    private Long idBoleto;
 }

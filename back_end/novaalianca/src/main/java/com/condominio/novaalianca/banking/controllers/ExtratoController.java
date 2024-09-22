@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.banking.controllers;
 
+import com.condominio.novaalianca.banking.models.entities.Extrato;
 import com.condominio.novaalianca.banking.services.ExtratoService;
 import com.condominio.novaalianca.dto.boleto.BoletoDTO;
 import inter.banking.model.FiltroConsultarExtratoEnriquecido;
@@ -20,12 +21,12 @@ public class ExtratoController {
     @Autowired
     private ExtratoService extratoService;
 
-    @GetMapping("/{dataInicio}/{dataFim}")
-    public ResponseEntity<List<TransacaoEnriquecida>> findAll(
+    @PostMapping("/{dataInicio}/{dataFim}")
+    public ResponseEntity<List<Extrato>> findAll(
              @RequestBody (required = false) FiltroConsultarExtratoEnriquecido filtroConsultarExtratoEnriquecido,
             @PathVariable String dataInicio, @PathVariable String dataFim) throws SdkException {
-        List<TransacaoEnriquecida> transacaoEnriquecidas = extratoService.getExtratoEnriquecido(dataInicio,dataFim,filtroConsultarExtratoEnriquecido);
-        return ResponseEntity.ok().body(transacaoEnriquecidas);
+        List<Extrato> listExtrato = extratoService.getExtratoEnriquecido(dataInicio,dataFim,filtroConsultarExtratoEnriquecido);
+        return ResponseEntity.ok().body(listExtrato);
     }
 
 }

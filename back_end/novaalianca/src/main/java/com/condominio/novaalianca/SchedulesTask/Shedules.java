@@ -1,21 +1,16 @@
 package com.condominio.novaalianca.SchedulesTask;
 
-import com.condominio.novaalianca.banking.services.ExtratoService;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
-import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.services.InterSDKService;
 import com.condominio.novaalianca.services.UsuarioService;
-import com.condominio.novaalianca.services.boleto.BoletoService;
-import com.condominio.novaalianca.util.CaminhoArquivosUtil;
+import com.condominio.novaalianca.cobranca.services.BoletoService;
 import com.condominio.novaalianca.util.DateUtils;
-import inter.InterSdk;
 import inter.cobranca.model.Boleto;
 import inter.exceptions.SdkException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;

@@ -1,8 +1,7 @@
-package com.condominio.novaalianca.controller;
+package com.condominio.novaalianca.cobranca.controller;
 
 import com.condominio.novaalianca.dto.boleto.BoletoDTO;
-import com.condominio.novaalianca.dto.boleto.BoletoTESTEOLDDTO;
-import com.condominio.novaalianca.services.boleto.BoletoService;
+import com.condominio.novaalianca.cobranca.services.BoletoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

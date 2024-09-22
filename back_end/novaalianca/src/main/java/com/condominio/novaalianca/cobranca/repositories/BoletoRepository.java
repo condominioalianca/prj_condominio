@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.repositories;
+package com.condominio.novaalianca.cobranca.repositories;
 
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import org.springframework.data.domain.Page;

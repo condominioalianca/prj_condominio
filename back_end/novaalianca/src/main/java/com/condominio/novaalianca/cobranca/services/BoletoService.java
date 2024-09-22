@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.services.boleto;
+package com.condominio.novaalianca.cobranca.services;
 
 
 import com.condominio.novaalianca.builder.BoletoBuilder;
@@ -17,29 +17,24 @@ import com.condominio.novaalianca.dto.boleto.ResponseListagemBoletosDTO;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.Usuario;
-import com.condominio.novaalianca.repositories.BoletoRepository;
+import com.condominio.novaalianca.cobranca.repositories.BoletoRepository;
 import com.condominio.novaalianca.services.EmailService;
-import com.condominio.novaalianca.services.UsuarioService;
 import com.condominio.novaalianca.util.DateUtils;
 import inter.cobranca.model.Boleto;
 import inter.cobranca.model.BoletoDetalhado;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
-import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;

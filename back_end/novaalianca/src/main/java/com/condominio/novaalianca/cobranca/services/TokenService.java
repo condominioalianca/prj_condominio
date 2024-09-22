@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.services.boleto;
+package com.condominio.novaalianca.cobranca.services;
 
 import com.condominio.novaalianca.dto.boleto.RequestBoleto;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
