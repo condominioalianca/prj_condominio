@@ -31,8 +31,11 @@ const Boletos = () => {
                 <table className="base-card table table-hover admin-container-table">
                     <thead>
                     <tr>
+                        <th className={"initial_colum"} scope="col">Unidade</th>
+                        <th className={"initial_colum"} scope="col">Usuario</th>
                         <th scope="col">Situacao</th>
                         <th scope="col">Mes</th>
+                        <th scope="col">Ano</th>
                         <th scope="col">Valor Devido</th>
                         <th scope="col">Valor Pago</th>
                         <th scope="col">Acao</th>
@@ -43,12 +46,15 @@ const Boletos = () => {
                     {pageListBoletos?.content.map((boleto, key) => {
                         return (
                             <tr>
+                                <td className={"initial_colum"}>{boleto.unidade.numeroUnidade}</td>
+                                <td className={"initial_colum"}>{boleto.usuario.nomeUsuario}</td>
                                 <td>{boleto.txSituacao}</td>
                                 <td>{boleto.mesReferencia}</td>
+                                <td>{boleto.anoReferencia}</td>
                                 <td>{boleto.valor.toFixed(2)}</td>
                                 <td>{boleto.valorPagamento.toFixed(2)}</td>
-                                <td >
-                                    <ul className={"user-action"} >
+                                <td>
+                                    <ul className={"user-action"}>
                                         <li>
                                             <a href={'#teste'} className="btn btn-info btn-round btn-just-icon btn-sm">
                                                 <i className={"material-icons"}><AiFillEdit/></i>

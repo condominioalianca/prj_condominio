@@ -9,6 +9,9 @@ import Unidades from "./Unidades";
 import UnidadeEdit from "./Unidades/UnidadeEdit";
 import PrivateRoute from "../../components/PrivateRoute";
 import Boletos from "./Boletos";
+import Financeiro from "./Financeiro";
+import Contratos from "./Contratos";
+import Parametrizacao from "./Parametrizacao";
 
 
 const Admin = () => {
@@ -25,14 +28,7 @@ const Admin = () => {
                 <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']}  path={"/admin/unidade/:idUnidade"} exact={true}>
                     <UnidadeEdit/>
                 </PrivateRoute>
-
-                {/*Rotas de Para Listagem e Cadastro de Contratos*/}
-
-                <Route path={"/admin/Contratos"}>
-                    <h1>Contratos Crud</h1>
-                </Route>
-
-                {/*Rotas de Para Listagem e Cadastro de Usuarios*/}
+                    {/*Rotas de Para Listagem e Cadastro de Usuarios*/}
                 <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/users"} exact={true}>
                     <Usuarios/>
                 </PrivateRoute>
@@ -42,6 +38,18 @@ const Admin = () => {
 
                 <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/boleto"} exact={true}>
                     <Boletos/>
+                </PrivateRoute>
+
+                <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/financeiro"} exact={true}>
+                    <Financeiro/>
+                </PrivateRoute>
+
+                <PrivateRoute roles={ ['ADMINISTRADOR', 'SINDICO']} path={"/admin/contratos"} exact={true}>
+                    <Contratos/>
+                </PrivateRoute>
+
+                <PrivateRoute roles={ ['ADMINISTRADOR','SINDICO']} path={"/admin/parametrizacao"} exact={true}>
+                    <Parametrizacao/>
                 </PrivateRoute>
 
             </Switch>

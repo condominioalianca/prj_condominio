@@ -38,8 +38,13 @@ const Navbar = () => {
                 </li>
 
                 <li>
-                    <NavLink to={"/admin/contrato"} className={"admin-nav-item"}>
+                    <NavLink to={"/admin/contratos"} className={"admin-nav-item"}>
                         <p>Contratos</p>
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink to={"/admin/parametrizacao"} className={"admin-nav-item"}>
+                        <p>Parametrizações</p>
                     </NavLink>
                 </li>
 

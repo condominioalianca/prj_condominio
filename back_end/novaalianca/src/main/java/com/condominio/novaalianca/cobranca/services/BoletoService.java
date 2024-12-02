@@ -2,6 +2,7 @@ package com.condominio.novaalianca.cobranca.services;
 
 
 import com.condominio.novaalianca.builder.BoletoBuilder;
+import com.condominio.novaalianca.builder.PagingDTOBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.builder.UsuarioBuilder;
 import com.condominio.novaalianca.dto.EmailDTO;
@@ -14,6 +15,7 @@ import com.condominio.novaalianca.dto.boleto.RequestBoleto;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseBoletoDetalheDTO;
 import com.condominio.novaalianca.dto.boleto.ResponseListagemBoletosDTO;
+import com.condominio.novaalianca.dto.pageable.PageableResponseDTO;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.Usuario;
@@ -38,10 +40,11 @@ import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class BoletoService {
+public class BoletoService{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BoletoService.class);
 
@@ -57,6 +60,7 @@ public class BoletoService {
 
     @Autowired
     private BoletoBuilder boletoBuilder;
+
     @Autowired
     private DateUtils dateUtils;
 
@@ -195,9 +199,13 @@ public class BoletoService {
         return "Deu Bom";
     }
 
-    public Page<BoletoDTO> findAllPaged(Pageable pageable) {
-        Page<BoletoNovaAlianca> list = boletoRepository.findAll(pageable);
-        return list.map(x -> boletoBuilder.entityToDTO(x));
+    public PageableResponseDTO<BoletoDTO> findAllPaged(Pageable pageable) {
+        final Page<BoletoNovaAlianca> boletoEntitie = boletoRepository.findAll(pageable);
+
+        final List<BoletoDTO> boletoDTOSet = boletoEntitie.get().map(x->boletoBuilder.entityToDTO(x)).collect(Collectors.toList());
+
+        return buildPageableResponseDTO(boletoEntitie, boletoDTOSet);
+
     }
 
     public BoletoDTO findByNossoNumero(String nossoNumero) {
@@ -212,9 +220,15 @@ public class BoletoService {
         return list.map(x -> boletoBuilder.entityToDTO(x));
     }
 
-    public Page<BoletoDTO> findAllPagedByIdUsuario(Pageable pageable, Long idUsuario) {
+    public PageableResponseDTO<BoletoDTO> findAllPagedByIdUsuario(Pageable pageable, Long idUsuario) {
         Page<BoletoNovaAlianca> list = boletoRepository.findAllbyIdUsuario(pageable,idUsuario);
-        return list.map(x -> boletoBuilder.entityToDTO(x));
+
+        final List<BoletoDTO> boletoDTOSet = list.get().map(x->boletoBuilder.entityToDTO(x)).collect(Collectors.toList());
+
+        return buildPageableResponseDTO(list, boletoDTOSet);
+
+
+
     }
 
     public List<BoletoNovaAlianca> validaBoletosEnviadosMes(String month) {
@@ -257,5 +271,14 @@ public class BoletoService {
         }
 
 
+    }
+
+    private PageableResponseDTO<BoletoDTO> buildPageableResponseDTO(Page<BoletoNovaAlianca> page, List<BoletoDTO> boletoDTOSet) {
+        PageableResponseDTO<BoletoDTO> responseDTO = new PageableResponseDTO<>();
+
+        responseDTO.setPaging(PagingDTOBuilder.from(page));
+        responseDTO.setContent(boletoDTOSet);
+
+        return responseDTO;
     }
 }

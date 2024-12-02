@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.SchedulesTask;
 
+import com.condominio.novaalianca.banking.services.ExtratoService;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.services.InterSDKService;
@@ -11,6 +12,7 @@ import inter.exceptions.SdkException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -36,8 +38,8 @@ public class Shedules {
     @Autowired
     private InterSDKService interSDKService;
 
-//    @Autowired
-//    private ExtratoService extratoService;
+    @Autowired
+    private ExtratoService extratoService;
 
 //    @Scheduled(cron = "50 */4 11,12,20 1 * *")
     public void validaEnviodDeBoletos() throws SdkException, ParseException {
@@ -69,12 +71,11 @@ public class Shedules {
 
     }
 
+    //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
+    @Scheduled(cron = "0 0 8 * * *")
+    public void extrato() throws SdkException {
+        extratoService.getExtratoEnriquecido(dateUtils.localDateToStringYYYYMMDD(LocalDate.now().minusDays(80L)),dateUtils.localDateToStringYYYYMMDD(LocalDate.now()));
 
-//    //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-//    @Scheduled(cron = "0 15 15 * * *")
-//    public void extrato() throws SdkException {
-//        extratoService.getExtratoEnriquecido();
-//
-//    }
+    }
 
 }

@@ -12,7 +12,8 @@ type LoginResponse =
         userFistName: string
     }
 
-export const BASE_URL_BACK = process.env.REACT_APP_BACKEND_URL ?? 'http://condominio-spring-patrick.duckdns.org:8085';
+// export const BASE_URL_BACK = process.env.REACT_APP_BACKEND_URL ?? 'http://condominio-spring-patrick.duckdns.org:8085';
+export const BASE_URL_BACK = process.env.REACT_APP_BACKEND_URL ?? 'http://localhost:8086';
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID ?? 'front_nova_alianca'
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET ?? 'nova123'
 const tokenKey = 'authData'
