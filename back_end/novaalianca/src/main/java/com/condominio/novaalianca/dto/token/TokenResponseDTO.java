@@ -15,6 +15,7 @@ public class TokenResponseDTO {
     private String access_token;
     private String token_type;
     private String expires_in;
+    private String role;
     private String scope;
 
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenEnhancer implements TokenEnhancer {
@@ -25,6 +26,7 @@ public class JwtTokenEnhancer implements TokenEnhancer {
 
         map.put("userName", user.getNomeUsuario());
         map.put("userId", user.getIdUsuario());
+        map.put("roles", user.getListPerfis().stream().map(perfil -> perfil.getNomePerfil()).collect(Collectors.toSet()));
 
         DefaultOAuth2AccessToken token = (DefaultOAuth2AccessToken) oAuth2AccessToken;
         token.setAdditionalInformation(map);

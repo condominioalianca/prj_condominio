@@ -8,6 +8,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -51,11 +52,16 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             http.headers().frameOptions().disable();
         }
 
-        http.authorizeRequests()
+        http.
+                authorizeRequests()
                 .antMatchers(PUBLICO).permitAll()
                 .antMatchers(HttpMethod.GET, SINDICO).permitAll()
                 .antMatchers(ADMIN).hasAnyRole("ADMINISTRADOR", "SINDICO")
                 .anyRequest().authenticated();
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); //não guardar a sessao
+
 
         http.cors().configurationSource(corsConfigurationSource());
     }
@@ -71,8 +77,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         corsConfig.setAllowCredentials(true);
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
+
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
+
+
         return source;
     }
 
