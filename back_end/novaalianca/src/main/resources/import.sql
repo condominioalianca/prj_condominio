@@ -34,6 +34,7 @@ INSERT INTO tb_parametros_sistema (tx_desc_parametro, vl_parametro, dt_criacao, 
 INSERT INTO tb_parametros_sistema (tx_desc_parametro, vl_parametro, dt_criacao, dt_alteracao, id_usuario_criacao, id_usuario_alteracao, fl_ativo) VALUES('TAXA_ACRESCIMO_AGUA', '70', '2024-07-28', NULL, 5, NULL, true);
 INSERT INTO tb_parametros_sistema (tx_desc_parametro, vl_parametro, dt_criacao, dt_alteracao, id_usuario_criacao, id_usuario_alteracao, fl_ativo) VALUES('VALOR_TAXA_MIN_AGUA', '76.98', '2024-07-28', NULL, 5, NULL, true);
 INSERT INTO tb_parametros_sistema (tx_desc_parametro, vl_parametro, dt_criacao, dt_alteracao, id_usuario_criacao, id_usuario_alteracao, fl_ativo) VALUES('VALOR_CONDOMINIO_2024', '248.80', '2024-01-14', '2024-07-28', 5, NULL, true);
+INSERT INTO tb_parametros_sistema ( TX_DESC_PARAMETRO,FL_ATIVO, VL_PARAMETRO, DT_CRIACAO,DT_ALTERACAO,ID_USUARIO_CRIACAO, ID_USUARIO_ALTERACAO) VALUES ('VALOR_CONDOMINIO_2025',true,'265.07', CURRENT_TIMESTAMP,null,5,null );
 
 INSERT INTO tb_perfil(TX_DESC_PERFIL) VALUES ('ADMINISTRADOR');
 INSERT INTO tb_perfil(TX_DESC_PERFIL) VALUES ('SINDICO');

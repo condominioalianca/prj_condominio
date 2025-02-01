@@ -92,7 +92,7 @@ public class BoletoService{
                 .asObject(ResponseListagemBoletosDTO.class);
 
 
-        LOGGER.info("BODY : {}", response.getBody());
+        LOGGER.info("BODY : {}", response.getBody().getSize());
         return response.getBody();
     }
 
@@ -267,10 +267,7 @@ public class BoletoService{
 
         }else {
             LOGGER.info("Sem Emails para Enviar");
-
         }
-
-
     }
 
     private PageableResponseDTO<BoletoDTO> buildPageableResponseDTO(Page<BoletoNovaAlianca> page, List<BoletoDTO> boletoDTOSet) {

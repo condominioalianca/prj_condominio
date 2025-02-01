@@ -41,7 +41,7 @@ public class Shedules {
     @Autowired
     private ExtratoService extratoService;
 
-//    @Scheduled(cron = "50 */4 11,12,20 1 * *")
+    @Scheduled(cron = "50 */4 20 9 * *")
     public void validaEnviodDeBoletos() throws SdkException, ParseException {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -56,14 +56,14 @@ public class Shedules {
     }
 
 
- //   @Scheduled(cron = "10 */2 16,12,20 * * *")
+    @Scheduled(cron = "10 */2 20 * * *")
     public void recuperaBoletoDetalhado() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1).minusMonths(10);
         boletoService.cargaBoleo(dtInicio.toString(), dateUtils.ultimoDiaMes(), requestBoletoBuilder.requestBoleto("boleto-cobranca.read"));
 
     }
 
-//    @Scheduled(cron = "20 */2 13,14 1 * *")
+    @Scheduled(cron = "20 */2 20 9 * *")
     public void enviaEmail() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();

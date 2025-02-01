@@ -187,7 +187,7 @@ public class BoletoBuilder {
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		Double valorCondominio = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_CONDOMINIO.toString() +"_"+ LocalDate.now().format(formatterYear))));
 		Double valorTaxaMinAgua = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_TAXA_MIN_AGUA.toString())));
-		Double TAXA_ACRESCIMO_AGUA = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.TAXA_ACRESCIMO_AGUA.toString())));
+//		Double TAXA_ACRESCIMO_AGUA = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.TAXA_ACRESCIMO_AGUA.toString())));
 		Double valorMulta = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_MULTA.toString())));
 		Double valorMora = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_MORA.toString())));
 		int diaVencimento = Integer.parseInt(parametrosSistemaRepository.findValorParametro(ParametrosSistema.DIA_DE_VENCIMENTO_BOLETO.toString()));
