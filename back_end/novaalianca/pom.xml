@@ -92,7 +92,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
             <scope>provided</scope>
         </dependency>
 
@@ -141,7 +140,7 @@
         <dependency>
             <groupId>inter</groupId>
             <artifactId>inter-sdk-java</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.1</version>
             <scope>compile</scope>
         </dependency>
 

@@ -10,8 +10,6 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 
 
 @Getter
@@ -20,10 +18,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class BoletoDTO implements Serializable{
 
-
-
 	private static final long serialVersionUID = 1L;
-
 
 	private Long id;
 
@@ -46,10 +41,8 @@ public class BoletoDTO implements Serializable{
 	private LocalDate dtLimitePagamento;
 
 	private String txEspecie;
-
-	private String txCodBarras;
-
-	private String txLinhaDigitavel;
+	private String codigoBarras;
+	private String linhaDigitavel;
 
 	private String txOrigem;
 

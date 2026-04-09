@@ -1,9 +1,9 @@
 package com.condominio.novaalianca.dto.boleto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.condominio.novaalianca.cobranca.models.dto.ContentDTO;
+import com.condominio.novaalianca.cobranca.models.dto.ResponseCobrancaDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.util.List;
 
@@ -11,14 +11,21 @@ import java.util.List;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class ResponseListagemBoletosDTO {
 
-	private int totalPages;
-	private int totalElements;
-	private boolean last;
-	private boolean first;
-	private int size;
-	private int numberOfElements;
-	private List<ContentDTO> content;
+	private int totalPaginas;
+
+	private int totalElementos;
+
+	private int tamanhoPagina;
+
+	private boolean primeiraPagina;
+
+	private boolean ultimaPagina;
+
+	private int numeroDeElementos;
+
+	private List<ResponseCobrancaDTO> cobrancas;
 
 }

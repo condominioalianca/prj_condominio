@@ -16,11 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.devtools.livereload.LiveReloadServer;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 
@@ -55,6 +54,7 @@ public class ExtratoService {
 
     public List<Extrato> getExtratoEnriquecido(String dataInicio, String dataFim, FiltroConsultarExtratoEnriquecido filtro) throws SdkException {
         List<Extrato> listExtrato = new ArrayList<>();
+        AtomicReference<Integer> persistidas = new AtomicReference<>(0);
 
         List<TransacaoEnriquecida> listTransacoes = interSDKService.banking(dataInicio, dataFim, filtro.builder().build());
 
@@ -98,13 +98,16 @@ public class ExtratoService {
                 if (!extratoRepository.getbyIdTransacao(listTransacao.getIdTransacao()).isPresent()) {
                     log.info("IDTransação: [{}] , Enviada para persistencia no BD", listTransacao.getIdTransacao());
                     extratoRepository.save(extrato);
+                    persistidas.getAndSet(persistidas.get() + 1);
+
                 }
 
                 listExtrato.add(extrato);
                 log.info("IDTransação: [{}] , Processada com Sucesso", listTransacao.getIdTransacao());
 
             });
-            log.info("Fim - Total Transações Salvas: [{}]", listExtrato.size());
+            log.info("Fim - Total Transações [{}]", listExtrato.size());
+            log.info("Fim - Total Transações Persistidas [{}]", persistidas);
         }
         return listExtrato;
     }

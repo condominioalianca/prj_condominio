@@ -40,8 +40,8 @@ public class Shedules {
 
     @Autowired
     private ExtratoService extratoService;
-
-    @Scheduled(cron = "50 */4 20 9 * *")
+    //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
+    @Scheduled(cron = "0 */6 19 09 * *")
     public void validaEnviodDeBoletos() throws SdkException, ParseException {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -52,18 +52,20 @@ public class Shedules {
             log.info("Boleto sendo Emitido para{}", usuario.getNomeUsuario());
             Boleto boleto = boletoService.builderBoletoInter(usuario);
             interSDKService.emitirBoleto(boleto);
+
         }
     }
 
-
-    @Scheduled(cron = "10 */2 20 * * *")
+    //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
+    @Scheduled(cron = "10 */4 19 09 * *")
     public void recuperaBoletoDetalhado() throws Exception {
-        LocalDate dtInicio = LocalDate.now().withDayOfMonth(1).minusMonths(10);
+        LocalDate dtInicio = LocalDate.now().withDayOfMonth(1).minusMonths(2);
         boletoService.cargaBoleo(dtInicio.toString(), dateUtils.ultimoDiaMes(), requestBoletoBuilder.requestBoleto("boleto-cobranca.read"));
 
     }
 
-    @Scheduled(cron = "20 */2 20 9 * *")
+//    CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
+    @Scheduled(cron = "10 */2 19 09 * *")
     public void enviaEmail() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -72,7 +74,7 @@ public class Shedules {
     }
 
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 */2 * * * *")
     public void extrato() throws SdkException {
         extratoService.getExtratoEnriquecido(dateUtils.localDateToStringYYYYMMDD(LocalDate.now().minusDays(80L)),dateUtils.localDateToStringYYYYMMDD(LocalDate.now()));
 

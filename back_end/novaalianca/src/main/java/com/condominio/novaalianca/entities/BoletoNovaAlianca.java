@@ -110,4 +110,7 @@ public class BoletoNovaAlianca {
     @Column(name = "FL_EMAIL_ENVIADO")
     private Boolean emailEnviado;
 
+    @Column(name = "COD_SOLICITACAO")
+    private String codSolicitacao;
+
 }

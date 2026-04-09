@@ -1,9 +1,6 @@
-package com.condominio.novaalianca.dto.boleto;
+package com.condominio.novaalianca.cobranca.models.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -12,6 +9,8 @@ import java.io.Serializable;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PagadorDTO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

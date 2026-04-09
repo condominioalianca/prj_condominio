@@ -1,9 +1,7 @@
-package com.condominio.novaalianca.dto.boleto;
+package com.condominio.novaalianca.cobranca.models.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -11,11 +9,12 @@ import java.io.Serializable;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MoraDTO implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-
-	private String codigoMora;
+	private String codigo;
 	private String data;
 	private Float valor;
 	private Float taxa;

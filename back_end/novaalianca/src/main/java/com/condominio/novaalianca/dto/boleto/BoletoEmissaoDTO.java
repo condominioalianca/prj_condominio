@@ -1,5 +1,9 @@
 package com.condominio.novaalianca.dto.boleto;
 
+import com.condominio.novaalianca.cobranca.models.dto.DescontoDTO;
+import com.condominio.novaalianca.cobranca.models.dto.MoraDTO;
+import com.condominio.novaalianca.cobranca.models.dto.MultaDTO;
+import com.condominio.novaalianca.cobranca.models.dto.PagadorDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
