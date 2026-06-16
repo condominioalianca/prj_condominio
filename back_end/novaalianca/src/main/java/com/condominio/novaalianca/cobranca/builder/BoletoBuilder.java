@@ -8,32 +8,25 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
-
-
 import com.condominio.novaalianca.builder.UnidadeBuilder;
 import com.condominio.novaalianca.builder.UsuarioBuilder;
 import com.condominio.novaalianca.cobranca.models.dto.BoletoDTO;
-
-import com.condominio.novaalianca.cobranca.models.dto.PixDTO;
 import com.condominio.novaalianca.cobranca.models.dto.ResponseCobrancaDTO;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
+import com.condominio.novaalianca.dto.inter.cobranca.*;
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.CobrancaExtra;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.enums.*;
+import com.condominio.novaalianca.enums.inter.SituacaoBoleto;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.CobrancaExtraService;
 import com.condominio.novaalianca.util.Feriados;
-import inter.cobranca.model.Boleto;
-import inter.cobranca.model.Desconto;
-import inter.cobranca.model.Mensagem;
-import inter.cobranca.model.Mora;
-import inter.cobranca.model.Multa;
-import inter.cobranca.model.Pessoa;
-import inter.cobranca.model.enums.CodigoDesconto;
-import inter.cobranca.model.enums.CodigoMora;
-import inter.cobranca.model.enums.CodigoMulta;
+import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoDesconto;
+import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMora;
+import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMulta;
+import com.condominio.novaalianca.dto.inter.cobranca.enums.TipoPessoa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -99,7 +92,7 @@ public class BoletoBuilder {
 		mensagem.setLinha3("TAXA MIN AGUA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaMinAgua));
 
 
-		Boleto boletoInter = new inter.cobranca.model.Boleto();
+		Boleto boletoInter = new Boleto();
 		boletoInter.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
 		boletoInter.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
 		boletoInter.setNumDiasAgenda(30);
@@ -129,7 +122,7 @@ public class BoletoBuilder {
 		pagador.setUf(usuario.getEndereco().getTxUf());
 		pagador.setCep(usuario.getEndereco().getTxCep());
 		pagador.setDdd(usuario.getNrCelularDdd() == null ? "" : usuario.getNrCelularDdd());
-		pagador.setTipoPessoa(inter.cobranca.model.enums.TipoPessoa.FISICA);
+		pagador.setTipoPessoa(TipoPessoa.FISICA);
 
 		boletoInter.setPagador(pagador);
 
@@ -153,7 +146,7 @@ public class BoletoBuilder {
 		boletoInter.setMulta(multa);
 
 		/* Preenchendo Multa */
-		boletoInter.getMulta().setCodigoMulta(CodigoMulta.VALORFIXO);
+		boletoInter.getMulta().setCodigo(CodigoMulta.VALORFIXO);
 		boletoInter.getMulta().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
 		boletoInter.getMulta().setValor(BigDecimal.valueOf(valorMulta));
 		boletoInter.getMulta().setTaxa(BigDecimal.ZERO);
@@ -161,7 +154,7 @@ public class BoletoBuilder {
 		boletoInter.setMora(mora);
 
 		/* Preenchendo Mora */
-		boletoInter.getMora().setCodigoMora(CodigoMora.TAXAMENSAL);
+		boletoInter.getMora().setCodigo(CodigoMora.TAXAMENSAL);
 		boletoInter.getMora().setData(this.verificaFeriado(diaVencimento).plusDays(1).format(formatter));
 		boletoInter.getMora().setTaxa(BigDecimal.valueOf(valorMora));
 		boletoInter.getMora().setValor(BigDecimal.ZERO);
@@ -170,7 +163,7 @@ public class BoletoBuilder {
 		boletoInter.setBeneficiarioFinal(beneficiarioFinal);
 		boletoInter.getBeneficiarioFinal().setNome("Condominio Nova Alianca");
 		boletoInter.getBeneficiarioFinal().setCpfCnpj(properties.getCnpjCpfBenificiario());
-		boletoInter.getBeneficiarioFinal().setTipoPessoa(inter.cobranca.model.enums.TipoPessoa.JURIDICA);
+		boletoInter.getBeneficiarioFinal().setTipoPessoa(TipoPessoa.JURIDICA);
 		boletoInter.getBeneficiarioFinal().setCep("09894205");
 		boletoInter.getBeneficiarioFinal().setEndereco("RUA ARNALDO MARGONARI");
 		boletoInter.getBeneficiarioFinal().setBairro("JORDANOPOLIS");
@@ -277,6 +270,41 @@ public BoletoDTO entityToBoletoDTO(BoletoNovaAlianca ent){
 		boletoNovaAlianca.setAtivo(!dto.getCobranca().getSituacao().equals("CANCELADO") ? Boolean.TRUE : Boolean.FALSE);
 		boletoNovaAlianca.setEmailEnviado(Boolean.FALSE);
 		boletoNovaAlianca.setCodSolicitacao(dto.getCobranca().getCodigoSolicitacao());
+
+
+		return boletoNovaAlianca;
+	}
+
+	public BoletoNovaAlianca newBoletoCargaV2 (Boleto boleto, EmissaoBoletoResponseDTO dto, OrigemBoleto origem){
+		DateTimeFormatter formatterDataHora1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+		DateTimeFormatter formatterData1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+		Usuario usuario = usuarioBuilder.byCPF(boleto.getPagador().getCpfCnpj());
+		BoletoNovaAlianca boletoNovaAlianca = new BoletoNovaAlianca();
+		boletoNovaAlianca.setDhSituacao(LocalDateTime.now());
+		boletoNovaAlianca.setDtBaixa(null);
+		boletoNovaAlianca.setDtEmissao(LocalDate.now());
+		boletoNovaAlianca.setDtEnvio(null);
+		boletoNovaAlianca.setDtLimitePagamento(boletoNovaAlianca.getDtEmissao().plusDays(30));
+//		boletoNovaAlianca.setDtPagamento(LocalDate.parse(dto.getDataHoraSituacao(), formatterDataHora1));
+		boletoNovaAlianca.setDtVencimento(LocalDate.parse(boleto.getDataVencimento(),formatterData1));
+		boletoNovaAlianca.setMotivoBaixa(null);
+//		boletoNovaAlianca.setNossoNumero(boleto.getBoleto().getNossoNumero());
+		boletoNovaAlianca.setSeuNumero(boleto.getSeuNumero());
+		boletoNovaAlianca.setTxCancelamento(null);
+//		boletoNovaAlianca.setTxCodBarras(boleto.getBoleto().getCodigoBarras());
+//		boletoNovaAlianca.setTxEspecie(dto.getBoleto().getTxEspecie());
+//		boletoNovaAlianca.setTxLinhaDigitavel(boleto.getBoleto().getLinhaDigitavel());
+		boletoNovaAlianca.setTxOrigem(origem != null ? origem.name() : null);
+		boletoNovaAlianca.setTxSituacao(SituacaoBoleto.A_RECEBER.getValue());
+		boletoNovaAlianca.setValor(Double.valueOf(String.valueOf(boleto.getValorNominal())));
+//		boletoNovaAlianca.setValorPagamento(Objects.isNull(boleto.getCobranca().getValorTotalRecebido())? 0 : Double.valueOf(boleto.getCobranca().getValorTotalRecebido()));
+		boletoNovaAlianca.setEmpresa(null);
+		boletoNovaAlianca.setIdUnidade(usuario.getUnidade());
+		boletoNovaAlianca.setUsuario(usuario);
+		boletoNovaAlianca.setAtivo(Boolean.TRUE);
+		boletoNovaAlianca.setEmailEnviado(Boolean.FALSE);
+		boletoNovaAlianca.setCodSolicitacao(dto.getCodigoSolicitacao());
 
 
 		return boletoNovaAlianca;

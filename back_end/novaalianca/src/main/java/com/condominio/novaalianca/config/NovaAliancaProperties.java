@@ -9,11 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NovaAliancaProperties {
 
+    @Value("${banco.interurl.path_prod}")
+    private  String bancoInterUrlPathProd;
+
+    @Value("${banco.interurl.path_sand}")
+    private  String bancoInterUrlPathSand;
+
+
     @Value("${banco.inter.url.token}")
     private String bancoInterUrlToken;
 
     @Value("${banco.inter.url.boleto}")
     private String bancoInterUrlBoleto;
+
+    @Value("${banco.inter.url.extrato:https://cdpj-sandbox.partners.uatinter.co/banking/v2/extrato}")
+    private String bancoInterUrlExtrato;
 
     @Value("${banco.inter.caminho.certificado}")
     private String caminhoCertificado;

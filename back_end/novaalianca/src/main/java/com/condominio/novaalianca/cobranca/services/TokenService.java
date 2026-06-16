@@ -29,18 +29,6 @@ public class TokenService {
        String  caminhoArquivo = caminhoArquivosUtil.caminhoCertificado();
        LOGGER.info("Caminho do Arquivo {}", caminhoArquivo);
 
-//        Resource resource = new ClassPathResource("./certs/CONDOMINIONOVAALIANCA.pfx");
-//        String caminhoArquivoResource = resource.getFile().getPath();
-//        caminhoArquivoResource = caminhoArquivoResource.replace("/", "//");
-//
-//
-//        LOGGER.info("Caminho do ArquivoResource {}", caminhoArquivoResource);
-//        LOGGER.info("Caminho do URLArquivoResource {}", resource.getURI().getPath());
-//        LOGGER.info("Caminho do URLArquivoResourceFragment {}", resource.getURI().getRawFragment());
-//        LOGGER.info("Caminho do ArquivoResourceDescription {}", resource.getDescription());
-//        LOGGER.info("Caminho do ArquivoResourceFileName {}", resource.getFilename());
-
-
         Unirest.config().clientCertificateStore(caminhoArquivo , requestBoleto.getSenhaCertificado());
         HttpResponse<TokenResponseDTO> response = Unirest.post(requestBoleto.getUrlBancoInterToken())
                 .multiPartContent()

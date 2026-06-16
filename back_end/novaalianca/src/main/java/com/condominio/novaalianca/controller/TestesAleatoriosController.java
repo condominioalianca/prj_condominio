@@ -3,15 +3,13 @@ package com.condominio.novaalianca.controller;
 
 import com.condominio.novaalianca.cobranca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
-import com.condominio.novaalianca.dto.EmailDTO;
-import com.condominio.novaalianca.cobranca.models.dto.BoletoDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
 import com.condominio.novaalianca.services.EmailService;
 import com.condominio.novaalianca.dto.boleto.FiltroListagemBoletoDTO;
-import com.condominio.novaalianca.services.InterSDKService;
+import com.condominio.novaalianca.services.inter.InterService;
 import com.condominio.novaalianca.cobranca.services.BoletoService;
-import inter.cobranca.model.Boleto;
+import com.condominio.novaalianca.dto.inter.cobranca.Boleto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/testes")
@@ -47,7 +44,7 @@ public class TestesAleatoriosController {
     private BoletoService boletoService;
 
     @Autowired
-    private InterSDKService interSDKService;
+    private InterService interService;
 
     @GetMapping("/geraboleto")
  //   @Scheduled(cron="1 22 13 * * *")    //Segundo Minuto Hora dia-do-mes mes  dia-da-semana
@@ -66,7 +63,7 @@ public class TestesAleatoriosController {
 //            emailService.sendMail(emailDTO);
 //            if (!Objects.isNull(usuario) && usuario.getIdUsuario().equals(5L)){
 //                log.info("Usuarios sem Boleto Enviado {}", usuario.getNomeUsuario());
-//                interSDKService.emitirBoleto(boleto);
+//                interService.emitirBoleto(boleto);
 //            }
 
         }

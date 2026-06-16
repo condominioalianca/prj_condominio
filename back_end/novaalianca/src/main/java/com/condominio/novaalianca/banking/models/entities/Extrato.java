@@ -23,8 +23,14 @@ public class Extrato {
     @Column(name = "ID_TRANSACAO")
     private String idTransacao;
 
-    @Column(name = "DT_INCLUSAO")
+    @Column(name = "DT_INCLUSAO", columnDefinition = "TIMESTAMP")
     private LocalDate dtInclusao;
+
+    @Column(name = "DT_TRANSACAO", columnDefinition = "TIMESTAMP")
+    private LocalDate dtTransacao;
+
+    @Column(name = "DESCRICAO")
+    private String descricao;
 
     @Column(name = "TP_TRANACAO")
     private String tipoTransacao;
@@ -52,4 +58,16 @@ public class Extrato {
 
     @Column(name = "ID_BOLETO")
     private Long idBoleto;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID_EXTRATO_PIX")
+    private PixDetalhe pixDetalhe;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID_EXTRATO_PAGAMENTO")
+    private PagamentoDetalhe pagamentoDetalhe;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ID_EXTRATO_COMPRA_DEBITO")
+    private CompraDebitoDetalhe compraDebitoDetalhe;
 }

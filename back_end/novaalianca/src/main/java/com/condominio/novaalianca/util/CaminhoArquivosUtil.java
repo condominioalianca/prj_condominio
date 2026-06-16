@@ -1,6 +1,6 @@
 package com.condominio.novaalianca.util;
 
-//import com.condominio.novaalianca.SchedulesTask.Shedules;
+
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,21 +15,25 @@ public class CaminhoArquivosUtil {
     private NovaAliancaProperties properties;
 
     public String caminhoCertificado() {
-        String caminhoArquivo;
-        if(!properties.isDocker()){
+        String caminhoArquivo = properties.getCaminhoCertificado();
+        LOGGER.info("Caminho do certificado configurado nas propriedades: {}", caminhoArquivo);
 
-            caminhoArquivo = getClass().getResource("../").toString();
-            LOGGER.info("Caminho do class loader{}", caminhoArquivo);
+        if (properties.isDocker()) {
+            if (caminhoArquivo != null && caminhoArquivo.startsWith("src/main/resources/certs/")) {
+                String nomeArquivo = caminhoArquivo.substring("src/main/resources/certs/".length());
+                caminhoArquivo = "/etc/certs/" + nomeArquivo;
+            }
+            LOGGER.info("Caminho do certificado resolvido para o Docker: {}", caminhoArquivo);
+        } else {
+            String basePath = getClass().getResource("../").toString();
+            LOGGER.info("Caminho do class loader: {}", basePath);
             String webDir = "novaalianca/";
-            caminhoArquivo = caminhoArquivo.substring(6, caminhoArquivo.indexOf(webDir)+webDir.length());
-            LOGGER.info("Caminho do certificado properties {}", properties.getCaminhoCertificado());
-            caminhoArquivo = caminhoArquivo + properties.getCaminhoCertificado();
-            LOGGER.info("Caminho do certificado maquina local{}", caminhoArquivo);
-
-        }else{
-            caminhoArquivo = "/etc/certs/CONDOMINIONOVAALIANCA.pfx";
-            caminhoArquivo = caminhoArquivo.replace("/", "//");
-            LOGGER.info("Caminho do certificado docker{}", caminhoArquivo);
+            int index = basePath.indexOf(webDir);
+            if (index != -1) {
+                basePath = basePath.substring(6, index + webDir.length());
+                caminhoArquivo = basePath + caminhoArquivo;
+            }
+            LOGGER.info("Caminho do certificado resolvido localmente: {}", caminhoArquivo);
         }
         return caminhoArquivo;
     }

@@ -27,6 +27,10 @@ public class UsuarioDTO {
     @JsonProperty("email")
     private String txEmail;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
+    private String password;
+
     private String nrTelefoneDdd;
 
     private String nrTelefone;

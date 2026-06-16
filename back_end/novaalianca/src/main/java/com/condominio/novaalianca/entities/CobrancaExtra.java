@@ -4,6 +4,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -22,11 +24,11 @@ public class CobrancaExtra {
     @Column(name = "VL_COBRANCA")
     private Double valorCobranca;
 
-    @Column(name = "DT_INCLUSAO")
+    @Column(name = "DT_INCLUSAO",columnDefinition = "TIMESTAMP")
     private LocalDate dtInclusao;
 
     @Column(name = "MES_REFERENCIA")
-    private Integer mesReferencia;
+    private Long mesReferencia;
 
     @Column(name = "DESCRICAO")
     private String descricao;

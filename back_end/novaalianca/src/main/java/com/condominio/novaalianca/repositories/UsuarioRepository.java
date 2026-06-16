@@ -20,6 +20,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario,Long> , JpaSpec
 
     Usuario findByNrDocumentoCpf(String nrCocumento);
 
+    Usuario findByNrDocumentoCnpj(String nrDocumentoCnpj);
+
     @Query(value = "SELECT u FROM Usuario u WHERE u.ativo = true AND u.enviaBoleto = true")
     List<Usuario> findByAtivosAndEnviaBoleto();
 

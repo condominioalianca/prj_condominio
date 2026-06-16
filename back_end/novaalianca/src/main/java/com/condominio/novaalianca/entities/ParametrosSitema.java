@@ -36,10 +36,10 @@ public class ParametrosSitema {
     @Column(name = "VL_PARAMETRO")
     private String valorParametro;
 
-    @Column(name = "DT_CRIACAO")
+    @Column(name = "DT_CRIACAO",columnDefinition = "TIMESTAMP")
     private LocalDate dtCriacao;
 
-    @Column(name = "DT_ALTERACAO")
+    @Column(name = "DT_ALTERACAO",  columnDefinition = "TIMESTAMP")
     private LocalDate dtAlteracao;
 
     @ManyToOne

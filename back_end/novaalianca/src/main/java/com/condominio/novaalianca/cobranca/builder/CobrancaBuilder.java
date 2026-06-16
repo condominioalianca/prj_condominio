@@ -2,7 +2,6 @@ package com.condominio.novaalianca.cobranca.builder;
 
 import com.condominio.novaalianca.cobranca.models.dto.CobrancaDTO;
 import com.condominio.novaalianca.entities.BoletoNovaAlianca;
-import inter.pix.model.Cobranca;
 import org.springframework.stereotype.Component;
 
 @Component

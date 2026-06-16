@@ -56,7 +56,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 authorizeRequests()
                 .antMatchers(PUBLICO).permitAll()
                 .antMatchers(HttpMethod.GET, SINDICO).permitAll()
-                .antMatchers(ADMIN).hasAnyRole("ADMINISTRADOR", "SINDICO")
+                .antMatchers(ADMIN).hasAnyAuthority("ADMINISTRADOR", "SINDICO")
                 .anyRequest().authenticated();
 //        http
 //                .csrf(csrf -> csrf.disable())

@@ -64,12 +64,20 @@ public class UsuarioService implements UserDetailsService
         return usuarioBuilder.entityToDto(entity);
     }
 
+    public Usuario findByIDEntity(Long id) {
+        Optional<Usuario> usuario = usuarioRepository.findById(id);
+        Usuario entity = usuario.orElseThrow(() -> new ResourceNotFoundException("Usuario Não Encontrado"));
+        return entity;
+    }
+
     @Transactional
     public UsuarioDTO usuarioSave(UsuarioDTO dto) {
         LOGGER.info("dto = {}", dto);
 
         Usuario usuario = usuarioBuilder.dtoToEntity(dto);
-       // usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
         usuario = usuarioRepository.save(usuario);
 
         return usuarioBuilder.entityToDto(usuario);
@@ -93,14 +101,21 @@ public class UsuarioService implements UserDetailsService
         return usuario;
     }
 
+    @Transactional
     public void usuarioUpdate(UsuarioDTO usuarioDTO) {
+        String existingPassword = usuarioRepository.findById(usuarioDTO.getIdUsuario())
+                .map(Usuario::getPassword)
+                .orElse(null);
+
         Usuario usuario = usuarioBuilder.dtoToEntity(usuarioDTO);
+
+        if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
+        } else {
+            usuario.setPassword(existingPassword);
+        }
+
         usuarioRepository.save(usuario);
-
-    }
-
-    public List<Usuario> findByAtivosAndEnviaBoleto() {
-        return usuarioRepository.findByAtivosAndEnviaBoleto();
     }
 
     public Usuario findFirstByAtivosAndEnviaBoletoAndSemBoleto(LocalDate dtInicio, LocalDate dtFim) {
@@ -112,6 +127,26 @@ public class UsuarioService implements UserDetailsService
         Specification specification = UsuarioSpecification.findByIdUnidade(idUnidade);
         List<Usuario> usuarios = usuarioRepository.findAll(specification);
         return usuarios.get(0);
+    }
+
+    @Transactional
+    public UsuarioDTO findByDocumentoOrEmail(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("O valor de busca nao pode ser nulo ou vazio");
+        }
+        Usuario entity;
+        if (value.contains("@")) {
+            entity = usuarioRepository.findByTxEmail(value);
+        } else {
+            entity = usuarioRepository.findByNrDocumentoCpf(value);
+            if (entity == null) {
+                entity = usuarioRepository.findByNrDocumentoCnpj(value);
+            }
+        }
+        if (entity == null) {
+            throw new ResourceNotFoundException("Usuario nao encontrado para: " + value);
+        }
+        return usuarioBuilder.entityToDto(entity);
     }
 
 }

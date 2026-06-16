@@ -35,4 +35,13 @@ public class ParametrosServices {
         ParametrosSitema entity = repository.save(builder.dtoToEntity(parametrosDTO));
         return builder.entityTODto(entity);
     }
+
+    public ParametrosDTO update(ParametrosDTO parametrosDTO) {
+        ParametrosSitema entity = repository.save(builder.dtoToEntity(parametrosDTO));
+        return builder.entityTODto(entity);
+    }
+
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
 }

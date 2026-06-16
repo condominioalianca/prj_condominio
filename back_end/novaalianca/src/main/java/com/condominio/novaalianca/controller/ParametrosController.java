@@ -30,4 +30,15 @@ public class ParametrosController {
     public ResponseEntity<?> save(@RequestBody ParametrosDTO parametrosDTO){
         return  new ResponseEntity<>(services.save(parametrosDTO), HttpStatus.CREATED);
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<ParametrosDTO> update(@RequestBody ParametrosDTO dto) {
+        return ResponseEntity.ok().body(services.update(dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        services.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

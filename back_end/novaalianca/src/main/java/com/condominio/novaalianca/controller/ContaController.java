@@ -1,0 +1,45 @@
+package com.condominio.novaalianca.controller;
+
+import com.condominio.novaalianca.dto.ContaDTO;
+import com.condominio.novaalianca.services.ContaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequestMapping(value = "/contas")
+public class ContaController {
+
+    @Autowired
+    private ContaService service;
+
+    @GetMapping
+    public ResponseEntity<List<ContaDTO>> findAll() {
+        return ResponseEntity.ok().body(service.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ContaDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(service.findById(id));
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<ContaDTO> save(@Valid @RequestBody ContaDTO dto) {
+        return new ResponseEntity<>(service.save(dto), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ContaDTO> update(@Valid @RequestBody ContaDTO dto) {
+        return ResponseEntity.ok().body(service.update(dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

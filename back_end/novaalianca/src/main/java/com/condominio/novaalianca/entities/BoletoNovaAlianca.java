@@ -49,13 +49,13 @@ public class BoletoNovaAlianca {
     @Column(name = "DH_SITUACAO")
     private LocalDateTime dhSituacao;
 
-    @Column(name = "DT_VENCIMENTO")
+    @Column(name = "DT_VENCIMENTO", columnDefinition = "TIMESTAMP")
     private LocalDate dtVencimento;
 
     @Column(name = "VL_BOLETO")
     private Double valor;
 
-    @Column(name = "DT_EMISSAO")
+    @Column(name = "DT_EMISSAO",  columnDefinition = "TIMESTAMP"  )
     private LocalDate dtEmissao;
 
     @Column(name = "DT_LIMITE_PAGAMENTO")
@@ -87,13 +87,13 @@ public class BoletoNovaAlianca {
     @Column(name = "TX_MOTIVO_BAIXA")
     private String motivoBaixa;
 
-    @Column(name = "DT_BAIXA")
+    @Column(name = "DT_BAIXA",columnDefinition = "TIMESTAMP")
     private LocalDate dtBaixa;
 
-    @Column(name = "DT_PAGAMENTO")
+    @Column(name = "DT_PAGAMENTO", columnDefinition = "TIMESTAMP")
     private LocalDate dtPagamento;
 
-    @Column(name = "DT_ENVIO")
+    @Column(name = "DT_ENVIO", columnDefinition = "TIMESTAMP")
     private LocalDate dtEnvio;
 
     @ManyToOne
@@ -101,7 +101,7 @@ public class BoletoNovaAlianca {
     private Unidade idUnidade;
 
     @Column(name = "ARQUIVO_PDF")
-    @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")
     private byte[] arquivopdf;
 
     @Column(name = "FL_ATIVO")

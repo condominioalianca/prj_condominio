@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  novaalianca-backend:
+    build:
+      context: ./back_end/novaalianca
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/novaalianca-1.0.2-SNAPSHOT.jar
+    container_name: novaalianca-backend
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER=true
+      - APP_PROFILE=dev
+      - DB_URL=jdbc:postgresql://192.168.15.10:5432/condominio
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=140908
+      - INTER_CERT_PATH=/etc/certs/CONDOMINIONOVAALIANCA.pfx
+      - INTER_CERT_PASSWORD=140908
+      - INTER_CLIENT_ID=61851b55-cd4c-4932-bfb4-0b38ea941aad
+      - INTER_CLIENT_SECRET=87c6f9e2-e497-4611-bd98-d55b0ea085be
+      - MAIL_USERNAME=condominionovaaliancasbc
+      - MAIL_PASSWORD=xuvjwatpamgpaywy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always

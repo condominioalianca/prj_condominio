@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface CobrancaExtraRepository extends JpaRepository<CobrancaExtra,Long> {
 
     @Query(value = "Select ce FROM CobrancaExtra ce where ce.unidade = :uni AND ce.mesReferencia = :mesReferencia ")
-    CobrancaExtra findByidUnidadeAndMesReferencia(Unidade uni, Integer mesReferencia);
+    CobrancaExtra findByidUnidadeAndMesReferencia(Unidade uni, Long mesReferencia);
 }

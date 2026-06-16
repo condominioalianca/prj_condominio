@@ -26,7 +26,11 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         return ResponseEntity.ok().body(service.findByID(id));
+    }
 
+    @GetMapping("/search")
+    public ResponseEntity<UsuarioDTO> findByDocumentoOrEmail(@RequestParam String value) {
+        return ResponseEntity.ok().body(service.findByDocumentoOrEmail(value));
     }
 
     @PostMapping("/save")

@@ -23,8 +23,9 @@ import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.cobranca.repositories.BoletoRepository;
 import com.condominio.novaalianca.services.EmailService;
 import com.condominio.novaalianca.util.DateUtils;
-import inter.cobranca.model.Boleto;
-import inter.cobranca.model.BoletoDetalhado;
+import com.condominio.novaalianca.dto.inter.cobranca.Boleto;
+import com.condominio.novaalianca.services.inter.InterService;
+import com.condominio.novaalianca.dto.inter.cobranca.Boletoenriquecido;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
@@ -67,6 +68,9 @@ public class BoletoService{
 
     @Autowired
     private RequestBoletoBuilder builder;
+
+    @Autowired
+    private InterService interService;
 
     public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto) throws IOException {
         return tokenService.getToken(requestBoleto);
@@ -156,21 +160,29 @@ public class BoletoService{
 //        return response.getBody();
 //    }
 
-    public BoletoPDFDto downloadPDF(String codSolicitacao, RequestBoleto requestBoleto) throws Exception {
-        TokenResponseDTO token = tokenService.getToken( requestBoleto);
-        String url = requestBoleto.getUrlBancoInterBoleto() +  "/{codSolicitacao}/pdf";
-        HttpResponse<BoletoPDFDto> response = Unirest.get(url)
-                .header("Accept", "application/json")
-                .header("Host","cdpj.partners.bancointer.com.br")
-                .header("Content-Type", "application/json" )
-                .header("Authorization", "Bearer " + token.getAccess_token())
-                //.header("x-conta-corrente", filtro.getNumConta())
-                .routeParam("codSolicitacao", codSolicitacao)
-               // .asString();
-        .asObject(BoletoPDFDto.class);
+    public String downloadPDF(String codSolicitacao, String ambiente) throws Exception {
+        if (ambiente == null || ambiente.trim().isEmpty()) {
+            ambiente = "SANDBOX";
+        }
 
-        LOGGER.info("BODY : {}", response.getBody());
-        return response.getBody();
+        // 1. Chamar o InterService para obter o PDF
+        BoletoPDFDto pdfDto = interService.obterBoletoPdf(codSolicitacao, null, ambiente);
+        if (pdfDto == null || pdfDto.getPdf() == null) {
+            throw new RuntimeException("Não foi possível baixar o PDF do Banco Inter.");
+        }
+
+        // 2. Localizar o boleto no banco de dados local pelo codSolicitacao
+        BoletoNovaAlianca boleto = boletoRepository.findByCodSolicitacao(codSolicitacao);
+        if (boleto != null) {
+            // Decodificar o Base64 e persistir no campo Lob
+            byte[] pdfBytes = Base64.getDecoder().decode(pdfDto.getPdf());
+            boleto.setArquivopdf(pdfBytes);
+            boletoRepository.save(boleto);
+            LOGGER.info("PDF do boleto com código de solicitação {} salvo com sucesso no banco local.", codSolicitacao);
+        }
+
+        // 3. Retornar a string base64
+        return pdfDto.getPdf();
     }
 
     public ResponseListagemBoletosDTO cargaBoleo(String dataInicio, String datafim, RequestBoleto requestBoleto) throws Exception {
@@ -255,7 +267,13 @@ public class BoletoService{
             EmailDTO emailDTO = new EmailDTO();
             LOGGER.info("Enviando Boleto Para {}" , list.get(0).getUsuario().getNomeUsuario());
             emailDTO.setNossoNumero(list.get(0).getNossoNumero());
-            byte[] decoder = Base64.getDecoder().decode(this.downloadPDF( list.get(0).getCodSolicitacao(), builder.requestBoleto("boleto-cobranca.read")).getPdf());
+            byte[] decoder = list.get(0).getArquivopdf();
+            if (decoder == null || decoder.length == 0) {
+                LOGGER.info("PDF não encontrado localmente. Buscando no Banco Inter para o código: {}", list.get(0).getCodSolicitacao());
+                decoder = Base64.getDecoder().decode(this.downloadPDF(list.get(0).getCodSolicitacao(), "PRODUCAO"));
+            } else {
+                LOGGER.info("PDF do boleto carregado diretamente da base local.");
+            }
 
             emailDTO.setAnexo(decoder);
 
@@ -280,4 +298,146 @@ public class BoletoService{
 //
 //        return responseDTO;
 //    }
+
+    public BoletoNovaAlianca enriquecerBoleto(String codigoSolicitacao, String ambiente) {
+        if (codigoSolicitacao == null || codigoSolicitacao.trim().isEmpty()) {
+            throw new IllegalArgumentException("Código de solicitação inválido.");
+        }
+
+        if (ambiente == null || ambiente.trim().isEmpty()) {
+            ambiente = "SANDBOX";
+        }
+
+        // 1. Buscar o boleto local correspondente
+        BoletoNovaAlianca boletoLocal = boletoRepository.findByCodSolicitacao(codigoSolicitacao);
+        if (boletoLocal == null) {
+            throw new NoSuchElementException("Boleto local não encontrado para o código de solicitação: " + codigoSolicitacao);
+        }
+
+        // 2. Chamar o interService para buscar os dados detalhados/enriquecidos
+        Boletoenriquecido response = interService.getBoletoEnriquecido(codigoSolicitacao,ambiente   );
+        if (response == null || response.getCobranca() == null) {
+            throw new RuntimeException("Não foi possível recuperar os dados detalhados do Banco Inter para o boleto.");
+        }
+
+        // 3. Validações
+        // Validar se o codigoSolicitacao é o mesmo
+        String apiCodSolicitacao = response.getCobranca().getCodigoSolicitacao();
+        if (!codigoSolicitacao.equalsIgnoreCase(apiCodSolicitacao)) {
+            throw new IllegalStateException("O código de solicitação retornado pela API (" + apiCodSolicitacao + ") difere do solicitado (" + codigoSolicitacao + ").");
+        }
+
+        // Validar se o CPF do pagador recuperado é o mesmo que temos no usuário da base
+        if (response.getCobranca().getPagador() == null) {
+            throw new IllegalStateException("Os dados do pagador não foram retornados pela API do Banco Inter.");
+        }
+        if (boletoLocal.getUsuario() == null) {
+            throw new IllegalStateException("O boleto local não possui um usuário pagador associado.");
+        }
+
+        String apiCpfCnpj = response.getCobranca().getPagador().getCpfCnpj().replaceAll("[^0-9]", "");
+        String localCpfCnpj = boletoLocal.getUsuario().getNrDocumentoCpf().replaceAll("[^0-9]", "");
+
+        if (!apiCpfCnpj.equals(localCpfCnpj)) {
+            throw new IllegalArgumentException("Validação falhou: o CPF do pagador retornado (" + apiCpfCnpj + ") não coincide com o do usuário na base (" + localCpfCnpj + ").");
+        }
+
+        // 4. Mapear e Enriquecer os dados do boleto
+        // Nosso Número
+        if (response.getBoleto() != null) {
+            if (response.getBoleto().getNossoNumero() != null) {
+                boletoLocal.setNossoNumero(response.getBoleto().getNossoNumero());
+            }
+            if (response.getBoleto().getCodigoBarras() != null) {
+                boletoLocal.setTxCodBarras(response.getBoleto().getCodigoBarras());
+            }
+            if (response.getBoleto().getLinhaDigitavel() != null) {
+                boletoLocal.setTxLinhaDigitavel(response.getBoleto().getLinhaDigitavel());
+            }
+        }
+
+        // Situação e outras informações da cobrança
+        if (response.getCobranca().getSituacao() != null) {
+            boletoLocal.setTxSituacao(response.getCobranca().getSituacao());
+        }
+
+        // Origem do recebimento
+        if (response.getCobranca().getOrigemRecebimento() != null) {
+            boletoLocal.setTxOrigem(response.getCobranca().getOrigemRecebimento());
+        }
+
+        // Datas de baixa/pagamento/situação
+        if (response.getCobranca().getDataSituacao() != null) {
+            try {
+                LocalDate dataSituacao = LocalDate.parse(response.getCobranca().getDataSituacao());
+                boletoLocal.setDhSituacao(dataSituacao.atStartOfDay());
+                
+                // Se a situação for RECEBIDO, preenchemos o valor pago e a data de pagamento
+                if ("RECEBIDO".equalsIgnoreCase(response.getCobranca().getSituacao())) {
+                    boletoLocal.setDtPagamento(dataSituacao);
+                    if (response.getCobranca().getValorTotalRecebido() != null) {
+                        try {
+                            boletoLocal.setValorPagamento(Double.parseDouble(response.getCobranca().getValorTotalRecebido()));
+                        } catch (NumberFormatException e) {
+                            LOGGER.warn("Erro ao converter valor recebido: {}", response.getCobranca().getValorTotalRecebido());
+                        }
+                    }
+                } else if ("CANCELADO".equalsIgnoreCase(response.getCobranca().getSituacao()) || "BAIXADO".equalsIgnoreCase(response.getCobranca().getSituacao())) {
+                    boletoLocal.setDtBaixa(dataSituacao);
+                    boletoLocal.setMotivoBaixa(response.getCobranca().getMotivoCancelamento());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Erro ao fazer parse da dataSituacao: {}", response.getCobranca().getDataSituacao(), e);
+            }
+        }
+
+        // 4.5 Buscar PDF do Banco Inter e associar à entidade antes de persistir
+        try {
+            LOGGER.info("Buscando PDF para anexar ao boleto de código: {}", codigoSolicitacao);
+            BoletoPDFDto pdfDto = interService.obterBoletoPdf(codigoSolicitacao, null, ambiente);
+            if (pdfDto != null && pdfDto.getPdf() != null) {
+                byte[] pdfBytes = Base64.getDecoder().decode(pdfDto.getPdf());
+                boletoLocal.setArquivopdf(pdfBytes);
+                LOGGER.info("PDF anexado com sucesso para persistência conjunta.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Falha ao recuperar e anexar o PDF do boleto durante o enriquecimento: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar o PDF do boleto para persistência conjunta: " + e.getMessage(), e);
+        }
+
+        // 5. Persistir e retornar
+        return boletoRepository.save(boletoLocal);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<BoletoNovaAlianca> findAll() {
+        return boletoRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public BoletoNovaAlianca findById(Long id) {
+        return boletoRepository.findById(id)
+                .orElseThrow(() -> new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + id));
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public BoletoNovaAlianca save(BoletoNovaAlianca entity) {
+        return boletoRepository.save(entity);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public BoletoNovaAlianca update(BoletoNovaAlianca entity) {
+        if (!boletoRepository.existsById(entity.getId())) {
+            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + entity.getId());
+        }
+        return boletoRepository.save(entity);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteById(Long id) {
+        if (!boletoRepository.existsById(id)) {
+            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + id);
+        }
+        boletoRepository.deleteById(id);
+    }
 }

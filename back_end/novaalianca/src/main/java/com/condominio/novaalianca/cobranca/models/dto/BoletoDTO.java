@@ -2,10 +2,7 @@ package com.condominio.novaalianca.cobranca.models.dto;
 
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.dto.UsuarioDTO;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BoletoDTO implements Serializable{
 

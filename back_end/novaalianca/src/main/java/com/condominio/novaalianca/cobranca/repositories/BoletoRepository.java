@@ -23,9 +23,6 @@ public interface BoletoRepository extends JpaRepository<BoletoNovaAlianca, Long>
     @Query(value = "select b From BoletoNovaAlianca b where TO_CHAR(b.dtEmissao, 'MM') =:mesEmissao AND b.ativo=TRUE")
     List<BoletoNovaAlianca> findAllByMesEmissao(String mesEmissao);
 
-    @Query(value = "select b From BoletoNovaAlianca b where TO_CHAR(b.dtEmissao, 'MM') =:mesEmissao")
-    List<BoletoNovaAlianca> findYBboletoDoMesAtual(String mesEmissao);
-
 
     @Query(value = "select b From BoletoNovaAlianca b where date_trunc('MONTH',b.dtEmissao) BETWEEN to_date(:dataInicial, 'YYYY/MM/DD') AND to_date(:dataFinal, 'YYYY/MM/DD') AND b.ativo=TRUE AND b.emailEnviado = FALSE")
     List<BoletoNovaAlianca> findAllByMesEmissaoAndNaoEnviadoByEmail(LocalDate dataInicial, LocalDate dataFinal);
@@ -34,4 +31,9 @@ public interface BoletoRepository extends JpaRepository<BoletoNovaAlianca, Long>
     List<BoletoNovaAlianca> findAllByDateFiltro(LocalDate dataInicial, LocalDate dataFinal);
 
     BoletoNovaAlianca findByTxCodBarras(String codigoBarras);
+
+    BoletoNovaAlianca findByCodSolicitacao(String codSolicitacao);
+
+    @Query("select b from BoletoNovaAlianca b where (b.txCodBarras is null or b.txCodBarras = '' or b.txLinhaDigitavel is null or b.txLinhaDigitavel = '' or b.arquivopdf is null) and b.codSolicitacao is not null and b.codSolicitacao <> '' and b.dtEmissao > ?1")
+    List<BoletoNovaAlianca> findBoletosSemCodigoBarrasELinhaDigitavel(LocalDate dataCorte);
 }
