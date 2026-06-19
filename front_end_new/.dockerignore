@@ -5,5 +5,4 @@ dist
 .idea
 *.iml
 README.md
-Dockerfile
-nginx.conf
+
