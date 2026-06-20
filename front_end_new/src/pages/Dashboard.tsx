@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { useAuth } from '../context/AuthContext';
 import { backEndService } from '../services/api';
-import type { IExtrato, IBoleto } from '../types';
+import type { IExtrato, IBoleto, ISaldo } from '../types';
 import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner } from 'react-icons/fa';
 import type { ApexOptions } from 'apexcharts';
 
@@ -12,6 +12,7 @@ const Dashboard: React.FC = () => {
   // Estados
   const [extratos, setExtratos] = useState<IExtrato[]>([]);
   const [boletos, setBoletos] = useState<IBoleto[]>([]);
+  const [saldoAtual, setSaldoAtual] = useState<ISaldo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,14 +25,20 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Chamadas paralelas para obter Extratos e Boletos
-        const [extratosData, boletosData] = await Promise.all([
+        // Chamadas paralelas para obter Extratos, Boletos e Saldo
+        const promises: [Promise<IExtrato[]>, Promise<IBoleto[]>, Promise<ISaldo | null>] = [
           backEndService.get<IExtrato[]>('/extratos'),
           backEndService.get<IBoleto[]>('/boletos'),
-        ]);
+          isAdminOrSindico() 
+            ? backEndService.get<ISaldo>('/saldo/atual').catch(() => null) 
+            : Promise.resolve(null)
+        ];
+
+        const [extratosData, boletosData, saldoData] = await Promise.all(promises);
 
         setExtratos(extratosData);
         setBoletos(boletosData);
+        setSaldoAtual(saldoData);
       } catch (err: any) {
         console.error(err);
         setError('Ocorreu um erro ao carregar os dados. Verifique a conexão.');
@@ -90,23 +97,27 @@ const Dashboard: React.FC = () => {
 
   // Filtragem de Boletos
   // - Usuário Comum: Seus boletos do último ano (365 dias)
-  // - Admin/Sindico: Todos os boletos dos últimos 60 dias
+  // - Admin/Sindico: Todos os boletos dos últimos 90 dias (ordenados pelos últimos gerados)
   const getFilteredBoletos = (): IBoleto[] => {
     const limitDate = new Date();
     
     if (isAdminOrSindico()) {
-      limitDate.setDate(limitDate.getDate() - 60);
-      return boletos.filter((b) => {
-        const boletoDate = new Date(b.dtEmissao);
-        return boletoDate >= limitDate;
-      });
+      limitDate.setDate(limitDate.getDate() - 90);
+      return boletos
+        .filter((b) => {
+          const boletoDate = new Date(b.dtEmissao);
+          return boletoDate >= limitDate;
+        })
+        .sort((a, b) => b.id - a.id); // Ordenados pelos últimos gerados (Desc)
     } else {
       limitDate.setDate(limitDate.getDate() - 365);
-      return boletos.filter((b) => {
-        const isOwnBoleto = b.usuario && b.usuario.id === user?.userId;
-        const boletoDate = new Date(b.dtEmissao);
-        return isOwnBoleto && boletoDate >= limitDate;
-      });
+      return boletos
+        .filter((b) => {
+          const isOwnBoleto = b.usuario && (b.usuario.id === user?.userId || b.usuario.idUsuario === user?.userId);
+          const boletoDate = new Date(b.dtEmissao);
+          return isOwnBoleto && boletoDate >= limitDate;
+        })
+        .sort((a, b) => b.id - a.id);
     }
   };
 
@@ -297,7 +308,7 @@ const Dashboard: React.FC = () => {
       {/* Cards de Métricas */}
       <div className="row g-4 mb-4">
         <div className="col-md-4">
-          <div className="card-metric shadow-sm">
+          <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">Receitas ({daysFilter} dias)</p>
               <h3 className="card-metric-value">
@@ -311,7 +322,7 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="col-md-4">
-          <div className="card-metric shadow-sm">
+          <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">Despesas ({daysFilter} dias)</p>
               <h3 className="card-metric-value text-danger">
@@ -325,12 +336,21 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="col-md-4">
-          <div className="card-metric shadow-sm">
+          <div className="card-metric shadow-sm h-100">
             <div>
-              <p className="card-metric-title">Saldo Consolidado</p>
-              <h3 className={`card-metric-value ${balance >= 0 ? 'text-success' : 'text-danger'}`}>
-                R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <p className="card-metric-title">
+                {isAdminOrSindico() ? 'Saldo Conta Corrente' : 'Saldo Consolidado'}
+              </p>
+              <h3 className={`card-metric-value ${(isAdminOrSindico() ? (saldoAtual?.disponivel ?? 0) : balance) >= 0 ? 'text-success' : 'text-danger'}`}>
+                R$ {(isAdminOrSindico() ? (saldoAtual?.disponivel ?? 0) : balance).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
+              {isAdminOrSindico() && saldoAtual && (
+                <div className="mt-1">
+                  <span className="text-muted d-block" style={{ fontSize: '0.68rem', fontStyle: 'italic' }}>
+                    Atualizado  {`${new Date(saldoAtual.createdAt).toLocaleDateString('pt-BR')}, ${new Date(saldoAtual.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="card-metric-icon balance">
               <FaWallet />
@@ -389,7 +409,7 @@ const Dashboard: React.FC = () => {
         <div className="card-content-header">
           <div>
             <h5 className="card-content-title">
-              {isAdminOrSindico() ? 'Boletos Registrados (Últimos 60 dias)' : 'Meus Boletos (Último Ano)'}
+              {isAdminOrSindico() ? 'Boletos Registrados (Últimos 90 dias)' : 'Meus Boletos (Último Ano)'}
             </h5>
             <p className="text-muted small mb-0">Listagem de cobranças pendentes e pagas.</p>
           </div>

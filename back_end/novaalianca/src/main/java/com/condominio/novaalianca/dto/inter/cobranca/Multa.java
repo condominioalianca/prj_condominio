@@ -1,7 +1,12 @@
 package com.condominio.novaalianca.dto.inter.cobranca;
 
 import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMulta;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 

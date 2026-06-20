@@ -22,6 +22,7 @@ export interface IEndereco {
 
 export interface IUsuario {
   id: number | null;
+  idUsuario?: number | null;
   nomeUsuario: string;
   email: string;
   password?: string;
@@ -117,6 +118,17 @@ export interface IBoleto {
   ativo: boolean;
   emailEnviado: boolean;
   codSolicitacao: string | null;
+}
+
+export interface ISaldo {
+  id: number;
+  bloqueadoCheque: number;
+  disponivel: number;
+  bloqueadoJudicialmente: number;
+  bloqueadoAdministrativo: number;
+  limite: number;
+  dataReferencia: string;
+  createdAt: string;
 }
 
 export interface ICobrancaExtra {

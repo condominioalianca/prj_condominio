@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaBars, FaSignOutAlt, FaUserCog, FaChevronDown } from 'react-icons/fa';
+import { getEnvironment } from '../services/api';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -13,6 +14,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const env = getEnvironment();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -51,14 +53,47 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="header-wrapper">
-      <button 
-        className="header-toggle-btn" 
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        title="Toggle Menu"
-      >
-        <FaBars />
-      </button>
+    <header className="header-wrapper d-flex align-items-center justify-content-between">
+      <div className="d-flex align-items-center">
+        <button 
+          className="header-toggle-btn" 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          title="Toggle Menu"
+        >
+          <FaBars />
+        </button>
+
+        {/* Indicador de Ambiente */}
+        <div className="ms-3">
+          <span 
+            style={{
+              backgroundColor: env.color + '12',
+              color: env.color,
+              border: `1px solid ${env.color}25`,
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              letterSpacing: '0.3px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              boxShadow: `0 2px 6px ${env.color}08`
+            }}
+          >
+            <span 
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: env.color,
+                marginRight: '6px',
+                display: 'inline-block'
+              }}
+            />
+            {env.label}
+          </span>
+        </div>
+      </div>
 
       <div className="header-right">
         {user && (

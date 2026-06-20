@@ -2,7 +2,12 @@ package com.condominio.novaalianca.cobranca.models.dto;
 
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.dto.UsuarioDTO;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;

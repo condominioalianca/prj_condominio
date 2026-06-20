@@ -2,7 +2,41 @@ import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { IAuthResponse } from '../types';
 
-const API_URL = import.meta.env.BACK_END_NOVA_ALIANCA || 'http://localhost:8086';
+export const getEnvironment = () => {
+  const { hostname, port } = window.location;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
+
+  if (!isLocalhost) {
+    return { name: 'PRD' as const, label: 'Produção', color: '#10b981' }; // Verde esmeralda
+  }
+
+  // Identifica DEV (Vite Dev Server) e HML (Nginx/Docker local) baseado nas portas padrão
+  const isViteDev = port === '3000' || port === '3001' || port === '5173';
+  if (isViteDev) {
+    return { name: 'DEV' as const, label: 'Desenvolvimento', color: '#ef4444' }; // Vermelho
+  }
+
+  return { name: 'HML' as const, label: 'Homologação (Docker)', color: '#f59e0b' }; // Laranja/Amarelo
+};
+
+const getBackendUrl = (): string => {
+  const envUrl = import.meta.env.BACK_END_NOVA_ALIANCA;
+  const { hostname, protocol } = window.location;
+
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
+
+  if (!isLocalhost) {
+    if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('192.168.')) {
+      return envUrl;
+    }
+    return `${protocol}//${hostname}:8086`;
+  }
+
+  // DEV ou HML Docker rodando localmente
+  return `http://${hostname}:8086`;
+};
+
+const API_URL = getBackendUrl();
 
 const api = axios.create({
   baseURL: API_URL,

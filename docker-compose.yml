@@ -6,7 +6,7 @@ services:
       context: ./back_end/novaalianca
       dockerfile: Dockerfile
       args:
-        JAR_FILE: target/novaalianca-1.0.2-SNAPSHOT.jar
+        JAR_FILE: target/novaalianca-*.jar
     container_name: novaalianca-backend
     ports:
       - "8086:8086"
