@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.dto.inter;
+package com.condominio.novaalianca.dto.inter.banking;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

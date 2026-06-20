@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.dto.inter;
+package com.condominio.novaalianca.dto.inter.banking;
 
 import com.condominio.novaalianca.enums.inter.TipoOperacaoEnum;
 import com.condominio.novaalianca.enums.inter.TipoTransacaoEnum;

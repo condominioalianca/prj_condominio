@@ -8,4 +8,6 @@ public enum ParametrosSistema {
     VALOR_MORA,
     VALOR_DESCONTO,
     DIA_DE_VENCIMENTO_BOLETO,
+    CORS_ORIGINS,
 }
+

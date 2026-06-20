@@ -1,4 +1,4 @@
-package com.condominio.novaalianca.dto.inter;
+package com.condominio.novaalianca.dto.inter.banking;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

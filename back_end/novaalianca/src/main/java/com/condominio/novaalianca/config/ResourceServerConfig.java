@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
+import com.condominio.novaalianca.enums.ParametrosSistema;
 
 import java.util.Arrays;
 
@@ -31,6 +33,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private JwtTokenStore tokenStore;
+
+    @Autowired
+    private ParametrosSistemaRepository parametrosSistemaRepository;
 
     private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**","/testes/**","/extrato/**"};
 
@@ -68,22 +73,30 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        return new CorsConfigurationSource() {
+            @Override
+            public CorsConfiguration getCorsConfiguration(javax.servlet.http.HttpServletRequest request) {
+                String originsStr = null;
+                try {
+                    originsStr = parametrosSistemaRepository.findValorParametro(ParametrosSistema.CORS_ORIGINS.toString());
+                } catch (Exception e) {
+                    // Fallback se o banco não estiver acessível ou o parâmetro não existir
+                }
 
-        String[] origins = properties.getCorsOrigins().split(",");
+                if (originsStr == null || originsStr.trim().isEmpty()) {
+                    originsStr = properties.getCorsOrigins();
+                }
 
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
-        corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+                String[] origins = originsStr.split(",");
 
-
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
-
-
-        return source;
+                CorsConfiguration corsConfig = new CorsConfiguration();
+                corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
+                corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
+                corsConfig.setAllowCredentials(true);
+                corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+                return corsConfig;
+            }
+        };
     }
 
     @Bean

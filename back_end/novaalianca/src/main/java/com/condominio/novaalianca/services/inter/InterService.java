@@ -1,8 +1,9 @@
 package com.condominio.novaalianca.services.inter;
 
 import com.condominio.novaalianca.config.NovaAliancaProperties;
-import com.condominio.novaalianca.dto.inter.ExtratoResponseDTO;
-import com.condominio.novaalianca.dto.inter.ExtratoEnriquecidoResponseDTO;
+import com.condominio.novaalianca.dto.inter.banking.ExtratoResponseDTO;
+import com.condominio.novaalianca.dto.inter.banking.ExtratoEnriquecidoResponseDTO;
+import com.condominio.novaalianca.dto.inter.banking.SaldoResponseDTO;
 import com.condominio.novaalianca.dto.inter.cobranca.Boleto;
 import com.condominio.novaalianca.dto.inter.cobranca.EmissaoBoletoResponseDTO;
 import com.condominio.novaalianca.dto.inter.cobranca.Boletoenriquecido;
@@ -13,7 +14,11 @@ import com.condominio.novaalianca.util.RestTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -272,6 +277,61 @@ public class InterService {
         } catch (Exception e) {
             log.error("Erro inesperado ao consumir extrato enriquecido Banco Inter: {}", e.getMessage(), e);
             throw new RuntimeException("Erro inesperado ao buscar extrato enriquecido do Banco Inter: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Consome nativamente o endpoint de saldo da conta corrente utilizando RestTemplate com mTLS.
+     * 
+     * GET /banking/v2/saldo
+     */
+    public SaldoResponseDTO buscarSaldo(String dataSaldo, String contaCorrente, String ambiente) {
+        try {
+            String accessToken = interTokenService.obterAccessToken(ambiente, "extrato.read");
+
+            if (contaCorrente == null || contaCorrente.trim().isEmpty()) {
+                contaCorrente = properties.getNumeroContaCorrente();
+            }
+
+            String saldoUrl = getFullUrl("/banking/v2/saldo", ambiente);
+            log.info("Buscando saldo da conta corrente Banco Inter em: {}", saldoUrl);
+
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(saldoUrl);
+            if (dataSaldo != null && !dataSaldo.trim().isEmpty()) {
+                uriBuilder.queryParam("dataSaldo", dataSaldo);
+            }
+
+            RestTemplate restTemplate = restTemplateUtil.criarRestTemplateMtls();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + accessToken);
+            headers.set("x-conta-corrente", contaCorrente);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<SaldoResponseDTO> response = restTemplate.exchange(
+                    uriBuilder.toUriString(),
+                    HttpMethod.GET,
+                    entity,
+                    SaldoResponseDTO.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.info("Saldo recuperado com sucesso.");
+                return response.getBody();
+            } else {
+                log.error("Erro ao buscar saldo do Banco Inter: HTTP status {}", response.getStatusCode());
+                throw new RuntimeException("Erro ao buscar saldo do Banco Inter: HTTP status " + response.getStatusCode());
+            }
+
+        } catch (HttpStatusCodeException e) {
+            log.error("Erro HTTP ao consumir saldo Banco Inter. Status: {}, Response: {}", 
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw new RuntimeException("Erro HTTP na API do Banco Inter: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro inesperado ao consumir saldo Banco Inter: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro inesperado ao buscar saldo do Banco Inter: " + e.getMessage(), e);
         }
     }
 

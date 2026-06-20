@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.SchedulesTask;
 
 import com.condominio.novaalianca.banking.services.ExtratoService;
+import com.condominio.novaalianca.banking.services.SaldoService;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.services.inter.InterService;
@@ -48,12 +49,15 @@ public class Shedules {
     private ExtratoService extratoService;
 
     @Autowired
+    private SaldoService saldoService;
+
+    @Autowired
     private BoletoRepository boletoRepository;
 
     @Autowired
     private BoletoBuilder boletoBuilder;
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "0 */4 10 1 * *")
+    @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 10 1 * *}")
     public void validaEnviodDeBoletos() throws ParseException {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -76,7 +80,7 @@ public class Shedules {
     }
 
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "0 */1 10 1 * *")
+    @Scheduled(cron = "${cron.schedule.recupera-boleto:0 */1 10 1 * *}")
     public void recuperaBoletoDetalhado() throws Exception {
         LocalDate dataCorte = LocalDate.of(2026, 6, 01);
         List<BoletoNovaAlianca> boletosPendentes = boletoRepository.findBoletosSemCodigoBarrasELinhaDigitavel(dataCorte);
@@ -105,7 +109,7 @@ public class Shedules {
     }
 
 //    CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-@Scheduled(cron = "10 */2 10 1 * *")
+@Scheduled(cron = "${cron.schedule.envia-email:10 */2 10 1 * *}")
     public void enviaEmail() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -114,12 +118,17 @@ public class Shedules {
     }
 
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "0 0 */1 * * *")
+    @Scheduled(cron = "${cron.schedule.extrato:0 0 */1 * * *}")
     public void extrato() {
         extratoService.getExtratoEnriquecido(
                 dateUtils.localDateToStringYYYYMMDD(LocalDate.now().minusDays(80L)),
                 dateUtils.localDateToStringYYYYMMDD(LocalDate.now()),
                 "PRODUCAO");
+        try {
+            saldoService.atualizarSaldo("PRODUCAO");
+        } catch (Exception e) {
+            log.error("Erro ao rodar schedule de atualizacao de saldo: {}", e.getMessage(), e);
+        }
 
     }
 
