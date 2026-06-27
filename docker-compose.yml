@@ -12,7 +12,7 @@ services:
       - "8086:8086"
     environment:
       - DOCKER=true
-      - APP_PROFILE=dev
+      - APP_PROFILE=test
       - DB_URL=jdbc:postgresql://192.168.15.10:5432/condominio
       - DB_USERNAME=postgres
       - DB_PASSWORD=140908
@@ -22,6 +22,10 @@ services:
       - INTER_CLIENT_SECRET=87c6f9e2-e497-4611-bd98-d55b0ea085be
       - MAIL_USERNAME=condominionovaaliancasbc
       - MAIL_PASSWORD=xuvjwatpamgpaywy
+      - CRON_SCHEDULE_EXTRATO=0 0 */1 * * *
+      - CRON_SCHEDULE_VALIDA_ENVIO=0 */4 10 1 * *
+      - CRON_SCHEDULE_RECUPERA_BOLETO=0 */1 10 1 * *
+      - CRON_SCHEDULE_ENVIA_EMAIL=10 */2 10 1 * *
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: always

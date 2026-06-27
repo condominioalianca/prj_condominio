@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaBars, FaSignOutAlt, FaUserCog, FaChevronDown } from 'react-icons/fa';
-import { getEnvironment } from '../services/api';
+import { getEnvironment, backEndService } from '../services/api';
+import type { IUsuario } from '../types';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -12,9 +13,29 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [showEnvBadge, setShowEnvBadge] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const env = getEnvironment();
+
+  useEffect(() => {
+    if (user && user.userId) {
+      backEndService.get<IUsuario>(`/usuarios/${user.userId}`)
+        .then(userData => {
+          if (userData && userData.cpf === '21958651800') {
+            setShowEnvBadge(true);
+          } else {
+            setShowEnvBadge(false);
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao buscar usuário para checar CPF', err);
+          setShowEnvBadge(false);
+        });
+    } else {
+      setShowEnvBadge(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -64,8 +85,9 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
         </button>
 
         {/* Indicador de Ambiente */}
-        <div className="ms-3">
-          <span 
+        {showEnvBadge && (
+          <div className="ms-3">
+            <span 
             style={{
               backgroundColor: env.color + '12',
               color: env.color,
@@ -93,6 +115,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             {env.label}
           </span>
         </div>
+        )}
       </div>
 
       <div className="header-right">
