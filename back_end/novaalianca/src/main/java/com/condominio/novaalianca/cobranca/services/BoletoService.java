@@ -22,6 +22,7 @@ import com.condominio.novaalianca.entities.BoletoNovaAlianca;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.cobranca.repositories.BoletoRepository;
 import com.condominio.novaalianca.services.EmailService;
+import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import com.condominio.novaalianca.util.DateUtils;
 import com.condominio.novaalianca.dto.inter.cobranca.Boleto;
 import com.condominio.novaalianca.services.inter.InterService;
@@ -420,7 +421,7 @@ public class BoletoService{
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public BoletoNovaAlianca findById(Long id) {
         return boletoRepository.findById(id)
-                .orElseThrow(() -> new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Boleto nao encontrado para o ID: " + id));
     }
 
     @org.springframework.transaction.annotation.Transactional
@@ -431,7 +432,7 @@ public class BoletoService{
     @org.springframework.transaction.annotation.Transactional
     public BoletoNovaAlianca update(BoletoNovaAlianca entity) {
         if (!boletoRepository.existsById(entity.getId())) {
-            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + entity.getId());
+            throw new ResourceNotFoundException("Boleto nao encontrado para o ID: " + entity.getId());
         }
         return boletoRepository.save(entity);
     }
@@ -439,7 +440,7 @@ public class BoletoService{
     @org.springframework.transaction.annotation.Transactional
     public void deleteById(Long id) {
         if (!boletoRepository.existsById(id)) {
-            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Boleto nao encontrado para o ID: " + id);
+            throw new ResourceNotFoundException("Boleto nao encontrado para o ID: " + id);
         }
         boletoRepository.deleteById(id);
     }
