@@ -20,9 +20,13 @@ import com.condominio.novaalianca.enums.inter.TipoTransacaoEnum;
 import com.condominio.novaalianca.services.inter.InterService;
 import com.condominio.novaalianca.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.condominio.novaalianca.banking.models.entities.Conciliacao;
+import com.condominio.novaalianca.banking.models.enums.StatusConciliacao;
+import com.condominio.novaalianca.banking.models.enums.StatusGeral;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +48,9 @@ public class ExtratoService {
 
     @Autowired
     private NovaAliancaProperties properties;
+
+    @Autowired
+    private ConciliacaoService conciliacaoService;
 
     @Autowired
     private DateUtils dateUtils;
@@ -77,15 +84,25 @@ public class ExtratoService {
                 continue;
             }
 
-            // Evitar duplicações
-            Optional<Extrato> extratoExistente = extratoRepository.getbyIdTransacao(transacaoDTO.getIdTransacao());
-            if (extratoExistente.isPresent()) {
-                log.debug("Transação ID {} já existe na base. Ignorando persistência.", transacaoDTO.getIdTransacao());
-                continue;
-            }
-
             try {
-                Extrato extrato = converterParaEntidade(transacaoDTO);
+                Extrato extrato;
+                Optional<Extrato> extratoExistente = extratoRepository.getbyIdTransacao(transacaoDTO.getIdTransacao());
+                if (extratoExistente.isPresent()) {
+                    extrato = extratoExistente.get();
+                    log.debug("Transação ID {} já existe na base. Atualizando informações do Banco Inter.", transacaoDTO.getIdTransacao());
+                } else {
+                    extrato = new Extrato();
+                    extrato.setStatusConciliado(StatusConciliacao.PENDENTE);
+                    extrato.setStatusGeral(StatusGeral.ATIVO);
+                }
+
+                converterParaEntidade(transacaoDTO, extrato);
+
+                if (extrato.getConciliacao() == null && extrato.getDtTransacao() != null) {
+                    Conciliacao c = conciliacaoService.findOrCreateByDataReferencia(extrato.getDtTransacao());
+                    extrato.setConciliacao(c);
+                }
+
                 extratoRepository.save(extrato);
                 persistidasCount.set(persistidasCount.get() + 1);
             } catch (Exception e) {
@@ -93,12 +110,11 @@ public class ExtratoService {
             }
         }
 
-        log.info("Processamento de Extrato Enriquecido concluído. Transações persistidas: {}", persistidasCount.get());
+        log.info("Processamento de Extrato Enriquecido concluído. Transações persistidas/atualizadas: {}", persistidasCount.get());
         return responseDTO;
     }
 
-    private Extrato converterParaEntidade(ExtratoEnriquecidoTransacaoDTO dto) {
-        Extrato extrato = new Extrato();
+    private void converterParaEntidade(ExtratoEnriquecidoTransacaoDTO dto, Extrato extrato) {
         extrato.setIdTransacao(dto.getIdTransacao());
         extrato.setDtInclusao(parseDate(dto.getDataInclusao()));
         extrato.setDtTransacao(parseDate(dto.getDataTransacao()));
@@ -126,23 +142,23 @@ public class ExtratoService {
                 extrato.setNomePagador(pixDto.getNomePagador() != null ? pixDto.getNomePagador() : pixDto.getNomeEmpresaPagador());
                 extrato.setDocumentePagador(pixDto.getCpfCnpjPagador());
 
-                PixDetalhe pixDetalhe = PixDetalhe.builder()
-                        .txId(pixDto.getTxId())
-                        .nomePagador(pixDto.getNomePagador())
-                        .descricaoPix(pixDto.getDescricaoPix())
-                        .cpfCnpjPagador(pixDto.getCpfCnpjPagador())
-                        .contaBancariaRecebedor(pixDto.getContaBancariaRecebedor())
-                        .nomeEmpresaPagador(pixDto.getNomeEmpresaPagador())
-                        .tipoDetalhe(pixDto.getTipoDetalhe())
-                        .endToEndId(pixDto.getEndToEndId())
-                        .chavePixRecebedor(pixDto.getChavePixRecebedor())
-                        .nomeEmpresaRecebedor(pixDto.getNomeEmpresaRecebedor())
-                        .nomeRecebedor(pixDto.getNomeRecebedor())
-                        .agenciaRecebedor(pixDto.getAgenciaRecebedor())
-                        .cpfCnpjRecebedor(pixDto.getCpfCnpjRecebedor())
-                        .origemMovimentacao(pixDto.getOrigemMovimentacao())
-                        .codigoSolicitacao(pixDto.getCodigoSolicitacao())
-                        .build();
+                PixDetalhe pixDetalhe = extrato.getPixDetalhe() != null ? extrato.getPixDetalhe() : new PixDetalhe();
+                pixDetalhe.setTxId(pixDto.getTxId());
+                pixDetalhe.setNomePagador(pixDto.getNomePagador());
+                pixDetalhe.setDescricaoPix(pixDto.getDescricaoPix());
+                pixDetalhe.setCpfCnpjPagador(pixDto.getCpfCnpjPagador());
+                pixDetalhe.setContaBancariaRecebedor(pixDto.getContaBancariaRecebedor());
+                pixDetalhe.setNomeEmpresaPagador(pixDto.getNomeEmpresaPagador());
+                pixDetalhe.setTipoDetalhe(pixDto.getTipoDetalhe());
+                pixDetalhe.setEndToEndId(pixDto.getEndToEndId());
+                pixDetalhe.setChavePixRecebedor(pixDto.getChavePixRecebedor());
+                pixDetalhe.setNomeEmpresaRecebedor(pixDto.getNomeEmpresaRecebedor());
+                pixDetalhe.setNomeRecebedor(pixDto.getNomeRecebedor());
+                pixDetalhe.setAgenciaRecebedor(pixDto.getAgenciaRecebedor());
+                pixDetalhe.setCpfCnpjRecebedor(pixDto.getCpfCnpjRecebedor());
+                pixDetalhe.setOrigemMovimentacao(pixDto.getOrigemMovimentacao());
+                pixDetalhe.setCodigoSolicitacao(pixDto.getCodigoSolicitacao());
+                
                 extrato.setPixDetalhe(pixDetalhe);
 
             } else if (dto.getTipoTransacao() == TipoTransacaoEnum.BOLETO_COBRANCA && detalhes instanceof BoletoCobrancaExtratoDetalheDTO) {
@@ -171,34 +187,34 @@ public class ExtratoService {
                 extrato.setNomePagador(pagDto.getNomeOrigem() != null ? pagDto.getNomeOrigem() : pagDto.getEmpresaOrigem());
                 extrato.setDocumentePagador("07890271000109");
 
-                PagamentoDetalhe pagDetalhe = PagamentoDetalhe.builder()
-                        .valorTotal(pagDto.getValorTotal())
-                        .detalheDescricao(pagDto.getDetalheDescricao())
-                        .contaBancaria(pagDto.getContaBancaria())
-                        .agencia(pagDto.getAgencia())
-                        .adicionado(pagDto.getAdicionado())
-                        .dataVencimento(pagDto.getDataVencimento())
-                        .codigoAfiliado(pagDto.getCodigoAfiliado())
-                        .empresaEmissora(pagDto.getEmpresaEmissora())
-                        .valorOriginal(pagDto.getValorOriginal())
-                        .desconto(pagDto.getDesconto())
-                        .cpfCnpj(pagDto.getCpfCnpj())
-                        .valorPrincipal(pagDto.getValorPrincipal())
-                        .periodoApuracao(pagDto.getPeriodoApuracao())
-                        .valorAumentado(pagDto.getValorAumentado())
-                        .codBarras(pagDto.getCodBarras())
-                        .valorParcial(pagDto.getValorParcial())
-                        .hora(pagDto.getHora())
-                        .juros(pagDto.getJuros())
-                        .multa(pagDto.getMulta())
-                        .empresaOrigem(pagDto.getEmpresaOrigem())
-                        .nomeDestinatario(pagDto.getNomeDestinatario())
-                        .tipoDetalhe(pagDto.getTipoDetalhe())
-                        .nomeOrigem(pagDto.getNomeOrigem())
-                        .codigoReceita(pagDto.getCodigoReceita())
-                        .linhaDigitavel(pagDto.getLinhaDigitavel())
-                        .autenticacao(pagDto.getAutenticacao())
-                        .build();
+                PagamentoDetalhe pagDetalhe = extrato.getPagamentoDetalhe() != null ? extrato.getPagamentoDetalhe() : new PagamentoDetalhe();
+                pagDetalhe.setValorTotal(pagDto.getValorTotal());
+                pagDetalhe.setDetalheDescricao(pagDto.getDetalheDescricao());
+                pagDetalhe.setContaBancaria(pagDto.getContaBancaria());
+                pagDetalhe.setAgencia(pagDto.getAgencia());
+                pagDetalhe.setAdicionado(pagDto.getAdicionado());
+                pagDetalhe.setDataVencimento(pagDto.getDataVencimento());
+                pagDetalhe.setCodigoAfiliado(pagDto.getCodigoAfiliado());
+                pagDetalhe.setEmpresaEmissora(pagDto.getEmpresaEmissora());
+                pagDetalhe.setValorOriginal(pagDto.getValorOriginal());
+                pagDetalhe.setDesconto(pagDto.getDesconto());
+                pagDetalhe.setCpfCnpj(pagDto.getCpfCnpj());
+                pagDetalhe.setValorPrincipal(pagDto.getValorPrincipal());
+                pagDetalhe.setPeriodoApuracao(pagDto.getPeriodoApuracao());
+                pagDetalhe.setValorAumentado(pagDto.getValorAumentado());
+                pagDetalhe.setCodBarras(pagDto.getCodBarras());
+                pagDetalhe.setValorParcial(pagDto.getValorParcial());
+                pagDetalhe.setHora(pagDto.getHora());
+                pagDetalhe.setJuros(pagDto.getJuros());
+                pagDetalhe.setMulta(pagDto.getMulta());
+                pagDetalhe.setEmpresaOrigem(pagDto.getEmpresaOrigem());
+                pagDetalhe.setNomeDestinatario(pagDto.getNomeDestinatario());
+                pagDetalhe.setTipoDetalhe(pagDto.getTipoDetalhe());
+                pagDetalhe.setNomeOrigem(pagDto.getNomeOrigem());
+                pagDetalhe.setCodigoReceita(pagDto.getCodigoReceita());
+                pagDetalhe.setLinhaDigitavel(pagDto.getLinhaDigitavel());
+                pagDetalhe.setAutenticacao(pagDto.getAutenticacao());
+                
                 extrato.setPagamentoDetalhe(pagDetalhe);
 
             } else if (dto.getTipoTransacao() == TipoTransacaoEnum.COMPRA_DEBITO && detalhes instanceof CompraDebitoExtratoDetalheDTO) {
@@ -206,10 +222,10 @@ public class ExtratoService {
                 extrato.setNomeRecebedor(compraDto.getEstabelecimento());
                 extrato.setNomePagador("Condominio Nova Aliança");
 
-                CompraDebitoDetalhe compraDetalhe = CompraDebitoDetalhe.builder()
-                        .estabelecimento(compraDto.getEstabelecimento())
-                        .tipoDetalhe(compraDto.getTipoDetalhe())
-                        .build();
+                CompraDebitoDetalhe compraDetalhe = extrato.getCompraDebitoDetalhe() != null ? extrato.getCompraDebitoDetalhe() : new CompraDebitoDetalhe();
+                compraDetalhe.setEstabelecimento(compraDto.getEstabelecimento());
+                compraDetalhe.setTipoDetalhe(compraDto.getTipoDetalhe());
+                
                 extrato.setCompraDebitoDetalhe(compraDetalhe);
             }
         }
@@ -227,8 +243,6 @@ public class ExtratoService {
                 extrato.setDocumentePagador("07890271000109");
             }
         }
-
-        return extrato;
     }
 
     private LocalDate parseDate(String dateStr) {
@@ -256,7 +270,7 @@ public class ExtratoService {
     @Transactional(readOnly = true)
     public Extrato findById(Long id) {
         return extratoRepository.findById(id)
-                .orElseThrow(() -> new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Extrato nao encontrado para o ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Extrato nao encontrado para o ID: " + id));
     }
 
     @Transactional
@@ -267,7 +281,7 @@ public class ExtratoService {
     @Transactional
     public Extrato update(Extrato entity) {
         if (!extratoRepository.existsById(entity.getId())) {
-            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Extrato nao encontrado para o ID: " + entity.getId());
+            throw new ResourceNotFoundException("Extrato nao encontrado para o ID: " + entity.getId());
         }
         return extratoRepository.save(entity);
     }
@@ -275,7 +289,7 @@ public class ExtratoService {
     @Transactional
     public void deleteById(Long id) {
         if (!extratoRepository.existsById(id)) {
-            throw new com.condominio.novaalianca.services.exceptions.ResourceNotFoundException("Extrato nao encontrado para o ID: " + id);
+            throw new ResourceNotFoundException("Extrato nao encontrado para o ID: " + id);
         }
         extratoRepository.deleteById(id);
     }

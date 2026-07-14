@@ -5,12 +5,16 @@ import com.condominio.novaalianca.banking.models.entities.Saldo;
 import com.condominio.novaalianca.dto.inter.banking.SaldoResponseDTO;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class SaldoBuilder {
 
     public Saldo toEntity(SaldoResponseDTO apiResponse) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         if (apiResponse == null) {
             return null;
         }
@@ -20,7 +24,7 @@ public class SaldoBuilder {
                 .bloqueadoJudicialmente(apiResponse.getBloqueadoJudicialmente())
                 .bloqueadoAdministrativo(apiResponse.getBloqueadoAdministrativo())
                 .limite(apiResponse.getLimite())
-                .dataReferencia(apiResponse.getDataReferencia())
+                .dataReferencia(apiResponse.getDataReferencia() == null ? LocalDate.now().format(formatter) : apiResponse.getDataReferencia())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

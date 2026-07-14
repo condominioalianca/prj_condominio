@@ -11,6 +11,7 @@ import Usuarios from './pages/Admin/Usuarios';
 import Unidades from './pages/Admin/Unidades';
 import Empresas from './pages/Admin/Empresas';
 import Conciliacao from './pages/Admin/Conciliacao';
+import ConciliacaoDetalhe from './pages/Admin/ConciliacaoDetalhe';
 import ParametrosSistema from './pages/Admin/ParametrosSistema';
 import ParametrosPerfis from './pages/Admin/ParametrosPerfis';
 import CobrancaExtra from './pages/Admin/CobrancaExtra';
@@ -98,6 +99,14 @@ const App: React.FC = () => {
               element={
                 <RoleRoute adminOrSindicoRequired>
                   <Conciliacao />
+                </RoleRoute>
+              } 
+            />
+            <Route 
+              path="admin/conciliacao/:id" 
+              element={
+                <RoleRoute adminOrSindicoRequired>
+                  <ConciliacaoDetalhe />
                 </RoleRoute>
               } 
             />

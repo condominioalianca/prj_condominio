@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface SaldoRepository extends JpaRepository<Saldo, Long> {
     Optional<Saldo> findFirstByOrderByIdDesc();
+    Optional<Saldo> findFirstByDataReferenciaEndingWithOrderByIdDesc(String dataReferencia);
 }
