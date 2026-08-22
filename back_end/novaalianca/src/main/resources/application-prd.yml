@@ -1,0 +1,85 @@
+server:
+  port: ${PORT:8086}
+
+source:
+  docker: ${DOCKER:false}
+
+spring:
+  datasource:
+    url: ${DB_URL_PRD}
+    username: ${DB_USERNAME_PRD}
+    password: ${DB_PASSWORD_PRD}
+  sql:
+    init:
+      mode: always
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    generate-ddl: true
+    show-sql: false
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  mail:
+    host: smtp.gmail.com
+    username: ${MAIL_USERNAME:condominionovaaliancasbc}
+    password: ${MAIL_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+      hibernate: "OFF"
+      hibernate.type.descriptor.sql.BasicBinder: "OFF"
+
+banco:
+  interurl:
+    path_prod: https://cdpj.partners.bancointer.com.br
+    path_sand: https://cdpj-sandbox.partners.uatinter.co
+  inter:
+    url:
+      boleto: /cobranca/v3/cobrancas
+      token: /oauth/v2/token
+      extrato: /banking/v2/extrato
+    client:
+      id: ${INTER_CLIENT_ID}
+      secret: ${INTER_CLIENT_SECRET}
+      grant:
+        type: ${INTER_GRANT_TYPE:client_credentials}
+    caminho:
+      certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
+    senha:
+      certificado: ${INTER_CERT_PASSWORD}
+
+boleto:
+  cpfcnpj:
+    benificiario: "07890271000109"
+  numerocontacorrente: "45553602"
+
+mail:
+  from: "Condominio Nova Alianca <condominionovaaliancasbc@gmail.com>"
+
+cron:
+  schedule:
+    valida-envio: "0 */4 10 1 * *"
+    recupera-boleto: "0 */1 10 1 * *"
+    envia-email: "10 */2 10 1 * *"
+    extrato: "0 0 * * * *"

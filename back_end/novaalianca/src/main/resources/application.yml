@@ -1,0 +1,74 @@
+spring:
+  profiles:
+    active: ${APP_PROFILE:dev}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+  mail:
+    host: smtp.gmail.com
+    username: ${MAIL_USERNAME:condominionovaaliancasbc}
+    password: ${MAIL_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  datasource:
+    url: ${DB_URL_DEV}
+    username: ${DB_USERNAME_DEV}
+    password: ${DB_PASSWORD_DEV}
+
+security:
+  oauth2:
+    client:
+      client-id: ${OAUTH_CLIENT_ID}
+      client-secret: ${OAUTH_CLIENT_SECRET}
+
+jwt:
+  secret: ${JWT_SECRET}
+  duration: ${JWT_DURATION}
+
+cors:
+  origins: ${CORS_ORIGINS}
+
+# Parâmetros para Envio de Email
+mail:
+  from: "Condominio Nova Alianca <condominionovaaliancasbc@gmail.com>"
+
+# BANCO INTER
+banco:
+  inter:
+    client:
+      id: ${INTER_CLIENT_ID}
+      secret: ${INTER_CLIENT_SECRET}
+      grant:
+        type: ${INTER_GRANT_TYPE:client_credentials}
+    caminho:
+      certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
+    senha:
+      certificado: ${INTER_CERT_PASSWORD}
+  interurl:
+    path_prod: https://cdpj.partners.bancointer.com.br
+    path_sand: https://cdpj-sandbox.partners.uatinter.co
+  inter:
+    url:
+      boleto: /cobranca/v3/cobrancas
+      token: /oauth/v2/token
+      extrato: /banking/v2/extrato
+
+boleto:
+  cpfcnpj:
+    benificiario: "07890271000109"
+  numerocontacorrente: "45553602"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,refresh"

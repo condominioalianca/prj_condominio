@@ -157,7 +157,15 @@
         </dependency>
         <!-- FIM DEPENDENCIAS PDF E GRAFICOS -->
 
-
+        <!-- MONITORAMENTO & CONFIGURAÇÕES DINÂMICAS -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+        </dependency>
 
     </dependencies>
 
