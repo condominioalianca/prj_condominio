@@ -44,11 +44,11 @@ mail:
 # BANCO INTER
 banco:
   inter:
+    grant:
+      type : ${INTER_GRANT_TYPE:client_credentials}
     client:
       id: ${INTER_CLIENT_ID:}
       secret: ${INTER_CLIENT_SECRET:}
-      grant:
-        type: ${INTER_GRANT_TYPE:client_credentials}
     caminho:
       certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
     senha:

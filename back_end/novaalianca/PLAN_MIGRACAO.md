@@ -20,6 +20,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 8.  **Migração do JavaMail & Activation:** Atualização dos pacotes de envio de e-mails para o ecossistema Jakarta.
 9.  **Ajustes de Depreciação no Core (BigDecimal & Spring Web):** Substituição de constantes depreciadas de arredondamento de `BigDecimal` e atualização do construtor de URLs do Spring Web.
 10. **Resolução de Resolução Eager de Variáveis do YAML:** Adição de fallbacks e valores padrão para placeholders de variáveis de ambiente para permitir bootstrapping local sem necessidade de declarar todas as variáveis na IDE.
+11. **Carregamento Nativo e Programático de Arquivo `.env`:** Implementação de um loader nativo no método `main` da aplicação que varre até 4 níveis de diretórios acima para localizar e injetar as propriedades de um arquivo `.env` do projeto de forma 100% transparente para o Spring Boot, dispensando o uso de plugins de IDE no desenvolvimento local.
 
 ---
 
@@ -60,6 +61,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Correção de chaves duplicadas `inter` sob a seção `banco` no arquivo principal de configurações `application.yml`.
 *   **Commit 10 (Fallbacks de Variáveis de Ambiente no YAML):**
     *   Adição de fallbacks default em todos os placeholders `${VAR}` (como `${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}`, `${JWT_SECRET:secret}`, etc.) nos arquivos YAML para evitar erros de inicialização de propriedades quando as variáveis não são passadas ativamente na IDE do desenvolvedor.
+*   **Commit 11 (Carregador Programático de `.env`):**
+    *   Implementação do método `loadDotEnv()` em `NovaaliancaApplication.java` que lê e injeta o arquivo `.env` do diretório raiz como propriedades do sistema da JVM na inicialização do Spring Boot.
 
 ---
 
@@ -147,6 +150,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 7.  **Fallbacks no YAML para Placeholders:**
     *   *Antes:* Declarar propriedades com `${VAR}` gerava erros se a variável estivesse ausente.
     *   *Depois:* Ajustado para `${VAR:default}` (ex: `${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}`) garantindo inicialização de fallback.
+8.  **Carregamento do Arquivo `.env` Nativo:**
+    *   *Antes:* Dependência de plugins externos do IntelliJ (como EnvFile) para injetar as variáveis de ambiente.
+    *   *Depois:* A classe `NovaaliancaApplication` carrega programaticamente no boot do Java o arquivo `.env` localizado na raiz do projeto (`C:\GIT\prj_condominio\.env`).
 
 ---
 
