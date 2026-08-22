@@ -18,6 +18,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 6.  **Migração de Namespace:** Migração total de imports Java EE (`javax.*`) para Jakarta EE (`jakarta.*`).
 7.  **Resolução de Incompatibilidades Java 25 & Hibernate 6:** Correção de construtores depreciados de `Locale` e `URL`, e ajuste na anotação `@Type` do Hibernate.
 8.  **Migração do JavaMail & Activation:** Atualização dos pacotes de envio de e-mails para o ecossistema Jakarta.
+9.  **Ajustes de Depreciação no Core (BigDecimal & Spring Web):** Substituição de constantes depreciadas de arredondamento de `BigDecimal` e atualização do construtor de URLs do Spring Web.
 
 ---
 
@@ -51,6 +52,9 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Adição da anotação `@lombok.Builder.Default` nos campos inicializados inline das classes anotadas com `@Builder` (`CategoriaGasto.java`, `UsuarioDTO.java` e `Usuario.java`).
 *   **Commit 7 (Correções do JavaMail & Activation Framework):**
     *   Substituição dos imports de e-mail `javax.mail.*` e ativação `javax.activation.*` por `jakarta.mail.*` e `jakarta.activation.*` no `EmailService.java`.
+*   **Commit 8 (Correções de BigDecimal & UriComponentsBuilder):**
+    *   Substituição da constante depreciada `BigDecimal.ROUND_HALF_EVEN` por `RoundingMode.HALF_EVEN` no `BoletoBuilder.java`.
+    *   Substituição do método de build do Spring Web `UriComponentsBuilder.fromHttpUrl(...)` por `fromUriString(...)` no `InterService.java`.
 
 ---
 
@@ -129,6 +133,12 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 4.  **JavaMail e Activation Namespaces:**
     *   *Antes:* `import javax.mail.*` e `import javax.activation.*` no `EmailService.java`.
     *   *Depois:* Migrado para `import jakarta.mail.*` e `import jakarta.activation.*`.
+5.  **Constantes Depreciadas de BigDecimal (Java 9+):**
+    *   *Antes:* `.setScale(2, BigDecimal.ROUND_HALF_EVEN)` no `BoletoBuilder.java`.
+    *   *Depois:* Substituído pelo enum moderno `.setScale(2, java.math.RoundingMode.HALF_EVEN)`.
+6.  **Compatibilidade do UriComponentsBuilder:**
+    *   *Antes:* `UriComponentsBuilder.fromHttpUrl(url)` no `InterService.java`.
+    *   *Depois:* Substituído por `UriComponentsBuilder.fromUriString(url)` para evitar incompatibilidades de compilação da classpath do Spring Web 6/7.
 
 ---
 

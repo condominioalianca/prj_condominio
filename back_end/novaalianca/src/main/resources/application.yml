@@ -53,14 +53,13 @@ banco:
       certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
     senha:
       certificado: ${INTER_CERT_PASSWORD}
-  interurl:
-    path_prod: https://cdpj.partners.bancointer.com.br
-    path_sand: https://cdpj-sandbox.partners.uatinter.co
-  inter:
     url:
       boleto: /cobranca/v3/cobrancas
       token: /oauth/v2/token
       extrato: /banking/v2/extrato
+  interurl:
+    path_prod: https://cdpj.partners.bancointer.com.br
+    path_sand: https://cdpj-sandbox.partners.uatinter.co
 
 boleto:
   cpfcnpj:
