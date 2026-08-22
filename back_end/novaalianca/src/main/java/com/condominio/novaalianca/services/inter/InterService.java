@@ -138,7 +138,7 @@ public class InterService {
             log.info("Buscando extrato bancário Banco Inter em: {}", extratoUrl);
 
             // Monta a URL com query params
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(extratoUrl)
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(extratoUrl)
                     .queryParam("dataInicio", dataInicio)
                     .queryParam("dataFim", dataFim);
 
@@ -226,7 +226,7 @@ public class InterService {
             log.info("Buscando extrato enriquecido Banco Inter em: {}", extratoUrl);
 
             // Monta a URL com query params obrigatórios
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(extratoUrl)
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(extratoUrl)
                     .queryParam("dataInicio", dataInicio)
                     .queryParam("dataFim", dataFim);
 
@@ -294,7 +294,7 @@ public class InterService {
             String saldoUrl = getFullUrl("/banking/v2/saldo", ambiente);
             log.info("Buscando saldo da conta corrente Banco Inter em: {}", saldoUrl);
 
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(saldoUrl);
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(saldoUrl);
             if (dataSaldo != null && !dataSaldo.trim().isEmpty()) {
                 uriBuilder.queryParam("dataSaldo", dataSaldo);
             }

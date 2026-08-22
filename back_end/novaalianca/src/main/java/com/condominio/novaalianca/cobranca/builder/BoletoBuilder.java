@@ -101,11 +101,11 @@ public class BoletoBuilder {
 		if(usuario.getUnidade().getQtMorador()>1){
 			mensagem.setLinha4("ACRESCIMO 70% DA TAXA MIN (UNIDADE COM MAIS DE 1 MORADOR) = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaAguaAcrescimoSetentaPorCento));
 			mensagem.setLinha5("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominioMaisMorador));
-			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2,BigDecimal.ROUND_HALF_EVEN));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2, java.math.RoundingMode.HALF_EVEN));
 
 		}else{
 			mensagem.setLinha4("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio1Morador));
-			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, BigDecimal.ROUND_HALF_EVEN));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, java.math.RoundingMode.HALF_EVEN));
 		}
 
 		boletoInter.setMensagem(mensagem);

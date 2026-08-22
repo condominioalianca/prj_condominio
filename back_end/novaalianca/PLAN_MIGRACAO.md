@@ -17,6 +17,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 5.  **Modernização da Segurança (OAuth2/Security 7):** Substituição do pacote legado e removido `spring-security-oauth2-autoconfigure` por uma arquitetura nativa com `spring-boot-starter-oauth2-resource-server` e criação de um Custom Token Controller para garantir compatibilidade reversa com o front-end.
 6.  **Migração de Namespace:** Migração total de imports Java EE (`javax.*`) para Jakarta EE (`jakarta.*`).
 7.  **Resolução de Incompatibilidades Java 25 & Hibernate 6:** Correção de construtores depreciados de `Locale` e `URL`, e ajuste na anotação `@Type` do Hibernate.
+8.  **Migração do JavaMail & Activation:** Atualização dos pacotes de envio de e-mails para o ecossistema Jakarta.
 
 ---
 
@@ -44,6 +45,12 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
 *   **Commit 5 (Correções do Java 25 & Hibernate 6):**
     *   Substituição de construtores depreciados de `Locale` e `URL` no Java 25.
     *   Remoção da anotação `@Type` legada do Hibernate em atributos binários para compatibilidade com o Hibernate 6.x.
+*   **Commit 6 (Correções de Transações, Annotations e Lombok Builder):**
+    *   Substituição de imports legados `javax.transaction.Transactional` por `jakarta.transaction.Transactional` em classes de serviços e controllers.
+    *   Substituição do import `javax.annotation.Generated` por `jakarta.annotation.Generated` no metamodelo JPA `Usuario_.java`.
+    *   Adição da anotação `@lombok.Builder.Default` nos campos inicializados inline das classes anotadas com `@Builder` (`CategoriaGasto.java`, `UsuarioDTO.java` e `Usuario.java`).
+*   **Commit 7 (Correções do JavaMail & Activation Framework):**
+    *   Substituição dos imports de e-mail `javax.mail.*` e ativação `javax.activation.*` por `jakarta.mail.*` e `jakarta.activation.*` no `EmailService.java`.
 
 ---
 
@@ -119,6 +126,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 3.  **Anotação `@Type` do Hibernate (Hibernate 6.x):**
     *   *Antes:* `@org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")` em campos `byte[]` das entidades `BoletoNovaAlianca`, `Comprovante` e `Conciliacao`.
     *   *Depois:* Removido por completo. No Hibernate 6, atributos do tipo `byte[]` são mapeados implicitamente como LOBs/binários corretos no banco sem a necessidade desta anotação (que teve seu atributo `type` removido e resultava em falha na compilação).
+4.  **JavaMail e Activation Namespaces:**
+    *   *Antes:* `import javax.mail.*` e `import javax.activation.*` no `EmailService.java`.
+    *   *Depois:* Migrado para `import jakarta.mail.*` e `import jakarta.activation.*`.
 
 ---
 
