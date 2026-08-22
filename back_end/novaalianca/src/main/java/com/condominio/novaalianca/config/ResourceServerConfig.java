@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import com.condominio.novaalianca.enums.ParametrosSistema;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -89,13 +91,17 @@ public class ResourceServerConfig {
                 originsStr = properties.getCorsOrigins();
             }
 
-            String[] origins = originsStr.split(",");
+            java.util.List<String> allowedOrigins = Arrays.stream(originsStr.split(","))
+                    .map(String::trim)
+                    .map(origin -> origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin)
+                    .filter(origin -> !origin.isEmpty())
+                    .collect(java.util.stream.Collectors.toList());
 
             CorsConfiguration corsConfig = new CorsConfiguration();
-            corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
-            corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
+            corsConfig.setAllowedOriginPatterns(allowedOrigins);
+            corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH", "OPTIONS"));
             corsConfig.setAllowCredentials(true);
-            corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+            corsConfig.setAllowedHeaders(Arrays.asList("*"));
             return corsConfig;
         };
     }

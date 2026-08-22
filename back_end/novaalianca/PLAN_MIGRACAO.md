@@ -71,6 +71,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Atualização explícita da propriedade `<lombok.version>` no `pom.xml` para `1.18.38` para resolver erros de carregamento e inicialização das estruturas internas do compilador (`com.sun.tools.javac.code.TypeTag :: UNKNOWN`) decorrentes de incompatibilidades do Lombok com o javac do Java 25.
 *   **Commit 14 (Desativação de Validação Estrita de Bytecode):**
     *   Inclusão de `System.setProperty("spring.classformat.ignore", "true")` na classe `NovaaliancaApplication.java` para permitir que o Spring Boot realize o escaneamento do classpath de classes compiladas para o formato Java 25.
+*   **Commit 15 (Alinhamento de Resposta de Login do Front-End):**
+    *   Inclusão da propriedade `roles` no corpo de resposta do JSON retornado pelo custom `/oauth/token` do `OAuthTokenController.java` do backend, de modo a satisfazer a sincronização de sessão exigida pela interface `IAuthResponse` no front-end do React.
 
 ---
 
@@ -116,7 +118,7 @@ Como a biblioteca obsoleta do Spring Boot 2.x foi descontinuada, implementamos u
 *   Chama o `AuthenticationManager` do Spring Security para validar as credenciais.
 *   Gera um token assinado por HMAC-SHA256 usando a biblioteca nativa **Nimbus JOSE** (inclusa no Starter de Resource Server).
 *   Garante as claims idênticas exigidas pelo front-end: `userName`, `userId` e as `roles` (perfis do usuário).
-*   Retorna exatamente a estrutura de resposta esperada:
+*   Retorna exatamente a estrutura de resposta esperada pelo front-end no JSON de token:
     ```json
     {
       "access_token": "ey...",
@@ -124,7 +126,8 @@ Como a biblioteca obsoleta do Spring Boot 2.x foi descontinuada, implementamos u
       "expires_in": 86400,
       "scope": "read write",
       "userName": "Nome do Usuário",
-      "userId": 1
+      "userId": 1,
+      "roles": ["ROLE_ADMINISTRADOR"]
     }
     ```
 
