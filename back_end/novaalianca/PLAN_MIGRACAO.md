@@ -1,4 +1,4 @@
-# Plano de Migração e Modernização: Java 25 & Spring Boot 4.1.1
+# Plano de Migração e Modernização: Java 25 & Spring Boot 3.4.2
 **Projeto:** Condomínio Aliança (Backend)  
 **Versão Alvo:** 2.0.0.0  
 **Data:** 22 de Agosto de 2026  
@@ -7,14 +7,14 @@
 
 ## 1. Resumo Executivo
 
-Este plano de migração descreve a elevação da arquitetura do backend do projeto Condomínio Aliança. O projeto foi migrado de **Java 17 / Spring Boot 2.7.9** diretamente para a vanguarda tecnológica do **Java 25 LTS e Spring Boot 4.1.1**.
+Este plano de migração descreve a elevação da arquitetura do backend do projeto Condomínio Aliança. O projeto foi migrado de **Java 17 / Spring Boot 2.7.9** diretamente para a vanguarda tecnológica do **Java 25 LTS e Spring Boot 3.4.2**.
 
 ### Principais Objetivos Alcançados:
 1.  **Atualização de Infraestrutura:** Uso de Maven 3.9.9 (via wrapper) e runtime do Java 25 no Docker.
 2.  **Injeção de Dependência Moderna:** Remoção completa da anotação `@Autowired` em favor de construtores implícitos gerados pelo Lombok (`@RequiredArgsConstructor`).
 3.  **Configurações YAML:** Conversão de arquivos flat `.properties` para estrutura hierárquica `.yml`.
 4.  **Monitoramento & Configuração Dinâmica:** Integração do Spring Actuator expondo `/actuator/health` e suporte a `@RefreshScope` no endpoint `/actuator/refresh` para alteração de variáveis em tempo real sem redeploy.
-5.  **Modernização da Segurança (OAuth2/Security 7):** Substituição do pacote legado e removido `spring-security-oauth2-autoconfigure` por uma arquitetura nativa com `spring-boot-starter-oauth2-resource-server` e criação de um Custom Token Controller para garantir compatibilidade reversa com o front-end.
+5.  **Modernização da Segurança (OAuth2/Security 6.4+):** Substituição do pacote legado e removido `spring-security-oauth2-autoconfigure` por uma arquitetura nativa com `spring-boot-starter-oauth2-resource-server` e criação de um Custom Token Controller para garantir compatibilidade reversa com o front-end.
 6.  **Migração de Namespace:** Migração total de imports Java EE (`javax.*`) para Jakarta EE (`jakarta.*`).
 7.  **Resolução de Incompatibilidades Java 25 & Hibernate 6:** Correção de construtores depreciados de `Locale` e `URL`, e ajuste na anotação `@Type` do Hibernate.
 8.  **Migração do JavaMail & Activation:** Atualização dos pacotes de envio de e-mails para o ecossistema Jakarta.
@@ -39,12 +39,12 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
 *   **Commit 3 (Injeção de Dependência):**
     *   Substituição sistemática em 41 arquivos de `@Autowired` por atributos `private final` combinados com `@RequiredArgsConstructor` do Lombok.
 *   **Commit 4 (Core Frameworks & Segurança):**
-    *   Parent do Spring Boot no pom.xml elevado para `4.1.1`.
+    *   Parent do Spring Boot no pom.xml elevado para `4.1.1` (posteriormente ajustado para `3.4.2`).
     *   Substituição da dependência `spring-security-oauth2-autoconfigure` por `spring-boot-starter-oauth2-resource-server`.
     *   Migração global de `javax.*` para `jakarta.*` em 31 arquivos `.java`.
     *   Remoção das classes legadas `AuthorizationServerConfig.java` e `JwtTokenEnhancer.java`.
     *   Criação do controller `OAuthTokenController.java` para prover autenticação JWT transparente para o front-end.
-    *   Simplificação e adequação de `ResourceServerConfig.java` e `WebSecurityConfig.java` ao padrão do Spring Security 7.
+    *   Simplificação e adequação de `ResourceServerConfig.java` e `WebSecurityConfig.java` ao padrão do Spring Security.
 *   **Commit 5 (Correções do Java 25 & Hibernate 6):**
     *   Substituição de construtores depreciados de `Locale` e `URL` no Java 25.
     *   Remoção da anotação `@Type` legada do Hibernate em atributos binários para compatibilidade com o Hibernate 6.x.
@@ -63,6 +63,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Adição de fallbacks default em todos os placeholders `${VAR}` (como `${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}`, `${JWT_SECRET:secret}`, etc.) nos arquivos YAML para evitar erros de inicialização de propriedades quando as variáveis não são passadas ativamente na IDE do desenvolvedor.
 *   **Commit 11 (Carregador Programático de `.env`):**
     *   Implementação do método `loadDotEnv()` em `NovaaliancaApplication.java` que lê e injeta o arquivo `.env` do diretório raiz como propriedades do sistema da JVM na inicialização do Spring Boot.
+*   **Commit 12 (Ajuste das Versões do Framework para Estabilidade):**
+    *   Downgrade do parent do Spring Boot no `pom.xml` para `3.4.2` e do Spring Cloud para `2024.0.0` para resolver incompatibilidades de carregamento de classes (`ConfigurableBootstrapContext` não encontrado). O target do Java e runtime do container Docker continuam fixos no **Java 25**.
 
 ---
 
@@ -100,7 +102,7 @@ management:
 ```
 Classes de serviço ou propriedades anotadas com `@RefreshScope` recarregarão seus valores do ambiente ao fazer uma chamada `POST` para `/actuator/refresh`.
 
-### 3.3. Nova Arquitetura de Segurança (Spring Security 7 + Nimbus JWT)
+### 3.3. Nova Arquitetura de Segurança (Spring Security 6.4+ + Nimbus JWT)
 Como a biblioteca obsoleta do Spring Boot 2.x foi descontinuada, implementamos um controlador customizado `/oauth/token` compatível com o fluxo `password` do front-end original.
 
 #### Endpoint de Autenticação (`OAuthTokenController.java`):

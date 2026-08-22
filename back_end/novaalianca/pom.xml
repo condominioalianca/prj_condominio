@@ -17,6 +17,7 @@
     <properties>
         <java.version>25</java.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
 <!-- INICIO DEPENDENCIAS SPRING   -->
