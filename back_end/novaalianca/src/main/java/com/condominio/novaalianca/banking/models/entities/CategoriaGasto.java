@@ -32,5 +32,6 @@ public class CategoriaGasto {
     private String descricao;
 
     @Column(name = "ativo", nullable = false)
+    @lombok.Builder.Default
     private Boolean ativo = true;
 }

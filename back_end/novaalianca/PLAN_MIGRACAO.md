@@ -16,12 +16,13 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 4.  **Monitoramento & Configuração Dinâmica:** Integração do Spring Actuator expondo `/actuator/health` e suporte a `@RefreshScope` no endpoint `/actuator/refresh` para alteração de variáveis em tempo real sem redeploy.
 5.  **Modernização da Segurança (OAuth2/Security 7):** Substituição do pacote legado e removido `spring-security-oauth2-autoconfigure` por uma arquitetura nativa com `spring-boot-starter-oauth2-resource-server` e criação de um Custom Token Controller para garantir compatibilidade reversa com o front-end.
 6.  **Migração de Namespace:** Migração total de imports Java EE (`javax.*`) para Jakarta EE (`jakarta.*`).
+7.  **Resolução de Incompatibilidades Java 25 & Hibernate 6:** Correção de construtores depreciados de `Locale` e `URL`, e ajuste na anotação `@Type` do Hibernate.
 
 ---
 
 ## 2. Estrutura de Commits Realizada (Branch Atual)
 
-Para garantir rastreabilidade e segurança, a migração foi executada em 4 commits sequenciais:
+Para garantir rastreabilidade e segurança, a migração foi executada de forma incremental:
 
 *   **Commit 1 (Build & Runtime):**
     *   pom.xml: Versão do projeto alterada para `2.0.0.0`, propriedade `<java.version>` atualizada para `25`.
@@ -40,6 +41,9 @@ Para garantir rastreabilidade e segurança, a migração foi executada em 4 comm
     *   Remoção das classes legadas `AuthorizationServerConfig.java` e `JwtTokenEnhancer.java`.
     *   Criação do controller `OAuthTokenController.java` para prover autenticação JWT transparente para o front-end.
     *   Simplificação e adequação de `ResourceServerConfig.java` e `WebSecurityConfig.java` ao padrão do Spring Security 7.
+*   **Commit 5 (Correções do Java 25 & Hibernate 6):**
+    *   Substituição de construtores depreciados de `Locale` e `URL` no Java 25.
+    *   Remoção da anotação `@Type` legada do Hibernate em atributos binários para compatibilidade com o Hibernate 6.x.
 
 ---
 
@@ -102,6 +106,20 @@ Como a biblioteca obsoleta do Spring Boot 2.x foi descontinuada, implementamos u
 *   Usa o `NimbusJwtDecoder` configurado com a chave secreta existente em `properties.getJwtSecret()`.
 *   Configura um `JwtAuthenticationConverter` para extrair os perfis da claim `roles` do JWT e convertê-los em Authorities com prefixo `ROLE_`.
 
+### 3.4. Resolução de Quebras de Compilação no Java 25 & Hibernate 6
+
+Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes incompatibilidades:
+
+1.  **Construtor depreciado do Locale (Java 19+):**
+    *   *Antes:* `new Locale("pt", "BR")` no `BoletoBuilder.java`.
+    *   *Depois:* Substituído pela factory estática moderna `Locale.of("pt", "BR")`.
+2.  **Construtor depreciado do URL (Java 20+):**
+    *   *Antes:* `new URL(certPath).openStream()` no `RestTemplateUtil.java`.
+    *   *Depois:* Substituído pela forma segura `java.net.URI.create(certPath).toURL().openStream()`.
+3.  **Anotação `@Type` do Hibernate (Hibernate 6.x):**
+    *   *Antes:* `@org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")` em campos `byte[]` das entidades `BoletoNovaAlianca`, `Comprovante` e `Conciliacao`.
+    *   *Depois:* Removido por completo. No Hibernate 6, atributos do tipo `byte[]` são mapeados implicitamente como LOBs/binários corretos no banco sem a necessidade desta anotação (que teve seu atributo `type` removido e resultava em falha na compilação).
+
 ---
 
 ## 4. Configuração do Docker e Pipeline Jenkins
@@ -163,7 +181,7 @@ pipeline {
 
 ### 5.1. Pré-Requisitos para Desenvolvimento Local
 *   Instalar o **JDK 25** na máquina local do desenvolvedor e configurar a variável `JAVA_HOME`.
-*   IDE atualizada (IntelliJ IDEA 2025+ ou VS Code com extensões Java mais recentes) para suportar a sintaxe do Java 25 e Jakarta EE 10+.
+*   IDE atualizada (IntelliJ IDEA 2025+ ou VS Code com as extensões Java mais recentes) para suportar a sintaxe do Java 25 e Jakarta EE 10+.
 
 ### 5.2. Validação da Compilação
 ```powershell

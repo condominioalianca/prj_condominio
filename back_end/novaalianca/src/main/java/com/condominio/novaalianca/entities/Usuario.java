@@ -94,6 +94,7 @@ public class Usuario implements UserDetails {
             joinColumns = @JoinColumn(name = "ID_USUARIO"),
             inverseJoinColumns = @JoinColumn(name = "ID_PERFIL"))
     @Setter(AccessLevel.NONE)
+    @lombok.Builder.Default
     private Set<Perfil> listPerfis = new HashSet<>();
 
 

@@ -51,6 +51,7 @@ public class UsuarioDTO {
     private boolean enviaSms;
 
     @Setter(AccessLevel.NONE)
+    @lombok.Builder.Default
     private Set<PerfilDTO> listPerfis = new HashSet<>();
 
 

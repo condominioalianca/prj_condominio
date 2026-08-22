@@ -4,7 +4,7 @@ package com.condominio.novaalianca.entities;
 
 import org.hibernate.metamodel.model.domain.internal.SetAttributeImpl;
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
