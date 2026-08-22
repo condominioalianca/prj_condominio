@@ -10,7 +10,7 @@ spring:
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USERNAME:condominionovaaliancasbc}
-    password: ${MAIL_PASSWORD}
+    password: ${MAIL_PASSWORD:}
     port: 587
     properties:
       mail:
@@ -20,22 +20,22 @@ spring:
             enable: true
             required: true
   datasource:
-    url: ${DB_URL_DEV}
-    username: ${DB_USERNAME_DEV}
-    password: ${DB_PASSWORD_DEV}
+    url: ${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}
+    username: ${DB_USERNAME_DEV:postgres}
+    password: ${DB_PASSWORD_DEV:}
 
 security:
   oauth2:
     client:
-      client-id: ${OAUTH_CLIENT_ID}
-      client-secret: ${OAUTH_CLIENT_SECRET}
+      client-id: ${OAUTH_CLIENT_ID:oauth-client-id}
+      client-secret: ${OAUTH_CLIENT_SECRET:oauth-client-secret}
 
 jwt:
-  secret: ${JWT_SECRET}
-  duration: ${JWT_DURATION}
+  secret: ${JWT_SECRET:secret-token-key-condominio-alianca-2026-very-secure}
+  duration: ${JWT_DURATION:86400}
 
 cors:
-  origins: ${CORS_ORIGINS}
+  origins: ${CORS_ORIGINS:*}
 
 # Parâmetros para Envio de Email
 mail:
@@ -45,14 +45,14 @@ mail:
 banco:
   inter:
     client:
-      id: ${INTER_CLIENT_ID}
-      secret: ${INTER_CLIENT_SECRET}
+      id: ${INTER_CLIENT_ID:}
+      secret: ${INTER_CLIENT_SECRET:}
       grant:
         type: ${INTER_GRANT_TYPE:client_credentials}
     caminho:
       certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
     senha:
-      certificado: ${INTER_CERT_PASSWORD}
+      certificado: ${INTER_CERT_PASSWORD:}
     url:
       boleto: /cobranca/v3/cobrancas
       token: /oauth/v2/token

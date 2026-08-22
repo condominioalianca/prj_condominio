@@ -32,7 +32,7 @@ spring:
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USERNAME:condominionovaaliancasbc}
-    password: ${MAIL_PASSWORD}
+    password: ${MAIL_PASSWORD:}
     port: 587
     properties:
       mail:
@@ -60,14 +60,14 @@ banco:
       token: /oauth/v2/token
       extrato: /banking/v2/extrato
     client:
-      id: ${INTER_CLIENT_ID}
-      secret: ${INTER_CLIENT_SECRET}
+      id: ${INTER_CLIENT_ID:}
+      secret: ${INTER_CLIENT_SECRET:}
       grant:
         type: ${INTER_GRANT_TYPE:client_credentials}
     caminho:
       certificado: ${INTER_CERT_PATH:src/main/resources/certs/CONDOMINIONOVAALIANCA.pfx}
     senha:
-      certificado: ${INTER_CERT_PASSWORD}
+      certificado: ${INTER_CERT_PASSWORD:}
 
 boleto:
   cpfcnpj:
