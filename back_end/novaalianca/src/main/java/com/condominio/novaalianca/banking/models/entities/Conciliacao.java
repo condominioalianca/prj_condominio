@@ -73,6 +73,5 @@ public class Conciliacao {
     private List<Extrato> extratos;
 
     @Column(name = "ARQUIVO_PDF")
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")
     private byte[] arquivoPdf;
 }

@@ -56,11 +56,11 @@ public class BoletoBuilder {
 
 	private final NovaAliancaProperties properties;
 
-	Locale BRASILLOCALE = new Locale("pt","BR");
+	Locale BRASILLOCALE = Locale.of("pt","BR");
 
 
 	public Boleto boletoInter (Usuario usuario) throws ParseException {
-		Locale ptBr = new Locale("pt", "BR");
+		Locale ptBr = Locale.of("pt", "BR");
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		Double valorCondominio = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_CONDOMINIO.toString() +"_"+ LocalDate.now().format(formatterYear))));
 		Double valorTaxaMinAgua = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_TAXA_MIN_AGUA.toString())));

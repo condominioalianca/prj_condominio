@@ -101,7 +101,6 @@ public class BoletoNovaAlianca {
     private Unidade idUnidade;
 
     @Column(name = "ARQUIVO_PDF")
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")
     private byte[] arquivopdf;
 
     @Column(name = "FL_ATIVO")

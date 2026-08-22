@@ -112,7 +112,7 @@ public class RestTemplateUtil {
         }
         
         try {
-            return new URL(certPath).openStream();
+            return java.net.URI.create(certPath).toURL().openStream();
         } catch (Exception e) {
             return new FileInputStream(certPath);
         }

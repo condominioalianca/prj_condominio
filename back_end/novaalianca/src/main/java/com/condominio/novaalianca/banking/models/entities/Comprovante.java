@@ -38,7 +38,6 @@ public class Comprovante {
     @Column(name = "TIPO_ARQUIVO")
     private String tipoArquivo;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")
     @Column(name = "DADOS", nullable = false)
     private byte[] dados;
 }
