@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.controller;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.parametros.ParametrosDTO;
 import com.condominio.novaalianca.services.ParametrosServices;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/parametros")
+@RequiredArgsConstructor
 public class ParametrosController {
 
-    @Autowired
-    private ParametrosServices services;
+    private final ParametrosServices services;
 
     @GetMapping("/")
     public ResponseEntity<?> findAll() throws Exception {

@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.component;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenEnhancer implements TokenEnhancer {
 
-   @Autowired
-    private UsuarioRepository userRepository;
+    private final UsuarioRepository userRepository;
 
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
@@ -35,4 +35,3 @@ public class JwtTokenEnhancer implements TokenEnhancer {
 
     }
 }
-

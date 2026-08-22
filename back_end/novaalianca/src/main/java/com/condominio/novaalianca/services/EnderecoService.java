@@ -1,11 +1,11 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.EnderecoBuilder;
 import com.condominio.novaalianca.dto.EnderecoDTO;
 import com.condominio.novaalianca.dto.UsuarioDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import com.condominio.novaalianca.repositories.EnderecoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,13 +14,12 @@ import javax.transaction.Transactional;
 
 @Service
 
+@RequiredArgsConstructor
 public class EnderecoService {
 
-    @Autowired
-    private EnderecoRepository enderecoRepository;
+    private final EnderecoRepository enderecoRepository;
 
-    @Autowired
-    private EnderecoBuilder enderecoBuilder;
+    private final EnderecoBuilder enderecoBuilder;
 
 
     @Transactional

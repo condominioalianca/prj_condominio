@@ -1,6 +1,6 @@
 package com.condominio.novaalianca.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,18 +24,15 @@ import java.util.Arrays;
 
 @Configuration
 @EnableResourceServer
+@RequiredArgsConstructor
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    @Autowired
-    private NovaAliancaProperties properties;
-    @Autowired
-    private Environment env;
+    private final NovaAliancaProperties properties;
+    private final Environment env;
 
-    @Autowired
-    private JwtTokenStore tokenStore;
+    private final JwtTokenStore tokenStore;
 
-    @Autowired
-    private ParametrosSistemaRepository parametrosSistemaRepository;
+    private final ParametrosSistemaRepository parametrosSistemaRepository;
 
     private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**","/testes/**","/extrato/**"};
 
@@ -109,4 +106,3 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 
 }
-

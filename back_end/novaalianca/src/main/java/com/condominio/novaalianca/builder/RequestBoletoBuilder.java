@@ -1,15 +1,15 @@
 package com.condominio.novaalianca.builder;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.boleto.RequestBoleto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class RequestBoletoBuilder {
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
     public RequestBoleto requestBoleto (String scope){
         return RequestBoleto.builder()
                 .grantType(properties.getGrantType())

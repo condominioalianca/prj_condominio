@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.cobranca.services;
 
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.cobranca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.PagingDTOBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
@@ -31,7 +32,6 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,34 +47,27 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BoletoService{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BoletoService.class);
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    @Autowired
-    private UsuarioBuilder usuarioBuilder;
+    private final UsuarioBuilder usuarioBuilder;
 
-    @Autowired
-    private BoletoRepository boletoRepository;
+    private final BoletoRepository boletoRepository;
 
 
-    @Autowired
-    private BoletoBuilder boletoBuilder;
+    private final BoletoBuilder boletoBuilder;
 
-    @Autowired
-    private DateUtils dateUtils;
+    private final DateUtils dateUtils;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    private RequestBoletoBuilder builder;
+    private final RequestBoletoBuilder builder;
 
-    @Autowired
-    private InterService interService;
+    private final InterService interService;
 
     public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto) throws IOException {
         return tokenService.getToken(requestBoleto);

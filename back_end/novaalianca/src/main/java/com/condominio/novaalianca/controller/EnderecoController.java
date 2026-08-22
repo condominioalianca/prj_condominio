@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.controller;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.EnderecoDTO;
 import com.condominio.novaalianca.services.EnderecoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +19,10 @@ import javax.transaction.Transactional;
 
 @RestController
 @RequestMapping(value = "/endereco")
+@RequiredArgsConstructor
 public class EnderecoController {
 
-    @Autowired
-    private EnderecoService service;
+    private final EnderecoService service;
 
     @GetMapping
     public ResponseEntity<Page<EnderecoDTO>> findAll(Pageable pageable) {

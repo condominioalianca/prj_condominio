@@ -1,11 +1,11 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.PerfilBuilder;
 import com.condominio.novaalianca.dto.PerfilDTO;
 import com.condominio.novaalianca.entities.Perfil;
 import com.condominio.novaalianca.repositories.PerfilRepository;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,13 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PerfilService {
 
-    @Autowired
-    private PerfilRepository repository;
+    private final PerfilRepository repository;
 
-    @Autowired
-    private PerfilBuilder builder;
+    private final PerfilBuilder builder;
 
     @Transactional(readOnly = true)
     public List<PerfilDTO> findAll() {

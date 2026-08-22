@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.util.TemplateEmail;
@@ -16,13 +17,12 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EmailService {
 
-    @Autowired
-    private NovaAliancaProperties propertiesConfig;
+    private final NovaAliancaProperties propertiesConfig;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
 //    @Autowired
 //    private BoletoService boletoService;
@@ -73,6 +73,5 @@ public class EmailService {
 
 
 }
-
 
 

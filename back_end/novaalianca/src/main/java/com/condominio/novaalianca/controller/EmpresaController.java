@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.controller;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.EmpresaDTO;
 import com.condominio.novaalianca.services.EmpresaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,10 +20,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/empresas")
+@RequiredArgsConstructor
 public class EmpresaController {
 
-    @Autowired
-    private EmpresaService service;
+    private final EmpresaService service;
 
     @GetMapping
     public ResponseEntity<List<EmpresaDTO>> findAll() {

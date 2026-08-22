@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.CobrancaExtraBuilder;
 import com.condominio.novaalianca.dto.CobrancaExtraDTO;
 import com.condominio.novaalianca.entities.CobrancaExtra;
@@ -9,7 +10,6 @@ import com.condominio.novaalianca.repositories.UnidadeRepository;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,17 +17,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CobrancaExtraService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CobrancaExtraService.class);
 
-    @Autowired
-    private CobrancaExtraRepository cobrancaExtraRepository;
+    private final CobrancaExtraRepository cobrancaExtraRepository;
 
-    @Autowired
-    private UnidadeRepository unidadeRepository;
+    private final UnidadeRepository unidadeRepository;
 
-    @Autowired
-    private CobrancaExtraBuilder builder;
+    private final CobrancaExtraBuilder builder;
 
     public CobrancaExtra getCobrancaExtraByIdUnidadeAndMesReferencia (Unidade unidade, int mesReferencia){
         LOGGER.info("Mes de Referencia Cobranca Extra: {}",mesReferencia);

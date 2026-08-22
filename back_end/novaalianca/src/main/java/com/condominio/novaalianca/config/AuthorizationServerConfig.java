@@ -1,7 +1,7 @@
 package com.condominio.novaalianca.config;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.component.JwtTokenEnhancer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,25 +18,20 @@ import java.util.Arrays;
 
 @Configuration
 @EnableAuthorizationServer
+@RequiredArgsConstructor
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    @Autowired
-    private  NovaAliancaProperties properties;
+    private final  NovaAliancaProperties properties;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtAccessTokenConverter accessTokenConverter;
+    private final JwtAccessTokenConverter accessTokenConverter;
 
-    @Autowired
-    private JwtTokenStore jwtTokenStore;
+    private final JwtTokenStore jwtTokenStore;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtTokenEnhancer tokenEnhancer;
+    private final JwtTokenEnhancer tokenEnhancer;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {

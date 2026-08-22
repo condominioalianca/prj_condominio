@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.banking.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.banking.models.entities.Extrato;
 import com.condominio.novaalianca.banking.models.entities.PixDetalhe;
 import com.condominio.novaalianca.banking.models.entities.PagamentoDetalhe;
@@ -21,7 +22,6 @@ import com.condominio.novaalianca.services.inter.InterService;
 import com.condominio.novaalianca.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.condominio.novaalianca.banking.models.entities.Conciliacao;
@@ -35,25 +35,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ExtratoService {
 
-    @Autowired
-    private InterService interService;
+    private final InterService interService;
 
-    @Autowired
-    private ExtratoRepository extratoRepository;
+    private final ExtratoRepository extratoRepository;
 
-    @Autowired
-    private BoletoRepository boletoRepository;
+    private final BoletoRepository boletoRepository;
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
 
-    @Autowired
-    private ConciliacaoService conciliacaoService;
+    private final ConciliacaoService conciliacaoService;
 
-    @Autowired
-    private DateUtils dateUtils;
+    private final DateUtils dateUtils;
 
     /**
      * Recupera o extrato enriquecido do Banco Inter, realiza o parse/mapeamento dos campos,

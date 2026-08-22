@@ -1,9 +1,9 @@
 package com.condominio.novaalianca.util;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -23,15 +23,14 @@ import java.security.KeyStore;
  * configuradas com mTLS (autenticação mútua SSL) para integrações seguras.
  */
 @Component
+@RequiredArgsConstructor
 public class RestTemplateUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RestTemplateUtil.class);
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
 
-    @Autowired
-    private CaminhoArquivosUtil caminhoArquivosUtil;
+    private final CaminhoArquivosUtil caminhoArquivosUtil;
 
     /**
      * Cria e configura um RestTemplate para mTLS (utilizando o certificado PFX).

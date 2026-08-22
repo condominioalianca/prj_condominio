@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.ContaBuilder;
 import com.condominio.novaalianca.dto.ContaDTO;
 import com.condominio.novaalianca.entities.Conta;
@@ -7,7 +8,6 @@ import com.condominio.novaalianca.entities.Empresa;
 import com.condominio.novaalianca.repositories.ContaRepository;
 import com.condominio.novaalianca.repositories.EmpresaRepository;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +15,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ContaService {
 
-    @Autowired
-    private ContaRepository repository;
+    private final ContaRepository repository;
 
-    @Autowired
-    private EmpresaRepository empresaRepository;
+    private final EmpresaRepository empresaRepository;
 
-    @Autowired
-    private ContaBuilder builder;
+    private final ContaBuilder builder;
 
     @Transactional(readOnly = true)
     public List<ContaDTO> findAll() {

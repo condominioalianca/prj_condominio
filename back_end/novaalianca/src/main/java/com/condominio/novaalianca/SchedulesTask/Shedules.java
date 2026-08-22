@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.SchedulesTask;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.banking.services.ExtratoService;
 import com.condominio.novaalianca.banking.services.SaldoService;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
@@ -16,7 +17,6 @@ import com.condominio.novaalianca.cobranca.builder.BoletoBuilder;
 import com.condominio.novaalianca.enums.OrigemBoleto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,35 +27,27 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class Shedules {
     private static final Logger log = LoggerFactory.getLogger(Shedules.class);
 
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
-    @Autowired
-    private BoletoService boletoService;
+    private final BoletoService boletoService;
 
-    @Autowired
-    private DateUtils dateUtils;
+    private final DateUtils dateUtils;
 
-    @Autowired
-    private RequestBoletoBuilder requestBoletoBuilder;
+    private final RequestBoletoBuilder requestBoletoBuilder;
 
-    @Autowired
-    private InterService interService;
+    private final InterService interService;
 
-    @Autowired
-    private ExtratoService extratoService;
+    private final ExtratoService extratoService;
 
-    @Autowired
-    private SaldoService saldoService;
+    private final SaldoService saldoService;
 
-    @Autowired
-    private BoletoRepository boletoRepository;
+    private final BoletoRepository boletoRepository;
 
-    @Autowired
-    private BoletoBuilder boletoBuilder;
+    private final BoletoBuilder boletoBuilder;
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
     @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 10 1 * *}")
     public void validaEnviodDeBoletos() throws ParseException {

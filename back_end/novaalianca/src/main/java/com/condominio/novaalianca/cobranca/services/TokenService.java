@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.cobranca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.boleto.RequestBoleto;
 import com.condominio.novaalianca.dto.token.TokenResponseDTO;
 import com.condominio.novaalianca.util.CaminhoArquivosUtil;
@@ -10,16 +11,15 @@ import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 public class TokenService {
 
-    @Autowired
-    private CaminhoArquivosUtil caminhoArquivosUtil;
+    private final CaminhoArquivosUtil caminhoArquivosUtil;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
 

@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.cobranca.builder;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -34,33 +35,26 @@ import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoDesconto;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMora;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMulta;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.TipoPessoa;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
 @Component
+@RequiredArgsConstructor
 public class BoletoBuilder {
 
-	@Autowired
-	Feriados feriados;
+	final Feriados feriados;
 
-	@Autowired
-	private UnidadeBuilder unidadeBuilder;
+	private final UnidadeBuilder unidadeBuilder;
 
-	@Autowired
-	private UsuarioBuilder usuarioBuilder;
+	private final UsuarioBuilder usuarioBuilder;
 	
-	@Autowired
-	ParametrosSistemaRepository parametrosSistemaRepository;
+	final ParametrosSistemaRepository parametrosSistemaRepository;
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+	private final UsuarioRepository usuarioRepository;
 
-	@Autowired
-	private CobrancaExtraService cobrancaExtraService;
+	private final CobrancaExtraService cobrancaExtraService;
 
-	@Autowired
-	private NovaAliancaProperties properties;
+	private final NovaAliancaProperties properties;
 
 	Locale BRASILLOCALE = new Locale("pt","BR");
 

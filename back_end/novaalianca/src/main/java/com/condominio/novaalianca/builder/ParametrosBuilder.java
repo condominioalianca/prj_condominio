@@ -1,17 +1,17 @@
 package com.condominio.novaalianca.builder;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.parametros.ParametrosDTO;
 import com.condominio.novaalianca.entities.ParametrosSitema;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class ParametrosBuilder {
 
-    @Autowired
-    private UsuarioBuilder usuarioBuilder;
+    private final UsuarioBuilder usuarioBuilder;
 
     public ParametrosDTO entityTODto(ParametrosSitema entity){
         return ParametrosDTO.builder()
