@@ -21,6 +21,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 9.  **Ajustes de Depreciação no Core (BigDecimal & Spring Web):** Substituição de constantes depreciadas de arredondamento de `BigDecimal` e atualização do construtor de URLs do Spring Web.
 10. **Resolução de Resolução Eager de Variáveis do YAML:** Adição de fallbacks e valores padrão para placeholders de variáveis de ambiente para permitir bootstrapping local sem necessidade de declarar todas as variáveis na IDE.
 11. **Carregamento Nativo e Programático de Arquivo `.env`:** Implementação de um loader nativo no método `main` da aplicação que varre até 4 níveis de diretórios acima para localizar e injetar as propriedades de um arquivo `.env` do projeto de forma 100% transparente para o Spring Boot, dispensando o uso de plugins de IDE no desenvolvimento local.
+12. **Upgrade do Lombok para Compatibilidade com Compilador do Java 25:** Elevação da versão do Lombok para `1.18.38` para evitar erros de inicialização de classes AST (`TypeTag :: UNKNOWN`) no javac do JDK 25.
 
 ---
 
@@ -65,6 +66,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Implementação do método `loadDotEnv()` em `NovaaliancaApplication.java` que lê e injeta o arquivo `.env` do diretório raiz como propriedades do sistema da JVM na inicialização do Spring Boot.
 *   **Commit 12 (Ajuste das Versões do Framework para Estabilidade):**
     *   Downgrade do parent do Spring Boot no `pom.xml` para `3.4.2` e do Spring Cloud para `2024.0.0` para resolver incompatibilidades de carregamento de classes (`ConfigurableBootstrapContext` não encontrado). O target do Java e runtime do container Docker continuam fixos no **Java 25**.
+*   **Commit 13 (Upgrade do Lombok para Java 25):**
+    *   Atualização explícita da propriedade `<lombok.version>` no `pom.xml` para `1.18.38` para resolver erros de carregamento e inicialização das estruturas internas do compilador (`com.sun.tools.javac.code.TypeTag :: UNKNOWN`) decorrentes de incompatibilidades do Lombok com o javac do Java 25.
 
 ---
 
@@ -155,6 +158,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 8.  **Carregamento do Arquivo `.env` Nativo:**
     *   *Antes:* Dependência de plugins externos do IntelliJ (como EnvFile) para injetar as variáveis de ambiente.
     *   *Depois:* A classe `NovaaliancaApplication` carrega programaticamente no boot do Java o arquivo `.env` localizado na raiz do projeto (`C:\GIT\prj_condominio\.env`).
+9.  **Lombok no Java 25:**
+    *   *Antes:* Falha de inicialização `TypeTag :: UNKNOWN` provocada por APIs modificadas do javac do Java 25.
+    *   *Depois:* Forçado uso do Lombok `1.18.38` nas properties do Maven, que introduz compatibilidade com os compiladores Java modernos.
 
 ---
 

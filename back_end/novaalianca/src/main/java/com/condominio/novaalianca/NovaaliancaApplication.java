@@ -10,6 +10,7 @@ public class NovaaliancaApplication {
 
 	public static void main(String[] args) {
 		loadDotEnv();
+		System.setProperty("spring.classformat.ignore", "true");
 		SpringApplication.run(NovaaliancaApplication.class, args);
 
 		System.out.println("Iniciou");
