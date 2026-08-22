@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.EmailDTO;
 import com.condominio.novaalianca.util.TemplateEmail;
@@ -8,21 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import javax.activation.DataSource;
-import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
+import jakarta.activation.DataSource;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EmailService {
 
-    @Autowired
-    private NovaAliancaProperties propertiesConfig;
+    private final NovaAliancaProperties propertiesConfig;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
 //    @Autowired
 //    private BoletoService boletoService;
@@ -73,6 +73,5 @@ public class EmailService {
 
 
 }
-
 
 

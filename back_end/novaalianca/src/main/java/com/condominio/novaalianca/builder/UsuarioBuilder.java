@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.builder;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.UsuarioDTO;
 import com.condominio.novaalianca.entities.Endereco;
 import com.condominio.novaalianca.entities.Unidade;
@@ -13,19 +14,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UsuarioBuilder {
 
-    @Autowired
-    private UnidadeBuilder unidadeBuilder;
+    private final UnidadeBuilder unidadeBuilder;
 
-    @Autowired
-    private EnderecoBuilder enderecoBuilder;
+    private final EnderecoBuilder enderecoBuilder;
 
-    @Autowired
-    private PerfilBuilder perfilBuilder;
+    private final PerfilBuilder perfilBuilder;
 
-    @Autowired
-    private UsuarioRepository repository;
+    private final UsuarioRepository repository;
 
 //    @Autowired
 //    private BCryptPasswordEncoder bCryptPasswordEncoder;

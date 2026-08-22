@@ -1,11 +1,11 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.EmpresaBuilder;
 import com.condominio.novaalianca.dto.EmpresaDTO;
 import com.condominio.novaalianca.entities.Empresa;
 import com.condominio.novaalianca.repositories.EmpresaRepository;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,13 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class EmpresaService {
 
-    @Autowired
-    private EmpresaRepository repository;
+    private final EmpresaRepository repository;
 
-    @Autowired
-    private EmpresaBuilder builder;
+    private final EmpresaBuilder builder;
 
     @Transactional(readOnly = true)
     public List<EmpresaDTO> findAll() {

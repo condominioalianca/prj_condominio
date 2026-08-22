@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.UsuarioBuilder;
 import com.condominio.novaalianca.dto.UsuarioDTO;
 import com.condominio.novaalianca.entities.Endereco;
@@ -11,7 +12,6 @@ import com.condominio.novaalianca.repositories.UsuarioSpecification;
 import com.condominio.novaalianca.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -29,27 +29,22 @@ import java.util.Optional;
 
 @Service
 
+@RequiredArgsConstructor
 public class UsuarioService implements UserDetailsService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioService.class);
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private EnderecoRepository enderecoRepository;
+    private final EnderecoRepository enderecoRepository;
 
-    @Autowired
-    private UsuarioBuilder usuarioBuilder;
+    private final UsuarioBuilder usuarioBuilder;
 
-    @Autowired
-    private EnderecoService enderecoService;
+    private final EnderecoService enderecoService;
 
-    @Autowired
-    private UnidadeService unidadeService;
+    private final UnidadeService unidadeService;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     @Transactional

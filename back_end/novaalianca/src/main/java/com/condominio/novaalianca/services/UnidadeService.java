@@ -1,25 +1,24 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.UnidadeBuilder;
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.entities.Unidade;
 import com.condominio.novaalianca.repositories.UnidadeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Service
 
+@RequiredArgsConstructor
 public class UnidadeService {
 
-    @Autowired
-    private UnidadeRepository repository;
+    private final UnidadeRepository repository;
 
-    @Autowired
-    private UnidadeBuilder builder;
+    private final UnidadeBuilder builder;
 
     @Transactional
     public Page<UnidadeDTO> findAllPaged(Pageable pageable) {

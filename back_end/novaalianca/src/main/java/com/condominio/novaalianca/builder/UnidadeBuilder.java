@@ -1,19 +1,19 @@
 package com.condominio.novaalianca.builder;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.entities.Unidade;
 import com.condominio.novaalianca.repositories.UnidadeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class UnidadeBuilder {
 
-    @Autowired
-    private UnidadeRepository unidadeRepository;
+    private final UnidadeRepository unidadeRepository;
 
     public UnidadeDTO entityToDto(Unidade unidade){
         return  UnidadeDTO.builder()

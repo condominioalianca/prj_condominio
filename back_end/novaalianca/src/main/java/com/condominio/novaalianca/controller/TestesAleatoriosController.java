@@ -1,6 +1,7 @@
 package com.condominio.novaalianca.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.cobranca.builder.BoletoBuilder;
 import com.condominio.novaalianca.builder.RequestBoletoBuilder;
 import com.condominio.novaalianca.entities.Usuario;
@@ -12,7 +13,6 @@ import com.condominio.novaalianca.cobranca.services.BoletoService;
 import com.condominio.novaalianca.dto.inter.cobranca.Boleto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,26 +25,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/testes")
+@RequiredArgsConstructor
 public class TestesAleatoriosController {
 
     private static final Logger log = LoggerFactory.getLogger(TestesAleatoriosController.class);
 
-    @Autowired
-    private RequestBoletoBuilder builder;
+    private final RequestBoletoBuilder builder;
 
-    @Autowired
-    private BoletoBuilder boletoBuilder;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final BoletoBuilder boletoBuilder;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    private BoletoService boletoService;
+    private final BoletoService boletoService;
 
-    @Autowired
-    private InterService interService;
+    private final InterService interService;
 
     @GetMapping("/geraboleto")
  //   @Scheduled(cron="1 22 13 * * *")    //Segundo Minuto Hora dia-do-mes mes  dia-da-semana

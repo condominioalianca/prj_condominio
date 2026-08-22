@@ -91,7 +91,7 @@ export const backEndService = {
 
     // Credenciais do cliente OAuth2 registradas no backend: front_nova_alianca / nova123
     const clientId = 'front_nova_alianca';
-    const clientSecret = 'nova123';
+    const clientSecret = '18af63e3001dcae1ca594292f23ddc3871dffcc4007c686c2aa73080661fcc2b';
     const basicAuth = 'Basic ' + btoa(`${clientId}:${clientSecret}`);
 
     const config: AxiosRequestConfig = {

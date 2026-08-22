@@ -10,8 +10,6 @@ public class NovaaliancaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(NovaaliancaApplication.class, args);
-
 		System.out.println("Iniciou");
 	}
-
 }

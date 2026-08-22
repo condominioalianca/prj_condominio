@@ -1,9 +1,9 @@
 package com.condominio.novaalianca.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.UnidadeDTO;
 import com.condominio.novaalianca.services.UnidadeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/unidade")
+@RequiredArgsConstructor
 public class UnidadeController {
 
-    @Autowired
-    private UnidadeService service;
+    private final UnidadeService service;
 
     @GetMapping
     public ResponseEntity<Page<UnidadeDTO>>findAll(Pageable pageable){

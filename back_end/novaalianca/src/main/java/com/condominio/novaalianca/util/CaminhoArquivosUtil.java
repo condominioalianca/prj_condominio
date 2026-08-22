@@ -1,18 +1,18 @@
 package com.condominio.novaalianca.util;
 
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CaminhoArquivosUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaminhoArquivosUtil.class);
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
 
     public String caminhoCertificado() {
         String caminhoArquivo = properties.getCaminhoCertificado();

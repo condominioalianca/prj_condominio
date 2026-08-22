@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.services.inter;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.dto.inter.banking.ExtratoResponseDTO;
 import com.condominio.novaalianca.dto.inter.banking.ExtratoEnriquecidoResponseDTO;
@@ -13,7 +14,6 @@ import com.condominio.novaalianca.enums.inter.TipoTransacaoEnum;
 import com.condominio.novaalianca.util.RestTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,18 +29,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Delega a obtenção de token e configuração SSL para os serviços correspondentes.
  */
 @Service
+@RequiredArgsConstructor
 public class InterService {
 
     private static final Logger log = LoggerFactory.getLogger(InterService.class);
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
 
-    @Autowired
-    private InterTokenService interTokenService;
+    private final InterTokenService interTokenService;
 
-    @Autowired
-    private RestTemplateUtil restTemplateUtil;
+    private final RestTemplateUtil restTemplateUtil;
 
     /**
      * Stub para emissão de boleto (compatibilidade reversa).
@@ -140,7 +138,7 @@ public class InterService {
             log.info("Buscando extrato bancário Banco Inter em: {}", extratoUrl);
 
             // Monta a URL com query params
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(extratoUrl)
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(extratoUrl)
                     .queryParam("dataInicio", dataInicio)
                     .queryParam("dataFim", dataFim);
 
@@ -228,7 +226,7 @@ public class InterService {
             log.info("Buscando extrato enriquecido Banco Inter em: {}", extratoUrl);
 
             // Monta a URL com query params obrigatórios
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(extratoUrl)
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(extratoUrl)
                     .queryParam("dataInicio", dataInicio)
                     .queryParam("dataFim", dataFim);
 
@@ -296,7 +294,7 @@ public class InterService {
             String saldoUrl = getFullUrl("/banking/v2/saldo", ambiente);
             log.info("Buscando saldo da conta corrente Banco Inter em: {}", saldoUrl);
 
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(saldoUrl);
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(saldoUrl);
             if (dataSaldo != null && !dataSaldo.trim().isEmpty()) {
                 uriBuilder.queryParam("dataSaldo", dataSaldo);
             }

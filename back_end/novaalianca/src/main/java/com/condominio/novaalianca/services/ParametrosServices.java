@@ -1,23 +1,22 @@
 package com.condominio.novaalianca.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.builder.ParametrosBuilder;
 import com.condominio.novaalianca.dto.parametros.ParametrosDTO;
 import com.condominio.novaalianca.entities.ParametrosSitema;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ParametrosServices {
 
-    @Autowired
-    private ParametrosSistemaRepository repository;
+    private final ParametrosSistemaRepository repository;
 
-    @Autowired
-    private ParametrosBuilder builder;
+    private final ParametrosBuilder builder;
 
     public List<ParametrosDTO> listParametros (){
         List<ParametrosSitema> listEntitesParametros = repository.findAll();

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,6 +51,7 @@ public class UsuarioDTO {
     private boolean enviaSms;
 
     @Setter(AccessLevel.NONE)
+    @lombok.Builder.Default
     private Set<PerfilDTO> listPerfis = new HashSet<>();
 
 

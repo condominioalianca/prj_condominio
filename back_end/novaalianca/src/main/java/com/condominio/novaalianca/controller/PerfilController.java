@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.controller;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.PerfilDTO;
 import com.condominio.novaalianca.services.PerfilService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/perfis")
+@RequiredArgsConstructor
 public class PerfilController {
 
-    @Autowired
-    private PerfilService service;
+    private final PerfilService service;
 
     @GetMapping
     public ResponseEntity<List<PerfilDTO>> findAll() {

@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.cobranca.builder;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -34,39 +35,32 @@ import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoDesconto;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMora;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.CodigoMulta;
 import com.condominio.novaalianca.dto.inter.cobranca.enums.TipoPessoa;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
 @Component
+@RequiredArgsConstructor
 public class BoletoBuilder {
 
-	@Autowired
-	Feriados feriados;
+	final Feriados feriados;
 
-	@Autowired
-	private UnidadeBuilder unidadeBuilder;
+	private final UnidadeBuilder unidadeBuilder;
 
-	@Autowired
-	private UsuarioBuilder usuarioBuilder;
+	private final UsuarioBuilder usuarioBuilder;
 	
-	@Autowired
-	ParametrosSistemaRepository parametrosSistemaRepository;
+	final ParametrosSistemaRepository parametrosSistemaRepository;
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+	private final UsuarioRepository usuarioRepository;
 
-	@Autowired
-	private CobrancaExtraService cobrancaExtraService;
+	private final CobrancaExtraService cobrancaExtraService;
 
-	@Autowired
-	private NovaAliancaProperties properties;
+	private final NovaAliancaProperties properties;
 
-	Locale BRASILLOCALE = new Locale("pt","BR");
+	Locale BRASILLOCALE = Locale.of("pt","BR");
 
 
 	public Boleto boletoInter (Usuario usuario) throws ParseException {
-		Locale ptBr = new Locale("pt", "BR");
+		Locale ptBr = Locale.of("pt", "BR");
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		Double valorCondominio = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_CONDOMINIO.toString() +"_"+ LocalDate.now().format(formatterYear))));
 		Double valorTaxaMinAgua = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_TAXA_MIN_AGUA.toString())));
@@ -107,11 +101,11 @@ public class BoletoBuilder {
 		if(usuario.getUnidade().getQtMorador()>1){
 			mensagem.setLinha4("ACRESCIMO 70% DA TAXA MIN (UNIDADE COM MAIS DE 1 MORADOR) = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaAguaAcrescimoSetentaPorCento));
 			mensagem.setLinha5("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominioMaisMorador));
-			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2,BigDecimal.ROUND_HALF_EVEN));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2, java.math.RoundingMode.HALF_EVEN));
 
 		}else{
 			mensagem.setLinha4("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio1Morador));
-			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, BigDecimal.ROUND_HALF_EVEN));
+			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, java.math.RoundingMode.HALF_EVEN));
 		}
 
 		boletoInter.setMensagem(mensagem);

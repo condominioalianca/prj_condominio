@@ -1,5 +1,6 @@
 package com.condominio.novaalianca.banking.services;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.banking.models.dtos.SaldoDTO;
 import com.condominio.novaalianca.banking.models.entities.Saldo;
 import com.condominio.novaalianca.banking.repositories.SaldoRepository;
@@ -9,28 +10,24 @@ import com.condominio.novaalianca.services.inter.InterService;
 import com.condominio.novaalianca.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class SaldoService {
 
     private static final Logger log = LoggerFactory.getLogger(SaldoService.class);
 
-    @Autowired
-    private InterService interService;
+    private final InterService interService;
 
-    @Autowired
-    private SaldoRepository saldoRepository;
+    private final SaldoRepository saldoRepository;
 
-    @Autowired
-    private SaldoBuilder saldoBuilder;
+    private final SaldoBuilder saldoBuilder;
 
-    @Autowired
-    private DateUtils dateUtils;
+    private final DateUtils dateUtils;
 
     public SaldoDTO obterSaldoMaisAtual() {
         return saldoRepository.findFirstByOrderByIdDesc()

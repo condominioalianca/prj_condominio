@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 
 @Getter
 @Setter
@@ -38,7 +38,6 @@ public class Comprovante {
     @Column(name = "TIPO_ARQUIVO")
     private String tipoArquivo;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.BinaryType")
     @Column(name = "DADOS", nullable = false)
     private byte[] dados;
 }

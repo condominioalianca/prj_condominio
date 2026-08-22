@@ -1,27 +1,26 @@
 package com.condominio.novaalianca.services.validation;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.controller.exeptions.FieldMessage;
 import com.condominio.novaalianca.dto.UsuarioUpdateDTO;
 
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerMapping;
 
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class UserUpdateValidator implements ConstraintValidator<UserUpdateValid, UsuarioUpdateDTO> {
 
-    @Autowired
-    private HttpServletRequest request;
-    @Autowired
-    private UsuarioRepository userRepository;
+    private final HttpServletRequest request;
+    private final UsuarioRepository userRepository;
 
     @Override
     public void initialize (UserUpdateValid ann){

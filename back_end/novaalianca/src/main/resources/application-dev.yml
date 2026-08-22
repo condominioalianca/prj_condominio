@@ -1,0 +1,51 @@
+server:
+  port: 8086
+
+source:
+  docker: ${DOCKER:false}
+
+spring:
+  sql:
+    init:
+      mode: always
+  jpa:
+    open-in-view: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    generate-ddl: true
+    show-sql: false
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+      hibernate: INFO
+      hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+banco:
+  interurl:
+    path_prod: https://cdpj.partners.bancointer.com.br
+    path_sand: https://cdpj-sandbox.partners.uatinter.co
+  inter:
+    url:
+      boleto: /cobranca/v3/cobrancas
+      token: /oauth/v2/token
+      extrato: /banking/v2/extrato
+
+cron:
+  schedule:
+    valida-envio: "0 */4 10 1 * *"
+    recupera-boleto: "0 */1 10 1 * *"
+    envia-email: "10 */2 10 1 * *"
+    extrato: "0 */10 * * * *"

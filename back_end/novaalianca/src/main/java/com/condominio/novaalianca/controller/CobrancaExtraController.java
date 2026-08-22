@@ -1,8 +1,8 @@
 package com.condominio.novaalianca.controller;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.CobrancaExtraDTO;
 import com.condominio.novaalianca.services.CobrancaExtraService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/cobrancas-extras")
+@RequiredArgsConstructor
 public class CobrancaExtraController {
 
-    @Autowired
-    private CobrancaExtraService service;
+    private final CobrancaExtraService service;
 
     @GetMapping
     public ResponseEntity<List<CobrancaExtraDTO>> findAll() {

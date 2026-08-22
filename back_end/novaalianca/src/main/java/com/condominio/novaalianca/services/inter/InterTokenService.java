@@ -1,10 +1,10 @@
 package com.condominio.novaalianca.services.inter;
 
+import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.config.NovaAliancaProperties;
 import com.condominio.novaalianca.util.RestTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,15 +19,14 @@ import java.util.Map;
  * utilizando o RestTemplate mTLS.
  */
 @Service
+@RequiredArgsConstructor
 public class InterTokenService {
 
     private static final Logger log = LoggerFactory.getLogger(InterTokenService.class);
 
-    @Autowired
-    private NovaAliancaProperties properties;
+    private final NovaAliancaProperties properties;
 
-    @Autowired
-    private RestTemplateUtil restTemplateUtil;
+    private final RestTemplateUtil restTemplateUtil;
 
     /**
      * Obtém o token de acesso OAuth2 usando mTLS.
