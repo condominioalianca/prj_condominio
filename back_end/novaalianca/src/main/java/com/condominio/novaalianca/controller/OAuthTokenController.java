@@ -77,6 +77,7 @@ public class OAuthTokenController {
             response.put("scope", "read write");
             response.put("userName", user.getNomeUsuario());
             response.put("userId", user.getIdUsuario());
+            response.put("roles", user.getListPerfis().stream().map(perfil -> perfil.getNomePerfil()).collect(Collectors.toList()));
 
             return ResponseEntity.ok(response);
 

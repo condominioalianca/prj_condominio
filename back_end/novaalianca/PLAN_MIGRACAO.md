@@ -22,6 +22,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 10. **Resolução de Resolução Eager de Variáveis do YAML:** Adição de fallbacks e valores padrão para placeholders de variáveis de ambiente para permitir bootstrapping local sem necessidade de declarar todas as variáveis na IDE.
 11. **Carregamento Nativo e Programático de Arquivo `.env`:** Implementação de um loader nativo no método `main` da aplicação que varre até 4 níveis de diretórios acima para localizar e injetar as propriedades de um arquivo `.env` do projeto de forma 100% transparente para o Spring Boot, dispensando o uso de plugins de IDE no desenvolvimento local.
 12. **Upgrade do Lombok para Compatibilidade com Compilador do Java 25:** Elevação da versão do Lombok para `1.18.38` para evitar erros de inicialização de classes AST (`TypeTag :: UNKNOWN`) no javac do JDK 25.
+13. **Suporte a Classpath Scanning do Bytecode Java 25:** Configuração programática da propriedade de sistema `spring.classformat.ignore=true` no bootstrap para que o leitor de bytecode interno do Spring Framework 6.x não rejeite classes compiladas no formato do Java 25 (versão de bytecode 69).
 
 ---
 
@@ -68,6 +69,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Downgrade do parent do Spring Boot no `pom.xml` para `3.4.2` e do Spring Cloud para `2024.0.0` para resolver incompatibilidades de carregamento de classes (`ConfigurableBootstrapContext` não encontrado). O target do Java e runtime do container Docker continuam fixos no **Java 25**.
 *   **Commit 13 (Upgrade do Lombok para Java 25):**
     *   Atualização explícita da propriedade `<lombok.version>` no `pom.xml` para `1.18.38` para resolver erros de carregamento e inicialização das estruturas internas do compilador (`com.sun.tools.javac.code.TypeTag :: UNKNOWN`) decorrentes de incompatibilidades do Lombok com o javac do Java 25.
+*   **Commit 14 (Desativação de Validação Estrita de Bytecode):**
+    *   Inclusão de `System.setProperty("spring.classformat.ignore", "true")` na classe `NovaaliancaApplication.java` para permitir que o Spring Boot realize o escaneamento do classpath de classes compiladas para o formato Java 25.
 
 ---
 
@@ -161,6 +164,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 9.  **Lombok no Java 25:**
     *   *Antes:* Falha de inicialização `TypeTag :: UNKNOWN` provocada por APIs modificadas do javac do Java 25.
     *   *Depois:* Forçado uso do Lombok `1.18.38` nas properties do Maven, que introduz compatibilidade com os compiladores Java modernos.
+10. **Ignorar Formato do Bytecode do Java 25 no Spring 6.x:**
+    *   *Antes:* Falha de boot `BeanDefinitionStoreException: Incompatible class format` em classes do DTO compiladas no Java 25 (versão de bytecode 69) ao escanear o classpath.
+    *   *Depois:* Adicionado `spring.classformat.ignore=true` nas propriedades de inicialização do Java para instruir o Spring Framework a pular a validação rígida de versão de bytecode.
 
 ---
 
