@@ -48,6 +48,7 @@ public class ResourceServerConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(PUBLICO).permitAll()
                 .requestMatchers(HttpMethod.GET, SINDICO).permitAll()
                 .requestMatchers(ADMIN).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
@@ -108,7 +109,9 @@ public class ResourceServerConfig {
 
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilter() {
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfigurationSource().getCorsConfiguration(null));
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }

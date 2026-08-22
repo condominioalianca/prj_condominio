@@ -23,6 +23,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 11. **Carregamento Nativo e Programático de Arquivo `.env`:** Implementação de um loader nativo no método `main` da aplicação que varre até 4 níveis de diretórios acima para localizar e injetar as propriedades de um arquivo `.env` do projeto de forma 100% transparente para o Spring Boot, dispensando o uso de plugins de IDE no desenvolvimento local.
 12. **Upgrade do Lombok para Compatibilidade com Compilador do Java 25:** Elevação da versão do Lombok para `1.18.38` para evitar erros de inicialização de classes AST (`TypeTag :: UNKNOWN`) no javac do JDK 25.
 13. **Suporte a Classpath Scanning do Bytecode Java 25:** Configuração programática da propriedade de sistema `spring.classformat.ignore=true` no bootstrap para que o leitor de bytecode interno do Spring Framework 6.x não rejeite classes compiladas no formato do Java 25 (versão de bytecode 69).
+14. **Tratamento Dinâmico de Origens do CORS e Preflight:** Limpeza automática de barras finais (`/`) nas origens cadastradas e permissão para múltiplos headers (`"*"`) e métodos HTTP (incluindo `OPTIONS`), evitando falhas de comunicação com navegadores locais.
 
 ---
 
@@ -73,6 +74,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Inclusão de `System.setProperty("spring.classformat.ignore", "true")` na classe `NovaaliancaApplication.java` para permitir que o Spring Boot realize o escaneamento do classpath de classes compiladas para o formato Java 25.
 *   **Commit 15 (Alinhamento de Resposta de Login do Front-End):**
     *   Inclusão da propriedade `roles` no corpo de resposta do JSON retornado pelo custom `/oauth/token` do `OAuthTokenController.java` do backend, de modo a satisfazer a sincronização de sessão exigida pela interface `IAuthResponse` no front-end do React.
+*   **Commit 16 (Sanitização e Robustez de CORS):**
+    *   Ajuste na leitura de origens permitidas em `ResourceServerConfig.java` para remover programaticamente barras finais (`/`) nos endereços retornados do banco. Liberação universal de headers (`"*"`) e adição de `OPTIONS` e `PATCH` como métodos válidos para evitar bloqueios de requisições pré-flight.
 
 ---
 
@@ -118,7 +121,7 @@ Como a biblioteca obsoleta do Spring Boot 2.x foi descontinuada, implementamos u
 *   Chama o `AuthenticationManager` do Spring Security para validar as credenciais.
 *   Gera um token assinado por HMAC-SHA256 usando a biblioteca nativa **Nimbus JOSE** (inclusa no Starter de Resource Server).
 *   Garante as claims idênticas exigidas pelo front-end: `userName`, `userId` e as `roles` (perfis do usuário).
-*   Retorna exatamente a estrutura de resposta esperada pelo front-end no JSON de token:
+*   Retorna exatamente a estrutura de resposta esperada:
     ```json
     {
       "access_token": "ey...",
@@ -170,6 +173,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 10. **Ignorar Formato do Bytecode do Java 25 no Spring 6.x:**
     *   *Antes:* Falha de boot `BeanDefinitionStoreException: Incompatible class format` em classes do DTO compiladas no Java 25 (versão de bytecode 69) ao escanear o classpath.
     *   *Depois:* Adicionado `spring.classformat.ignore=true` nas propriedades de inicialização do Java para instruir o Spring Framework a pular a validação rígida de versão de bytecode.
+11. **Sanitização de Barras no CORS:**
+    *   *Antes:* Cadastrar origens com barra `/` no final (ex: `http://localhost:3001/`) no banco de dados falhava no preflight por incompatibilidade de string estrita com o cabeçalho `Origin`.
+    *   *Depois:* Adicionado tratamento de `.endsWith("/")` para remover automaticamente a barra final das origens lidas, além de permitir headers universais (`"*"`) e preflight de requisições `OPTIONS`.
 
 ---
 
