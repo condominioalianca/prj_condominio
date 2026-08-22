@@ -8,101 +8,102 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 import com.condominio.novaalianca.enums.ParametrosSistema;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 
 @Configuration
-@EnableResourceServer
+@EnableWebSecurity
 @RequiredArgsConstructor
-public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig {
 
     private final NovaAliancaProperties properties;
     private final Environment env;
-
-    private final JwtTokenStore tokenStore;
-
     private final ParametrosSistemaRepository parametrosSistemaRepository;
 
-    private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**","/testes/**","/extrato/**"};
-
+    private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**", "/testes/**", "/extrato/**", "/actuator/health"};
     private static final String[] ADMIN = {"/parametros/**"};
-
     private static final String[] SINDICO = {"/boleto/**", "/endereco/**", "/unidade/**", "/usuarios/**"};
 
-    @Override
-    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-        resources.tokenStore(tokenStore);
-    }
-
-    //TODO REFATORAR
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-
-        // H2
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // H2 Frame options configuration for test profile
         if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
-            http.headers().frameOptions().disable();
+            http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
 
-        http.
-                authorizeRequests()
-                .antMatchers(PUBLICO).permitAll()
-                .antMatchers(HttpMethod.GET, SINDICO).permitAll()
-                .antMatchers(ADMIN).hasAnyAuthority("ADMINISTRADOR", "SINDICO")
-                .anyRequest().authenticated();
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); //não guardar a sessao
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(PUBLICO).permitAll()
+                .requestMatchers(HttpMethod.GET, SINDICO).permitAll()
+                .requestMatchers(ADMIN).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            )
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-
-        http.cors().configurationSource(corsConfigurationSource());
+        return http.build();
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(javax.servlet.http.HttpServletRequest request) {
-                String originsStr = null;
-                try {
-                    originsStr = parametrosSistemaRepository.findValorParametro(ParametrosSistema.CORS_ORIGINS.toString());
-                } catch (Exception e) {
-                    // Fallback se o banco não estiver acessível ou o parâmetro não existir
-                }
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withSecretKey(new SecretKeySpec(properties.getJwtSecret().getBytes(), "HmacSHA256")).build();
+    }
 
-                if (originsStr == null || originsStr.trim().isEmpty()) {
-                    originsStr = properties.getCorsOrigins();
-                }
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
-                String[] origins = originsStr.split(",");
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
+    }
 
-                CorsConfiguration corsConfig = new CorsConfiguration();
-                corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
-                corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
-                corsConfig.setAllowCredentials(true);
-                corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-                return corsConfig;
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            String originsStr = null;
+            try {
+                originsStr = parametrosSistemaRepository.findValorParametro(ParametrosSistema.CORS_ORIGINS.toString());
+            } catch (Exception e) {
+                // Fallback se o banco não estiver acessível
             }
+
+            if (originsStr == null || originsStr.trim().isEmpty()) {
+                originsStr = properties.getCorsOrigins();
+            }
+
+            String[] origins = originsStr.split(",");
+
+            CorsConfiguration corsConfig = new CorsConfiguration();
+            corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
+            corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
+            corsConfig.setAllowCredentials(true);
+            corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+            return corsConfig;
         };
     }
 
     @Bean
-    FilterRegistrationBean<CorsFilter> corsFilter() {
-        FilterRegistrationBean<CorsFilter> bean
-                = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
-
-
 }

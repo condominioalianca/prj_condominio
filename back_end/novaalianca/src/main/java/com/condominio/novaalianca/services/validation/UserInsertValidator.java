@@ -6,8 +6,8 @@ import com.condominio.novaalianca.controller.exeptions.FieldMessage;
 import com.condominio.novaalianca.dto.UsuarioChangPasswordtDTO;
 import com.condominio.novaalianca.entities.Usuario;
 import com.condominio.novaalianca.repositories.UsuarioRepository;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.ArrayList;
 import java.util.List;
 
