@@ -24,7 +24,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 12. **Upgrade do Lombok para Compatibilidade com Compilador do Java 25:** Elevação da versão do Lombok para `1.18.38` para evitar erros de inicialização de classes AST (`TypeTag :: UNKNOWN`) no javac do JDK 25.
 13. **Suporte a Classpath Scanning do Bytecode Java 25:** Configuração programática da propriedade de sistema `spring.classformat.ignore=true` no bootstrap para que o leitor de bytecode interno do Spring Framework 6.x não rejeite classes compiladas no formato do Java 25 (versão de bytecode 69).
 14. **Tratamento Dinâmico de Origens do CORS e Preflight:** Limpeza automática de barras finais (`/`) nas origens cadastradas e permissão para múltiplos headers (`"*"`) e métodos HTTP (incluindo `OPTIONS`), evitando falhas de comunicação com navegadores locais.
-15. **Liberação Global de Requisições OPTIONS e Mapeamento Recursivo:** Registro do filtro `CorsFilter` com a classe `UrlBasedCorsConfigurationSource` mapeando o padrão recursivo `"/**"` e inclusão de `.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()` na cadeia de segurança, blindando a API contra bloqueios de preflight em qualquer endpoint (incluindo `/oauth/token`).
+15. **Liberação Global de OPTIONS e Simplificação de Filtros:** Remoção do bean redundante `FilterRegistrationBean<CorsFilter>` para evitar duplicação e concorrência na resposta de cabeçalhos HTTP, deixando a gestão do CORS centralizada de forma nativa e integrada sob o Spring Security através da DSL `.cors(cors -> cors.configurationSource(corsConfigurationSource()))`.
 
 ---
 
@@ -77,8 +77,8 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
     *   Inclusão da propriedade `roles` no corpo de resposta do JSON retornado pelo custom `/oauth/token` do `OAuthTokenController.java` do backend, de modo a satisfazer a sincronização de sessão exigida pela interface `IAuthResponse` no front-end do React.
 *   **Commit 16 (Sanitização e Robustez de CORS):**
     *   Ajuste na leitura de origens permitidas em `ResourceServerConfig.java` para remover programaticamente barras finais (`/`) nos endereços retornados do banco. Liberação universal de headers (`"*"`) e adição de `OPTIONS` e `PATCH` como métodos válidos para evitar bloqueios de requisições pré-flight.
-*   **Commit 17 (CORS Preflight Recursivo para Rota de Token):**
-    *   Adoção de `UrlBasedCorsConfigurationSource` mapeando `"/**"` para registrar recursivamente o `CorsFilter` com prioridade máxima e adição de liberação explícita de `HttpMethod.OPTIONS` para todas as rotas no `SecurityFilterChain`.
+*   **Commit 17 (CORS Nativo Integrado no Spring Security):**
+    *   Remoção do filtro `FilterRegistrationBean<CorsFilter>` legado para evitar duplicação na cadeia de Servlets e centralização total do CORS dinâmico na cadeia do Spring Security via `.cors(cors -> cors.configurationSource(corsConfigurationSource()))`. Inclusão de tratamento defensivo de nulo na leitura das propriedades de origens do CORS.
 
 ---
 
@@ -179,9 +179,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 11. **Sanitização de Barras no CORS:**
     *   *Antes:* Cadastrar origens com barra `/` no final (ex: `http://localhost:3001/`) no banco de dados falhava no preflight por incompatibilidade de string estrita com o cabeçalho `Origin`.
     *   *Depois:* Adicionado tratamento de `.endsWith("/")` para remover automaticamente a barra final das origens lidas, além de permitir headers universais (`"*"`) e preflight de requisições `OPTIONS`.
-12. **Blindagem do Preflight OPTIONS:**
-    *   *Antes:* O Spring Security interceptava requisições prévias do tipo `OPTIONS` para rotas de subnível (como `/oauth/token`) e retornava 401/403 sem decorar os cabeçalhos de CORS.
-    *   *Depois:* O resolvedor do `CorsFilter` foi alterado para mapear de forma recursiva a árvore de URLs `"/**"` e adicionou-se a liberação explícita `.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()` na cadeia de segurança.
+12. **CORS Integrado no Spring Security:**
+    *   *Antes:* Redundância de CORS Filters na cadeia de filtros causava brigas e eliminação mútua de cabeçalhos de CORS.
+    *   *Depois:* Removido o filtro `FilterRegistrationBean` redundante. O CORS agora é gerenciado nativamente pelo Spring Security de ponta a ponta na sua própria cadeia de filtros através do resolvedor `CorsConfigurationSource` com tratamento defensivo absoluto contra nulo.
 
 ---
 

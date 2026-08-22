@@ -41,9 +41,17 @@ public class OAuthTokenController {
         }
 
         // Validate credentials using the AuthenticationManager
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+        } catch (Exception e) {
+            System.err.println("=== ERRO DE AUTENTICACAO NO BACKEND ===");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "invalid_grant", "error_description", "Falha de credenciais: " + e.getMessage()));
+        }
 
         Usuario user = usuarioRepository.findByTxEmail(username);
         if (user == null) {

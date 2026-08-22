@@ -2,10 +2,8 @@ package com.condominio.novaalianca.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,12 +15,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
-import com.condominio.novaalianca.enums.ParametrosSistema;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
+import java.util.Collections;
 
 @Slf4j
 @Configuration
@@ -39,6 +36,7 @@ public class ResourceServerConfig {
     private static final String[] SINDICO = {"/boleto/**", "/endereco/**", "/unidade/**", "/usuarios/**"};
 
     @Bean
+    @org.springframework.core.annotation.Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // H2 Frame options configuration for test profile
         if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
@@ -46,7 +44,9 @@ public class ResourceServerConfig {
         }
 
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(PUBLICO).permitAll()
@@ -56,8 +56,7 @@ public class ResourceServerConfig {
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            )
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+            );
 
         return http.build();
     }
@@ -81,28 +80,17 @@ public class ResourceServerConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         return request -> {
-            String originsStr = null;
-            try {
-                originsStr = parametrosSistemaRepository.findValorParametro(ParametrosSistema.CORS_ORIGINS.toString());
-            } catch (Exception e) {
-                // Fallback se o banco não estiver acessível
-            }
-
-            if (originsStr == null || originsStr.trim().isEmpty()) {
-                originsStr = properties.getCorsOrigins();
-            }
-            if (originsStr == null || originsStr.trim().isEmpty()) {
-                originsStr = "*";
-            }
-
-            java.util.List<String> allowedOrigins = Arrays.stream(originsStr.split(","))
-                    .map(String::trim)
-                    .map(origin -> origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin)
-                    .filter(origin -> !origin.isEmpty())
-                    .collect(java.util.stream.Collectors.toList());
-
             CorsConfiguration corsConfig = new CorsConfiguration();
-            corsConfig.setAllowedOriginPatterns(allowedOrigins);
+            String corsOrigins = parametrosSistemaRepository.findValorParametro("CORS_ORIGINS");
+            corsConfig.setAllowedOriginPatterns(Collections.singletonList(
+//                "http://localhost:3001",
+//                "http://127.0.0.1:3001",
+//                "http://localhost:*",
+//                "http://127.0.0.1:*",
+//                "http://*",
+//                "https://*"
+                    corsOrigins
+            ));
             corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH", "OPTIONS"));
             corsConfig.setAllowCredentials(true);
             corsConfig.setAllowedHeaders(Arrays.asList("*"));
