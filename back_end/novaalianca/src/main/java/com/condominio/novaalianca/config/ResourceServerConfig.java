@@ -91,6 +91,9 @@ public class ResourceServerConfig {
             if (originsStr == null || originsStr.trim().isEmpty()) {
                 originsStr = properties.getCorsOrigins();
             }
+            if (originsStr == null || originsStr.trim().isEmpty()) {
+                originsStr = "*";
+            }
 
             java.util.List<String> allowedOrigins = Arrays.stream(originsStr.split(","))
                     .map(String::trim)
@@ -105,14 +108,5 @@ public class ResourceServerConfig {
             corsConfig.setAllowedHeaders(Arrays.asList("*"));
             return corsConfig;
         };
-    }
-
-    @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter() {
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfigurationSource().getCorsConfiguration(null));
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
     }
 }
