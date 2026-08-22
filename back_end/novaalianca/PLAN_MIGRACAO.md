@@ -19,6 +19,7 @@ Este plano de migração descreve a elevação da arquitetura do backend do proj
 7.  **Resolução de Incompatibilidades Java 25 & Hibernate 6:** Correção de construtores depreciados de `Locale` e `URL`, e ajuste na anotação `@Type` do Hibernate.
 8.  **Migração do JavaMail & Activation:** Atualização dos pacotes de envio de e-mails para o ecossistema Jakarta.
 9.  **Ajustes de Depreciação no Core (BigDecimal & Spring Web):** Substituição de constantes depreciadas de arredondamento de `BigDecimal` e atualização do construtor de URLs do Spring Web.
+10. **Resolução de Resolução Eager de Variáveis do YAML:** Adição de fallbacks e valores padrão para placeholders de variáveis de ambiente para permitir bootstrapping local sem necessidade de declarar todas as variáveis na IDE.
 
 ---
 
@@ -55,6 +56,10 @@ Para garantir rastreabilidade e segurança, a migração foi executada de forma 
 *   **Commit 8 (Correções de BigDecimal & UriComponentsBuilder):**
     *   Substituição da constante depreciada `BigDecimal.ROUND_HALF_EVEN` por `RoundingMode.HALF_EVEN` no `BoletoBuilder.java`.
     *   Substituição do método de build do Spring Web `UriComponentsBuilder.fromHttpUrl(...)` por `fromUriString(...)` no `InterService.java`.
+*   **Commit 9 (Consolidação de Chaves YAML):**
+    *   Correção de chaves duplicadas `inter` sob a seção `banco` no arquivo principal de configurações `application.yml`.
+*   **Commit 10 (Fallbacks de Variáveis de Ambiente no YAML):**
+    *   Adição de fallbacks default em todos os placeholders `${VAR}` (como `${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}`, `${JWT_SECRET:secret}`, etc.) nos arquivos YAML para evitar erros de inicialização de propriedades quando as variáveis não são passadas ativamente na IDE do desenvolvedor.
 
 ---
 
@@ -139,6 +144,9 @@ Para que a aplicação seja compilada de forma limpa, resolvemos as seguintes in
 6.  **Compatibilidade do UriComponentsBuilder:**
     *   *Antes:* `UriComponentsBuilder.fromHttpUrl(url)` no `InterService.java`.
     *   *Depois:* Substituído por `UriComponentsBuilder.fromUriString(url)` para evitar incompatibilidades de compilação da classpath do Spring Web 6/7.
+7.  **Fallbacks no YAML para Placeholders:**
+    *   *Antes:* Declarar propriedades com `${VAR}` gerava erros se a variável estivesse ausente.
+    *   *Depois:* Ajustado para `${VAR:default}` (ex: `${DB_URL_DEV:jdbc:postgresql://localhost:5432/condominio}`) garantindo inicialização de fallback.
 
 ---
 
