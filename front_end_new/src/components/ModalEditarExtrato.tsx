@@ -10,7 +10,6 @@ interface ModalEditarProps {
 }
 
 const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, onClose, onConfirm }) => {
-  const [descricao, setDescricao] = useState<string>(extrato.descricao || '');
   const [idCategoriaGasto, setIdCategoriaGasto] = useState<number | ''>(extrato.idCategoriaGasto || '');
   const [statusConciliado, setStatusConciliado] = useState<StatusConciliacao>(extrato.statusConciliado);
   const [fileToUpload, setFileToUpload] = useState<File | undefined>();
@@ -33,13 +32,14 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
     e.preventDefault();
     
     // Validação da regra: Só pode aprovar (BATIDO) Débito se tiver descrição
-    if (extrato.tipoOperacao === 'DEBITO' && statusConciliado === 'BATIDO' && !descricao.trim()) {
+    const descText = (extrato.descricao || '').trim();
+    if (extrato.tipoOperacao === 'DEBITO' && statusConciliado === 'BATIDO' && !descText) {
       setErrorMsg('Para aprovar um registro de DÉBITO, a descrição é obrigatória.');
       return;
     }
 
     const dto: ExtratoConciliacaoPatchDTO = {
-      descricao: descricao.trim() || undefined,
+      descricao: descText || undefined,
       idCategoriaGasto: idCategoriaGasto !== '' ? Number(idCategoriaGasto) : undefined,
       statusConciliado: statusConciliado,
     };
@@ -86,7 +86,7 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                   <input
                     type="text"
                     className="form-control bg-light"
-                    value={descricao}
+                    value={extrato.descricao || ''}
                     disabled
                     placeholder="Descrição do lançamento"
                   />
