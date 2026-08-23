@@ -26,6 +26,9 @@ services:
       - CRON_SCHEDULE_VALIDA_ENVIO=0 */4 10 1 * *
       - CRON_SCHEDULE_RECUPERA_BOLETO=0 */1 10 1 * *
       - CRON_SCHEDULE_ENVIA_EMAIL=10 */2 10 1 * *
+      - UPLOAD_DIR=/app/uploads
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - "C:/ARQUIVOS_SITES/NOVA_ALINCA:/app/uploads"
     restart: always

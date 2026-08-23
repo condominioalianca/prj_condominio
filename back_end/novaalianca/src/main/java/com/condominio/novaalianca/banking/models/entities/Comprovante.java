@@ -38,6 +38,9 @@ public class Comprovante {
     @Column(name = "TIPO_ARQUIVO")
     private String tipoArquivo;
 
-    @Column(name = "DADOS", nullable = false)
+    @Column(name = "DADOS")
     private byte[] dados;
+
+    @Column(name = "NOME_SALVO")
+    private String nomeSalvo;
 }

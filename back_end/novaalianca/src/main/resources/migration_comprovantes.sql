@@ -24,3 +24,11 @@ ALTER TABLE tb_extrato
 -- 2.3 Remover a coluna antiga de bytes 
 -- (ATENÇÃO: Este comando apagará permanentemente os comprovantes que já estavam no banco)
 ALTER TABLE tb_extrato DROP COLUMN IF EXISTS comprovante;
+
+-- 3. Atualização para armazenamento de comprovantes no disco (Docker Volume)
+-- Adiciona a coluna para armazenar o nome único do arquivo salvo no disco
+ALTER TABLE tb_comprovante ADD COLUMN IF NOT EXISTS nome_salvo VARCHAR(255);
+
+-- Permite que a coluna antiga de bytes seja nula para novos comprovantes
+ALTER TABLE tb_comprovante ALTER COLUMN dados DROP NOT NULL;
+
