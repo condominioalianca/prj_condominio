@@ -1,0 +1,154 @@
+// ============================================================
+// Jenkinsfile — Pipeline do Backend (Spring Boot)
+// Repositório: c:\GIT\prj_condominio
+// Trigger: Manual
+// ============================================================
+pipeline {
+    agent any
+
+    // Todas as variáveis sensíveis vêm do Jenkins Credentials
+    // Cadastre-as em: Jenkins → Manage Jenkins → Credentials
+    environment {
+        // Banco de Dados DEV
+        DB_URL_DEV      = credentials('COND_DB_URL_DEV')
+        DB_USERNAME_DEV = credentials('COND_DB_USERNAME_DEV')
+        DB_PASSWORD_DEV = credentials('COND_DB_PASSWORD_DEV')
+
+        // Banco de Dados PRD (Neon)
+        DB_URL_PRD      = credentials('COND_DB_URL_PRD')
+        DB_USERNAME_PRD = credentials('COND_DB_USERNAME_PRD')
+        DB_PASSWORD_PRD = credentials('COND_DB_PASSWORD_PRD')
+
+        // Segurança / JWT
+        JWT_SECRET      = credentials('COND_JWT_SECRET')
+        JWT_DURATION    = '86400'
+
+        // OAuth2
+        OAUTH_CLIENT_ID     = 'front_nova_alianca'
+        OAUTH_CLIENT_SECRET = credentials('COND_OAUTH_CLIENT_SECRET')
+        CLIENT_ID           = 'front_nova_alianca'
+        CLIENT_SECRET       = credentials('COND_CLIENT_SECRET')
+
+        // CORS
+        CORS_ORIGINS = 'http://localhost:3001'
+
+        // Banco Inter
+        INTER_CERT_PATH     = credentials('COND_INTER_CERT_PATH')
+        INTER_CERT_PASSWORD = credentials('COND_INTER_CERT_PASSWORD')
+        INTER_CLIENT_ID     = credentials('COND_INTER_CLIENT_ID')
+        INTER_CLIENT_SECRET = credentials('COND_INTER_CLIENT_SECRET')
+        INTER_GRANT_TYPE    = 'client_credentials'
+
+        // E-mail
+        MAIL_USERNAME = credentials('COND_MAIL_USERNAME')
+        MAIL_PASSWORD = credentials('COND_MAIL_PASSWORD')
+
+        // Docker
+        DOCKER_IMAGE   = 'patrickmoura/novaalianca-back'
+        CONTAINER_NAME = 'backnovaalianca'
+        APP_PORT       = '8086'
+    }
+
+    stages {
+
+        stage('🔍 Checkout') {
+            steps {
+                echo '=== Clonando repositório ==='
+                checkout scm
+            }
+        }
+
+        stage('📦 Build Maven') {
+            steps {
+                echo '=== Compilando e empacotando o Backend ==='
+                dir('back_end/novaalianca') {
+                    sh '''
+                        mvn clean package -DskipTests \
+                            -Djava.version=25 \
+                            --no-transfer-progress
+                    '''
+                }
+            }
+        }
+
+        stage('🐳 Docker Build') {
+            steps {
+                echo '=== Construindo imagem Docker do Backend ==='
+                dir('back_end/novaalianca') {
+                    sh '''
+                        docker build \
+                            --build-arg JAR_FILE=target/*.jar \
+                            -t ${DOCKER_IMAGE}:latest \
+                            -t ${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                            .
+                    '''
+                }
+            }
+        }
+
+        stage('🚀 Deploy') {
+            steps {
+                echo '=== Parando container antigo e subindo novo ==='
+                sh '''
+                    # Para e remove o container anterior (se existir)
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm   ${CONTAINER_NAME} || true
+
+                    # Sobe o novo container passando todas as credenciais
+                    # via variáveis de ambiente (sem arquivo .env no servidor)
+                    docker run \
+                        --name ${CONTAINER_NAME} \
+                        --restart=always \
+                        -d \
+                        -p ${APP_PORT}:${APP_PORT} \
+                        -e SPRING_PROFILES_ACTIVE=dev \
+                        -e DB_URL_DEV="${DB_URL_DEV}" \
+                        -e DB_USERNAME_DEV="${DB_USERNAME_DEV}" \
+                        -e DB_PASSWORD_DEV="${DB_PASSWORD_DEV}" \
+                        -e DB_URL_PRD="${DB_URL_PRD}" \
+                        -e DB_USERNAME_PRD="${DB_USERNAME_PRD}" \
+                        -e DB_PASSWORD_PRD="${DB_PASSWORD_PRD}" \
+                        -e JWT_SECRET="${JWT_SECRET}" \
+                        -e JWT_DURATION="${JWT_DURATION}" \
+                        -e OAUTH_CLIENT_ID="${OAUTH_CLIENT_ID}" \
+                        -e OAUTH_CLIENT_SECRET="${OAUTH_CLIENT_SECRET}" \
+                        -e CLIENT_ID="${CLIENT_ID}" \
+                        -e CLIENT_SECRET="${CLIENT_SECRET}" \
+                        -e CORS_ORIGINS="${CORS_ORIGINS}" \
+                        -e INTER_CERT_PATH="${INTER_CERT_PATH}" \
+                        -e INTER_CERT_PASSWORD="${INTER_CERT_PASSWORD}" \
+                        -e INTER_CLIENT_ID="${INTER_CLIENT_ID}" \
+                        -e INTER_CLIENT_SECRET="${INTER_CLIENT_SECRET}" \
+                        -e INTER_GRANT_TYPE="${INTER_GRANT_TYPE}" \
+                        -e MAIL_USERNAME="${MAIL_USERNAME}" \
+                        -e MAIL_PASSWORD="${MAIL_PASSWORD}" \
+                        ${DOCKER_IMAGE}:latest
+                '''
+            }
+        }
+
+        stage('✅ Health Check') {
+            steps {
+                echo '=== Verificando se o Backend subiu corretamente ==='
+                sh '''
+                    sleep 20
+                    curl -f http://localhost:${APP_PORT}/actuator/health || \
+                        (echo "ERRO: Backend não respondeu ao health check!" && exit 1)
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline do Backend concluída com sucesso! Build #${BUILD_NUMBER}"
+        }
+        failure {
+            echo "❌ Pipeline do Backend FALHOU no build #${BUILD_NUMBER}. Verifique os logs acima."
+        }
+        always {
+            // Remove imagens antigas para economizar espaço em disco
+            sh 'docker image prune -f || true'
+        }
+    }
+}
