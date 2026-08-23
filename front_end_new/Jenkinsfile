@@ -63,7 +63,7 @@ pipeline {
                     # Sobe o novo container do Frontend (Nginx na porta 3001) conectado à rede
                     docker run \
                         --name ${CONTAINER_NAME} \
-                        --network jenkins_net \
+                        --network jenkins_jenkins_net \
                         --restart=always \
                         -d \
                         -p ${APP_PORT}:80 \
