@@ -63,9 +63,10 @@ pipeline {
                 echo '=== Compilando e empacotando o Backend ==='
                 dir('back_end/novaalianca') {
                     sh '''
-                        mvn clean package -DskipTests \
-                            -Djava.version=25 \
-                            --no-transfer-progress
+                        export JAVA_HOME=/usr/lib/jvm/zulu25
+                        export PATH=$JAVA_HOME/bin:$PATH
+                        java -version
+                        mvn clean package -DskipTests --no-transfer-progress
                     '''
                 }
             }
@@ -148,7 +149,7 @@ pipeline {
         }
         always {
             // Remove imagens antigas para economizar espaço em disco
-            sh 'docker image prune -f || true'
+            sh 'docker image prune -f 2>/dev/null || true'
         }
     }
 }
