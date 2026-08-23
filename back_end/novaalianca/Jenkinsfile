@@ -95,10 +95,10 @@ pipeline {
                     docker stop ${CONTAINER_NAME} || true
                     docker rm   ${CONTAINER_NAME} || true
 
-                    # Sobe o novo container passando todas as credenciais
-                    # via variáveis de ambiente (sem arquivo .env no servidor)
+                    # Sobe o novo container conectado à rede do Jenkins (jenkins_net)
                     docker run \
                         --name ${CONTAINER_NAME} \
+                        --network jenkins_net \
                         --restart=always \
                         -d \
                         -p ${APP_PORT}:${APP_PORT} \
@@ -133,7 +133,7 @@ pipeline {
                 echo '=== Verificando se o Backend subiu corretamente ==='
                 sh '''
                     sleep 20
-                    curl -f http://localhost:${APP_PORT}/actuator/health || \
+                    curl -f http://${CONTAINER_NAME}:${APP_PORT}/actuator/health || \
                         (echo "ERRO: Backend não respondeu ao health check!" && exit 1)
                 '''
             }
