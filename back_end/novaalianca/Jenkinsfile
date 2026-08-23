@@ -47,6 +47,7 @@ pipeline {
         DOCKER_IMAGE   = 'patrickmoura/novaalianca-back'
         CONTAINER_NAME = 'backnovaalianca'
         APP_PORT       = '8086'
+        UPLOAD_DIR     = '/app/uploads'
     }
 
     stages {
@@ -102,7 +103,9 @@ pipeline {
                         --restart=always \
                         -d \
                         -p ${APP_PORT}:${APP_PORT} \
+                        -v "C:/ARQUIVOS_SITES/NOVA_ALINCA:/app/uploads" \
                         -e SPRING_PROFILES_ACTIVE=dev \
+                        -e UPLOAD_DIR="${UPLOAD_DIR}" \
                         -e DB_URL_DEV="${DB_URL_DEV}" \
                         -e DB_USERNAME_DEV="${DB_USERNAME_DEV}" \
                         -e DB_PASSWORD_DEV="${DB_PASSWORD_DEV}" \
