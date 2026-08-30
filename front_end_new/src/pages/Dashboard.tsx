@@ -13,11 +13,12 @@ const Dashboard: React.FC = () => {
   const [extratos, setExtratos] = useState<IExtrato[]>([]);
   const [boletos, setBoletos] = useState<IBoleto[]>([]);
   const [saldoAtual, setSaldoAtual] = useState<ISaldo | null>(null);
+  const [hasUnidade, setHasUnidade] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Estados dos filtros
-  const [daysFilter, setDaysFilter] = useState<number>(isAdminOrSindico() ? 90 : 30);
+  const [daysFilter, setDaysFilter] = useState<number>(30);
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -25,20 +26,32 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Chamadas paralelas para obter Extratos, Boletos e Saldo
-        const promises: [Promise<IExtrato[]>, Promise<IBoleto[]>, Promise<ISaldo | null>] = [
+        // Chamadas paralelas para obter Extratos, Boletos, Saldo e Perfil Completo do Usuário
+        const promises: [Promise<IExtrato[]>, Promise<IBoleto[]>, Promise<ISaldo | null>, Promise<any>] = [
           backEndService.get<IExtrato[]>('/extratos'),
           backEndService.get<IBoleto[]>('/boletos'),
           isAdminOrSindico() 
             ? backEndService.get<ISaldo>('/saldo/atual').catch(() => null) 
-            : Promise.resolve(null)
+            : Promise.resolve(null),
+          user?.userId ? backEndService.get<any>(`/usuarios/${user.userId}`).catch(() => null) : Promise.resolve(null)
         ];
 
-        const [extratosData, boletosData, saldoData] = await Promise.all(promises);
+        const [extratosData, boletosData, saldoData, userData] = await Promise.all(promises);
 
         setExtratos(extratosData);
         setBoletos(boletosData);
         setSaldoAtual(saldoData);
+
+        // Se não for Admin/Síndico, verifica se possui unidade associada
+        if (!isAdminOrSindico()) {
+          if (userData && !userData.unidade) {
+            setHasUnidade(false);
+          } else {
+            setHasUnidade(true);
+          }
+        } else {
+          setHasUnidade(true);
+        }
       } catch (err: any) {
         console.error(err);
         setError('Ocorreu um erro ao carregar os dados. Verifique a conexão.');
@@ -48,7 +61,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, [isAdminOrSindico]);
+  }, [isAdminOrSindico, user?.userId]);
 
   // Função auxiliar de baixar PDF a partir de base64
   const handleDownloadPdf = (base64String: string | null, nossoNumero: string): void => {
@@ -85,20 +98,27 @@ const Dashboard: React.FC = () => {
   const filteredExtratos = filterExtratosByDays(extratos, daysFilter);
 
   // Cálculo das Métricas
-  const totalCredits = filteredExtratos
-    .filter((item) => item.tipoOperacao === 'C')
-    .reduce((sum, item) => sum + item.valorTransacao, 0);
+  const totalCredits = hasUnidade
+    ? filteredExtratos
+        .filter((item) => item.tipoOperacao === 'C')
+        .reduce((sum, item) => sum + item.valorTransacao, 0)
+    : 0;
 
-  const totalDebits = filteredExtratos
-    .filter((item) => item.tipoOperacao === 'D')
-    .reduce((sum, item) => sum + item.valorTransacao, 0);
+  const totalDebits = hasUnidade
+    ? filteredExtratos
+        .filter((item) => item.tipoOperacao === 'D')
+        .reduce((sum, item) => sum + item.valorTransacao, 0)
+    : 0;
 
-  const balance = totalCredits - totalDebits;
+  const balance = hasUnidade ? totalCredits - totalDebits : 0;
 
   // Filtragem de Boletos
   // - Usuário Comum: Seus boletos do último ano (365 dias)
   // - Admin/Sindico: Todos os boletos dos últimos 90 dias (ordenados pelos últimos gerados)
   const getFilteredBoletos = (): IBoleto[] => {
+    if (!hasUnidade) {
+      return [];
+    }
     const limitDate = new Date();
     
     if (isAdminOrSindico()) {
@@ -270,6 +290,13 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
+      {!hasUnidade && (
+        <div className="alert alert-warning border-0 shadow-sm mb-4 p-3" role="alert">
+          <strong>Atenção:</strong> Seu cadastro está ativo, mas você ainda não tem uma unidade vinculada ao condomínio. 
+          Entre em contato com o Síndico ou Administrador para vincular sua unidade e acessar as informações de cobrança, extrato e saldos.
+        </div>
+      )}
+
       {/* Cabeçalho do Dashboard com Filtro de Período */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
@@ -360,49 +387,51 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Gráficos de Fluxo de Caixa */}
-      <div className="row g-4 mb-4">
-        <div className={isAdminOrSindico() ? 'col-lg-8' : 'col-12'}>
-          <div className="card-content">
-            <div className="card-content-header">
-              <h5 className="card-content-title">Fluxo de Caixa (Débitos vs Créditos) - Últimos {daysFilter} Dias</h5>
-            </div>
-            <div className="card-content-body">
-              {chart1Info.series[0].data.length > 0 ? (
-                <ReactApexChart 
-                  options={cashFlowChartOptions} 
-                  series={chart1Info.series} 
-                  type="bar" 
-                  height={350} 
-                />
-              ) : (
-                <div className="py-5 text-center text-muted">Sem movimentações no período filtrado.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {isAdminOrSindico() && (
-          <div className="col-lg-4">
+      {hasUnidade && (
+        <div className="row g-4 mb-4">
+          <div className={isAdminOrSindico() ? 'col-lg-8' : 'col-12'}>
             <div className="card-content">
               <div className="card-content-header">
-                <h5 className="card-content-title">Maiores Ofensores de Débito</h5>
+                <h5 className="card-content-title">Fluxo de Caixa (Débitos vs Créditos) - Últimos {daysFilter} Dias</h5>
               </div>
               <div className="card-content-body">
-                {top5Info.series.length > 0 ? (
+                {chart1Info.series[0].data.length > 0 ? (
                   <ReactApexChart 
-                    options={topDebtorsChartOptions} 
-                    series={top5Info.series} 
-                    type="donut" 
+                    options={cashFlowChartOptions} 
+                    series={chart1Info.series} 
+                    type="bar" 
                     height={350} 
                   />
                 ) : (
-                  <div className="py-5 text-center text-muted">Sem despesas registradas no período.</div>
+                  <div className="py-5 text-center text-muted">Sem movimentações no período filtrado.</div>
                 )}
               </div>
             </div>
           </div>
-        )}
-      </div>
+
+          {isAdminOrSindico() && (
+            <div className="col-lg-4">
+              <div className="card-content">
+                <div className="card-content-header">
+                  <h5 className="card-content-title">Maiores Ofensores de Débito</h5>
+                </div>
+                <div className="card-content-body">
+                  {top5Info.series.length > 0 ? (
+                    <ReactApexChart 
+                      options={topDebtorsChartOptions} 
+                      series={top5Info.series} 
+                      type="donut" 
+                      height={350} 
+                    />
+                  ) : (
+                    <div className="py-5 text-center text-muted">Sem despesas registradas no período.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tabela de Boletos */}
       <div className="card-content">

@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 public class EnderecoBuilder {
 
     public EnderecoDTO entityToDto (Endereco endereco){
+        if (endereco == null) {
+            return null;
+        }
         return EnderecoDTO.builder()
                 .idEndereco(endereco.getIdEndereco())
                 .txEndereco(endereco.getTxEndereco())
@@ -22,7 +25,9 @@ public class EnderecoBuilder {
     }
 
     public Endereco dtoToEntity(EnderecoDTO dto) {
-
+        if (dto == null) {
+            return null;
+        }
         return Endereco.builder()
                 .idEndereco(dto.getIdEndereco())
                 .txEndereco(dto.getTxEndereco())

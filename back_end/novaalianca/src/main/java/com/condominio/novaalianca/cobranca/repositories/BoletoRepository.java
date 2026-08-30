@@ -36,4 +36,7 @@ public interface BoletoRepository extends JpaRepository<BoletoNovaAlianca, Long>
 
     @Query("select b from BoletoNovaAlianca b where (b.txCodBarras is null or b.txCodBarras = '' or b.txLinhaDigitavel is null or b.txLinhaDigitavel = '' or b.arquivopdf is null) and b.codSolicitacao is not null and b.codSolicitacao <> '' and b.dtEmissao > ?1")
     List<BoletoNovaAlianca> findBoletosSemCodigoBarrasELinhaDigitavel(LocalDate dataCorte);
+
+    @Query("select b from BoletoNovaAlianca b where b.codSolicitacao is not null and b.codSolicitacao <> '' and b.dtEmissao >= ?1 and (b.txSituacao is null or b.txSituacao <> 'RECEBIDO')")
+    List<BoletoNovaAlianca> findBoletosParaEnriquecer(LocalDate dataCorte);
 }

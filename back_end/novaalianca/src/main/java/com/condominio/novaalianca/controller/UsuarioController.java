@@ -1,7 +1,8 @@
 package com.condominio.novaalianca.controller;
 
-import lombok.RequiredArgsConstructor;
 import com.condominio.novaalianca.dto.UsuarioDTO;
+import lombok.RequiredArgsConstructor;
+import com.condominio.novaalianca.dto.UsuarioCadastroDTO;
 import com.condominio.novaalianca.services.UsuarioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,11 @@ public class UsuarioController {
     public ResponseEntity<?> usuarioSave(@Valid @RequestBody UsuarioDTO usuarioInsertDTO){
         return ResponseEntity.ok().body(service.usuarioSave(usuarioInsertDTO));
 
+    }
+
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrarUsuario(@Valid @RequestBody UsuarioCadastroDTO usuarioCadastroDTO){
+        return ResponseEntity.ok().body(service.cadastrarUsuario(usuarioCadastroDTO));
     }
 
     @PutMapping("/update")

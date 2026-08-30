@@ -43,6 +43,12 @@ pipeline {
         MAIL_USERNAME = credentials('COND_MAIL_USERNAME')
         MAIL_PASSWORD = credentials('COND_MAIL_PASSWORD')
 
+        // Expressões Cron (devem ser injetadas pelo Jenkins Credentials para que o container suba)
+        CRON_SCHEDULE_VALIDA_ENVIO    = credentials('CRON_SCHEDULE_VALIDA_ENVIO')
+        CRON_SCHEDULE_RECUPERA_BOLETO = credentials('CRON_SCHEDULE_RECUPERA_BOLETO')
+        CRON_SCHEDULE_ENVIA_EMAIL     = credentials('CRON_SCHEDULE_ENVIA_EMAIL')
+        CRON_SCHEDULE_EXTRATO         = credentials('CRON_SCHEDULE_EXTRATO')
+
         // Docker
         DOCKER_IMAGE   = 'patrickmoura/novaalianca-back'
         CONTAINER_NAME = 'backnovaalianca'
@@ -126,6 +132,10 @@ pipeline {
                         -e INTER_GRANT_TYPE="${INTER_GRANT_TYPE}" \
                         -e MAIL_USERNAME="${MAIL_USERNAME}" \
                         -e MAIL_PASSWORD="${MAIL_PASSWORD}" \
+                        -e CRON_SCHEDULE_VALIDA_ENVIO="${CRON_SCHEDULE_VALIDA_ENVIO}" \
+                        -e CRON_SCHEDULE_RECUPERA_BOLETO="${CRON_SCHEDULE_RECUPERA_BOLETO}" \
+                        -e CRON_SCHEDULE_ENVIA_EMAIL="${CRON_SCHEDULE_ENVIA_EMAIL}" \
+                        -e CRON_SCHEDULE_EXTRATO="${CRON_SCHEDULE_EXTRATO}" \
                         ${DOCKER_IMAGE}:latest
                 '''
             }

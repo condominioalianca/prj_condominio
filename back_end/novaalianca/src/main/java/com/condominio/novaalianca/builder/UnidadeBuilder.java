@@ -16,6 +16,9 @@ public class UnidadeBuilder {
     private final UnidadeRepository unidadeRepository;
 
     public UnidadeDTO entityToDto(Unidade unidade){
+        if (unidade == null) {
+            return null;
+        }
         return  UnidadeDTO.builder()
                 .idUnidade(unidade.getIdUnidade())
                 .numeroUnidade(unidade.getNumeroUnidade())
@@ -25,7 +28,9 @@ public class UnidadeBuilder {
 
 
     public Unidade dtoToEntity(UnidadeDTO dto){
-
+        if (dto == null) {
+            return null;
+        }
         Optional<Unidade> unidade = Objects.isNull(dto.getIdUnidade()) ? Optional.empty()  : unidadeRepository.findById(dto.getIdUnidade());
         return unidade.orElseGet(() -> Unidade.builder()
                 .idUnidade(dto.getIdUnidade())

@@ -80,82 +80,15 @@ public class BoletoService{
         LOGGER.info("Data Inicial: {} ", dataInicio);
         LOGGER.info("Data Final: {} ", dataFim);
         HttpResponse<ResponseListagemBoletosDTO> response = Unirest.get(requestBoleto.getUrlBancoInterBoleto())
-//        HttpResponse<ResponseListagemBoletosDTO> response = Unirest.get("https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas?dataInicial=2024-08-01&dataFinal=2025-06-30")
-//        HttpResponse<String> response = Unirest.get("https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas?dataInicial=2024-08-01&dataFinal=2025-06-30")
-//        HttpResponse<String> response1 = Unirest.get(requestBoleto.getUrlBancoInterBoleto())
                 .header("Accept", "application/json")
                 .header("Authorization", "Bearer " + token.getAccess_token())
-//                .header("Host","cdpj.partners.bancointer.com.br")
                 .queryString("dataInicial", dataInicio)
                 .queryString("dataFinal", dataFim)
                 .asObject(ResponseListagemBoletosDTO.class);
-//                .asString();
         LOGGER.info("Response: {} ", response.getBody());
-//        Gson gson = new Gson();
-//        ResponseListagemBoletosDTO response = gson.fromJson(response1.getBody(), ResponseListagemBoletosDTO.class);
-        //        HttpResponse<String> response = Unirest.get("https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas?dataInicial=2024-08-01&dataFinal=2025-06-30")
-//                .header("Accept", "application/json")
-//                .header("Authorization", "Bearer cbb8f88f-7db0-426a-a8a7-8526ffd5d2a8")
-//                .asString();
-
-//        LOGGER.info("BODY : {}", response.getBody().getSize());
         return response.getBody();
     }
 
-//    public ResponseBoletoDetalheDTO boletoDetalhado(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-//        TokenResponseDTO token = tokenService.getToken( requestBoleto);
-//        String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}";
-//
-//        HttpResponse<ResponseBoletoDetalheDTO> response = Unirest.get(url)
-//                .header("Accept", "application/json")
-//                .header("Authorization", "Bearer " + token.getAccess_token())
-//                .header("x-conta-corrente", filtro.getNumConta())
-//                .header("Host","cdpj.partners.bancointer.com.br")
-//                .routeParam("nossoNumero", filtro.getNossoNumero())
-//                .asObject(ResponseBoletoDetalheDTO.class);
-//
-//        LOGGER.info("BODY : {}", response.getBody());
-//        return response.getBody();
-//    }
-//
-//    public ResponseBoletoDTO geraBoleto(RequestBoleto requestBoleto, BoletoEmissaoDTO boletoDTO) throws Exception {
-//        TokenResponseDTO token = new TokenResponseDTO();
-//        boolean execute = false;
-//        int count = 0;
-//        while (Objects.isNull(token.getAccess_token()) &&  count < 15){
-//            token = tokenService.getToken( requestBoleto);
-//            count++;
-//        }
-//        String url = requestBoleto.getUrlBancoInterBoleto();
-//        HttpResponse<ResponseBoletoDTO> response = Unirest.post(url)
-//                .header("Accept", "application/json")
-//                .header("Host","cdpj.partners.bancointer.com.br")
-//                .header("Content-Type", "application/json" )
-//                .header("Authorization", "Bearer " + token.getAccess_token())
-//                .body(boletoDTO)
-//                .asObject(ResponseBoletoDTO.class);
-//
-//        LOGGER.info("BODY : {}", response.getBody());
-//        return response.getBody();
-//    }
-//
-//    public String cancelaBoleto(FiltroListagemBoletoDTO filtro, RequestBoleto requestBoleto) throws Exception {
-//        TokenResponseDTO token = tokenService.getToken( requestBoleto);
-//        String url = requestBoleto.getUrlBancoInterBoleto() +  "/{nossoNumero}/cancelar";
-//        HttpResponse<String> response = Unirest.post(url)
-//                .header("Accept", "application/json")
-//                .header("Host","cdpj.partners.bancointer.com.br")
-//                .header("Content-Type", "application/json" )
-//                .header("Authorization", "Bearer " + token.getAccess_token())
-//                //.header("x-conta-corrente", filtro.getNumConta())
-//                .routeParam("nossoNumero", filtro.getNossoNumero())
-//                .body(filtro)
-//                .asString();
-//                //.asObject(ResponseBoletoDTO.class);
-//
-//        LOGGER.info("BODY : {}", response.getBody());
-//        return response.getBody();
-//    }
 
     public String downloadPDF(String codSolicitacao, String ambiente) throws Exception {
         if (ambiente == null || ambiente.trim().isEmpty()) {
@@ -210,51 +143,9 @@ public class BoletoService{
         return responseListagemBoletosDTO;
     }
 
-////    public PageableResponseDTO<BoletoDTO> findAllPaged(Pageable pageable) {
-////        final Page<BoletoNovaAlianca> boletoEntitie = boletoRepository.findAll(pageable);
-////
-////        final List<BoletoDTO> boletoDTOSet = boletoEntitie.get().map(x->boletoBuilder.entityToDTO(x)).collect(Collectors.toList());
-////
-////        return buildPageableResponseDTO(boletoEntitie, boletoDTOSet);
-////
-////    }
-//
-////    public BoletoDTO findByNossoNumero(String nossoNumero) {
-////        BoletoNovaAlianca boletoNovaAlianca = boletoRepository.findByNossoNumero(nossoNumero);
-////        return boletoBuilder
-////                .entityToDTO(boletoNovaAlianca);
-////
-////    }
-//
-//    public Page<BoletoDTO> findAllPagedByCpfUsuario(Pageable pageable, String cpfUsuario) {
-//        Page<BoletoNovaAlianca> list = boletoRepository.findAllbyCpfUsuario(pageable,cpfUsuario);
-//        return list.map(x -> boletoBuilder.entityToDTO(x));
-//    }
-//
-//    public PageableResponseDTO<BoletoDTO> findAllPagedByIdUsuario(Pageable pageable, Long idUsuario) {
-//        Page<BoletoNovaAlianca> list = boletoRepository.findAllbyIdUsuario(pageable,idUsuario);
-//
-//        final List<BoletoDTO> boletoDTOSet = list.get().map(x->boletoBuilder.entityToDTO(x)).collect(Collectors.toList());
-//
-//        return buildPageableResponseDTO(list, boletoDTOSet);
-//
-//
-//
-//    }
-//
-//    public List<BoletoNovaAlianca> validaBoletosEnviadosMes(String month) {
-//        return boletoRepository.findAllByMesEmissao(month);
-//    }
-//
     public Boleto builderBoletoInter(Usuario usuario) throws ParseException {
         return boletoBuilder.boletoInter(usuario);
     }
-//
-//    public void save(BoletoDetalhado boleto) {
-//
-//        boletoRepository.save(boletoBuilder.entityInterToEntityNovaAlianca(boleto));
-//    }
-//
     public void enviaBoletosPorEmail(LocalDate dtInicio, LocalDate dtFim) throws Exception {
 
         LOGGER.info("MES ATUAL {}", dateUtils.mesAtual());
@@ -286,16 +177,6 @@ public class BoletoService{
             LOGGER.info("Sem Emails para Enviar");
         }
     }
-//
-//    private PageableResponseDTO<BoletoDTO> buildPageableResponseDTO(Page<BoletoNovaAlianca> page, List<BoletoDTO> boletoDTOSet) {
-//        PageableResponseDTO<BoletoDTO> responseDTO = new PageableResponseDTO<>();
-//
-//        responseDTO.setPaging(PagingDTOBuilder.from(page));
-//        responseDTO.setContent(boletoDTOSet);
-//
-//        return responseDTO;
-//    }
-
     public BoletoNovaAlianca enriquecerBoleto(String codigoSolicitacao, String ambiente) {
         if (codigoSolicitacao == null || codigoSolicitacao.trim().isEmpty()) {
             throw new IllegalArgumentException("Código de solicitação inválido.");

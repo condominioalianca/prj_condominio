@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaEnvelope, FaLock, FaBuilding } from 'react-icons/fa';
 
@@ -110,6 +110,13 @@ const Login: React.FC = () => {
                 <span>Entrar</span>
               )}
             </button>
+
+            <div className="text-center mt-3">
+              <span className="text-muted small">Não tem uma conta? </span>
+              <Link to="/cadastro" className="text-primary small fw-semibold text-decoration-none">
+                Cadastre-se
+              </Link>
+            </div>
           </form>
         </div>
       </div>

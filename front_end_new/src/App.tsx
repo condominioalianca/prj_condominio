@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import Cadastro from './pages/Cadastro';
 import Dashboard from './pages/Dashboard';
 import Configuracoes from './pages/Configuracoes';
 
@@ -62,6 +63,7 @@ const App: React.FC = () => {
         <Routes>
           {/* Rota Pública */}
           <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
 
           {/* Rotas Protegidas de Layout */}
           <Route path="/" element={<Layout />}>

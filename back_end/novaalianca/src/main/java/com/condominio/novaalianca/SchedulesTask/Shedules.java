@@ -74,16 +74,32 @@ public class Shedules {
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
     @Scheduled(cron = "${cron.schedule.recupera-boleto:0 */1 10 1 * *}")
     public void recuperaBoletoDetalhado() throws Exception {
-        LocalDate dataCorte = LocalDate.of(2026, 6, 01);
-        List<BoletoNovaAlianca> boletosPendentes = boletoRepository.findBoletosSemCodigoBarrasELinhaDigitavel(dataCorte);
+        LocalDate dataCorte = LocalDate.now().minusDays(120);
+        List<BoletoNovaAlianca> boletosPendentes = boletoRepository.findBoletosParaEnriquecer(dataCorte);
 
         if (boletosPendentes != null && !boletosPendentes.isEmpty()) {
-            log.info("Iniciando lote de enriquecimento de {} boletos pendentes emitidos após junho de 2026.", boletosPendentes.size());
+            log.info("Iniciando lote de enriquecimento de {} boletos emitidos nos últimos 60 dias.", boletosPendentes.size());
             
             DateTimeFormatter logFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             
+            int chamadasNoMinuto = 0;
+            long tempoInicioMinuto = System.currentTimeMillis();
+            
             for (BoletoNovaAlianca boleto : boletosPendentes) {
                 try {
+                    // Cada enriquecimento faz 2 requisições à API do Inter (detalhe + PDF).
+                    // Se as próximas 2 requisições excederem o limite de 5 por minuto, aguarda o reinício do minuto.
+                    if (chamadasNoMinuto + 2 > 5) {
+                        long tempoDecorrido = System.currentTimeMillis() - tempoInicioMinuto;
+                        long tempoRestante = 60000 - tempoDecorrido;
+                        if (tempoRestante > 0) {
+                            log.info("Atingido o limite de chamadas permitidas por minuto (5). Aguardando {} ms para reiniciar o limite.", tempoRestante);
+                            Thread.sleep(tempoRestante);
+                        }
+                        chamadasNoMinuto = 0;
+                        tempoInicioMinuto = System.currentTimeMillis();
+                    }
+
                     String username = boleto.getUsuario() != null ? boleto.getUsuario().getNomeUsuario() : "N/A";
                     String formattedDate = boleto.getDtEmissao() != null ? boleto.getDtEmissao().format(logFormatter) : "N/A";
                     
@@ -91,12 +107,21 @@ public class Shedules {
                             username, formattedDate, boleto.getId(), boleto.getCodSolicitacao());
                     
                     boletoService.enriquecerBoleto(boleto.getCodSolicitacao(), "PRODUCAO");
+                    
+                    chamadasNoMinuto += 2;
+                    
+                    // Pequeno delay de segurança de 1 segundo entre boletos
+                    Thread.sleep(1000);
+                } catch (InterruptedException ie) {
+                    log.error("Loop de enriquecimento interrompido: {}", ie.getMessage());
+                    Thread.currentThread().interrupt();
+                    break;
                 } catch (Exception e) {
                     log.error("Erro ao enriquecer o boleto ID: {} - {}", boleto.getId(), e.getMessage(), e);
                 }
             }
         } else {
-            log.info("Nenhum boleto emitido após junho de 2026 pendente de enriquecimento (sem código de barras e linha digitável) foi encontrado.");
+            log.info("Nenhum boleto emitido nos últimos 60 dias pendente de enriquecimento foi encontrado.");
         }
     }
 

@@ -8,7 +8,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://192.168.15.10:5432/condominio}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:140908}
+    password: ${DB_PASSWORD}
   sql:
     init:
       mode: always
@@ -79,7 +79,7 @@ mail:
 
 cron:
   schedule:
-    valida-envio: "0 */4 10 1 * *"
-    recupera-boleto: "0 */1 10 1 * *"
-    envia-email: "10 */2 10 1 * *"
-    extrato: "0 */2 * * * *"
+    valida-envio: ${CRON_SCHEDULE_VALIDA_ENVIO}
+    recupera-boleto: ${CRON_SCHEDULE_RECUPERA_BOLETO}
+    envia-email: ${CRON_SCHEDULE_ENVIA_EMAIL}
+    extrato: ${CRON_SCHEDULE_EXTRATO}

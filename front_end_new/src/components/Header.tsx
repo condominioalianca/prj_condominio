@@ -11,8 +11,9 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdminOrSindico } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [hasUnidade, setHasUnidade] = useState<boolean>(true);
   const [showEnvBadge, setShowEnvBadge] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -27,15 +28,27 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
           } else {
             setShowEnvBadge(false);
           }
+
+          if (!isAdminOrSindico()) {
+            if (userData && !userData.unidade) {
+              setHasUnidade(false);
+            } else {
+              setHasUnidade(true);
+            }
+          } else {
+            setHasUnidade(true);
+          }
         })
         .catch(err => {
-          console.error('Erro ao buscar usuário para checar CPF', err);
+          console.error('Erro ao buscar usuário', err);
           setShowEnvBadge(false);
+          setHasUnidade(true);
         });
     } else {
       setShowEnvBadge(false);
+      setHasUnidade(true);
     }
-  }, [user]);
+  }, [user, isAdminOrSindico]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -127,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             >
               <div className="d-none d-md-block text-end">
                 <p className="header-profile-name">{user.userName}</p>
-                <p className="header-profile-role">{formatRole(user.roles)}</p>
+                {hasUnidade && <p className="header-profile-role">{formatRole(user.roles)}</p>}
               </div>
               <div className="header-profile-avatar">
                 {getInitials(user.userName)}

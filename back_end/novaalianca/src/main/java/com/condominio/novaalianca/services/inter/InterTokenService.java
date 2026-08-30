@@ -28,15 +28,31 @@ public class InterTokenService {
 
     private final RestTemplateUtil restTemplateUtil;
 
+    private final java.util.Map<String, CachedToken> tokenCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static class CachedToken {
+        String token;
+        long expiryTimeMillis;
+    }
+
     /**
-     * Obtém o token de acesso OAuth2 usando mTLS.
+     * Obtém o token de acesso OAuth2 usando mTLS com cache de 1 hora.
      */
-    public String obterAccessToken(String ambiente, String scope) throws Exception {
+    public synchronized String obterAccessToken(String ambiente, String scope) throws Exception {
+        String cacheKey = (ambiente != null ? ambiente.toUpperCase() : "SANDBOX") + ":" + scope;
+        CachedToken cached = tokenCache.get(cacheKey);
+
+        // Se o token existe e ainda é válido (com margem de segurança de 30 segundos)
+        if (cached != null && System.currentTimeMillis() < cached.expiryTimeMillis - 30000) {
+            log.info("Utilizando token de acesso em cache para chave: {}", cacheKey);
+            return cached.token;
+        }
+
         String tokenUrl = ambiente != null && !ambiente.equalsIgnoreCase("SANDBOX")
                 ? properties.getBancoInterUrlPathProd() + properties.getBancoInterUrlToken()
                 : properties.getBancoInterUrlPathSand() + properties.getBancoInterUrlToken();
         
-        log.info("Obtendo token de acesso do Banco Inter em: {}", tokenUrl);
+        log.info("Obtendo novo token de acesso do Banco Inter em: {}", tokenUrl);
 
         RestTemplate restTemplate = restTemplateUtil.criarRestTemplateMtls();
 
@@ -56,7 +72,16 @@ public class InterTokenService {
         
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             String token = (String) response.getBody().get("access_token");
-            log.info("Token de acesso obtido com sucesso.");
+            Number expiresIn = (Number) response.getBody().get("expires_in");
+            long expiresDurationSeconds = expiresIn != null ? expiresIn.longValue() : 3600L;
+
+            CachedToken newCached = new CachedToken();
+            newCached.token = token;
+            newCached.expiryTimeMillis = System.currentTimeMillis() + (expiresDurationSeconds * 1000L);
+
+            tokenCache.put(cacheKey, newCached);
+
+            log.info("Token de acesso obtido com sucesso e cacheado. Expira em {} segundos.", expiresDurationSeconds);
             return token;
         } else {
             throw new RuntimeException("Falha ao obter token de acesso do Banco Inter: " + response.getStatusCode());
