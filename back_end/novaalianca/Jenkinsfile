@@ -65,6 +65,19 @@ pipeline {
             }
         }
 
+        stage('🧪 Testes Unitários') {
+            steps {
+                echo '=== Executando os Testes Automatizados ==='
+                dir('back_end/novaalianca') {
+                    sh '''
+                        export JAVA_HOME=/usr/lib/jvm/zulu25
+                        export PATH=$JAVA_HOME/bin:$PATH
+                        mvn test --no-transfer-progress
+                    '''
+                }
+            }
+        }
+
         stage('📦 Build Maven') {
             steps {
                 echo '=== Compilando e empacotando o Backend ==='
