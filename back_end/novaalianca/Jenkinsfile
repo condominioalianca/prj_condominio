@@ -127,7 +127,7 @@ pipeline {
                         -p ${APP_PORT}:${APP_PORT} \
                         -v "C:/ARQUIVOS_SITES/NOVA_ALINCA:/app/uploads" \
                         -e SPRING_PROFILES_ACTIVE=dev \
-                        -e OPENSEARCH_URL="http://192.168.15.10:9200" \
+                        -e OPENSEARCH_URL="https://192.168.15.10:9200" \
                         -e OPENSEARCH_USERNAME="admin" \
                         -e OPENSEARCH_PASSWORD="${OPENSEARCH_PASSWORD}" \
                         -e UPLOAD_DIR="${UPLOAD_DIR}" \
