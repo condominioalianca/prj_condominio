@@ -63,6 +63,9 @@ public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
         // Configura SSLContext para confiar em certificados autoassinados (comum no OpenSearch local/interno)
         HttpClient.Builder clientBuilder = HttpClient.newBuilder().executor(executor);
         try {
+            // Desativa a verificação de hostname do HttpClient do JDK (necessário para IP local como 192.168.15.10)
+            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");
+
             javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
             sslContext.init(null, new javax.net.ssl.TrustManager[]{
                 new javax.net.ssl.X509TrustManager() {
