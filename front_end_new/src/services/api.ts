@@ -46,8 +46,12 @@ const api = axios.create({
 // Interceptor de Requisições
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Se for requisição de autenticação, não envia o token do usuário logado
-    if (config.url === '/oauth/token') {
+    // Se for requisição de autenticação, cadastro ou redefinição de senha, não envia o token
+    const isPublicRoute = config.url === '/oauth/token' || 
+                          config.url === '/usuarios/cadastrar' || 
+                          config.url?.startsWith('/auth/password-reset');
+    
+    if (isPublicRoute) {
       return config;
     }
 
