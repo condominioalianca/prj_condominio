@@ -162,7 +162,9 @@ pipeline {
         }
         always {
             // Remove imagens antigas para economizar espaço em disco
-            sh 'docker image prune -f 2>/dev/null || true'
+            node {
+                sh 'docker image prune -f 2>/dev/null || true'
+            }
         }
     }
 }
