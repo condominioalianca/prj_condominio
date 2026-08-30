@@ -21,7 +21,7 @@ export const getEnvironment = () => {
 
 const getBackendUrl = (): string => {
   const envUrl = import.meta.env.BACK_END_NOVA_ALIANCA;
-  const { hostname, protocol } = window.location;
+  const { hostname, origin } = window.location;
 
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
 
@@ -29,8 +29,8 @@ const getBackendUrl = (): string => {
     if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('192.168.')) {
       return envUrl;
     }
-    // Em produção, passa pela porta 443 padrão sob o prefixo /api
-    return `${protocol}//${hostname}/api`;
+    // Mantém https://dominio:porta (ex: 8443) e adiciona o prefixo /api
+    return `${origin}/api`;
   }
 
   // DEV ou HML Docker rodando localmente
