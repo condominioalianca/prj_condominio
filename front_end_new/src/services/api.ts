@@ -29,7 +29,8 @@ const getBackendUrl = (): string => {
     if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('192.168.')) {
       return envUrl;
     }
-    return `${protocol}//${hostname}:8086`;
+    // Em produção, passa pela porta 443 padrão sob o prefixo /api
+    return `${protocol}//${hostname}/api`;
   }
 
   // DEV ou HML Docker rodando localmente
