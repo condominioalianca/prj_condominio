@@ -74,3 +74,8 @@ management:
 
 app:
   upload-dir: ${UPLOAD_DIR:/app/uploads}
+
+opensearch:
+  url: ${OPENSEARCH_URL:http://192.168.15.10:9200}
+  username: ${OPENSEARCH_USERNAME:admin}
+  password: ${OPENSEARCH_PASSWORD:admin}
