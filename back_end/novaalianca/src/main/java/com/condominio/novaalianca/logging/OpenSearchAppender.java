@@ -60,9 +60,23 @@ public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
             return t;
         });
 
-        httpClient = HttpClient.newBuilder()
-                .executor(executor)
-                .build();
+        // Configura SSLContext para confiar em certificados autoassinados (comum no OpenSearch local/interno)
+        HttpClient.Builder clientBuilder = HttpClient.newBuilder().executor(executor);
+        try {
+            javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
+            sslContext.init(null, new javax.net.ssl.TrustManager[]{
+                new javax.net.ssl.X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                }
+            }, new java.security.SecureRandom());
+            clientBuilder.sslContext(sslContext);
+        } catch (Exception e) {
+            addError("Erro ao configurar SSLContext para o HttpClient", e);
+        }
+
+        httpClient = clientBuilder.build();
 
         if (username != null && password != null && !username.trim().isEmpty()) {
             String auth = username + ":" + password;
