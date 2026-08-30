@@ -31,7 +31,7 @@ public class ResourceServerConfig {
     private final Environment env;
     private final ParametrosSistemaRepository parametrosSistemaRepository;
 
-    private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**", "/testes/**", "/extrato/**", "/actuator/health", "/usuarios/cadastrar", "/auth/password-reset/**"};
+    private static final String[] PUBLICO = {"/oauth/token", "/h2-console/**", "/swagger-ui/**", "/testes/**", "/extrato/**", "/actuator/health", "/usuarios/cadastrar", "/auth/password-reset/**", "/error"};
     private static final String[] ADMIN = {"/parametros/**"};
     private static final String[] SINDICO = {"/boleto/**", "/endereco/**", "/unidade/**", "/usuarios/**"};
 
