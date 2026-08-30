@@ -117,6 +117,11 @@ const Login: React.FC = () => {
                 Cadastre-se
               </Link>
             </div>
+            <div className="text-center mt-2">
+              <Link to="/recuperar-senha" className="text-secondary small text-decoration-none">
+                Esqueceu sua senha?
+              </Link>
+            </div>
           </form>
         </div>
       </div>
