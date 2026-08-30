@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Propriedades para configurar a URL e credenciais do OpenSearch -->
+    <!-- springProperty lê as variáveis do application.yml do Spring -->
+    <springProperty scope="context" name="openSearchUrl" source="opensearch.url"/>
+    <springProperty scope="context" name="openSearchUser" source="opensearch.username"/>
+    <springProperty scope="context" name="openSearchPass" source="opensearch.password"/>
+
+    <!-- ========================================== -->
+    <!-- 1. APPENDER DE CONSOLE (Desenvolvimento)   -->
+    <!-- ========================================== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Formato de texto legível para desenvolvimento local -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================================== -->
+    <!-- 2. APPENDER HTTP PARA OPENSEARCH (Produção)-->
+    <!-- ========================================== -->
+    <!-- Usando nosso Custom Appender que faz envios assíncronos via HTTP -->
+    <appender name="OPENSEARCH" class="com.condominio.novaalianca.logging.OpenSearchAppender">
+        <url>${openSearchUrl}</url>
+        <username>${openSearchUser}</username>
+        <password>${openSearchPass}</password>
+        <index>condominio-logs</index>
+    </appender>
+
+    <!-- ========================================== -->
+    <!-- 3. CONFIGURAÇÃO DE PERFIS (PROFILES)       -->
+    <!-- ========================================== -->
+    
+    <!-- Perfil de Desenvolvimento: Console e OpenSearch -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="OPENSEARCH"/>
+        </root>
+    </springProfile>
+
+    <!-- Perfil de Produção: Envia para o Console e para o OpenSearch -->
+    <springProfile name="prd">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="OPENSEARCH"/>
+        </root>
+    </springProfile>
+
+</configuration>

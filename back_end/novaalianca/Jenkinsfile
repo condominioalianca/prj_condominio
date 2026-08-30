@@ -49,6 +49,9 @@ pipeline {
         CRON_SCHEDULE_ENVIA_EMAIL     = credentials('CRON_SCHEDULE_ENVIA_EMAIL')
         CRON_SCHEDULE_EXTRATO         = credentials('CRON_SCHEDULE_EXTRATO')
 
+        //CREDENCIAR OPENSERCH
+        OPENSEARCH_PASSWORD         = credentials('OPENSEARCH_PASSWORD')
+
         // Docker
         DOCKER_IMAGE   = 'patrickmoura/novaalianca-back'
         CONTAINER_NAME = 'backnovaalianca'
@@ -126,7 +129,7 @@ pipeline {
                         -e SPRING_PROFILES_ACTIVE=dev \
                         -e OPENSEARCH_URL="http://192.168.15.10:9200" \
                         -e OPENSEARCH_USERNAME="admin" \
-                        -e OPENSEARCH_PASSWORD="admin" \
+                        -e OPENSEARCH_PASSWORD="${OPENSEARCH_PASSWORD}" \
                         -e UPLOAD_DIR="${UPLOAD_DIR}" \
                         -e DB_URL_DEV="${DB_URL_DEV}" \
                         -e DB_USERNAME_DEV="${DB_USERNAME_DEV}" \
