@@ -3,6 +3,7 @@
 
     <!-- Propriedades para configurar a URL e credenciais do OpenSearch -->
     <!-- springProperty lê as variáveis do application.yml do Spring -->
+    <springProperty scope="context" name="openSearchEnabled" source="opensearch.enabled" defaultValue="false"/>
     <springProperty scope="context" name="openSearchUrl" source="opensearch.url"/>
     <springProperty scope="context" name="openSearchUser" source="opensearch.username"/>
     <springProperty scope="context" name="openSearchPass" source="opensearch.password"/>
@@ -22,6 +23,7 @@
     <!-- ========================================== -->
     <!-- Usando nosso Custom Appender que faz envios assíncronos via HTTP -->
     <appender name="OPENSEARCH" class="com.condominio.novaalianca.logging.OpenSearchAppender">
+        <enabled>${openSearchEnabled}</enabled>
         <url>${openSearchUrl}</url>
         <username>${openSearchUser}</username>
         <password>${openSearchPass}</password>

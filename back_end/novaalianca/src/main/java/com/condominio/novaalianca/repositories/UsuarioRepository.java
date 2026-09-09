@@ -26,7 +26,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario,Long> , JpaSpec
     List<Usuario> findByAtivosAndEnviaBoleto();
 
     @Query(value = "SELECT u FROM Usuario u WHERE u.ativo = true AND u.enviaBoleto = true " +
-            " AND u.idUsuario NOT IN ( SELECT b.usuario.idUsuario  FROM BoletoNovaAlianca b  WHERE date_trunc('MONTH',b.dtEmissao) BETWEEN to_date(:dtInicio, 'YYYY/MM/DD') AND to_date(:dtFim, 'YYYY/MM/DD') and b.txSituacao not in ('CANCELADO')) " )
+            " AND u.idUsuario NOT IN ( SELECT b.usuario.idUsuario FROM BoletoNovaAlianca b WHERE b.dtEmissao BETWEEN :dtInicio AND :dtFim AND b.txSituacao NOT IN ('CANCELADO'))")
     List<Usuario> findFirstByAtivosAndEnviaBoletoAndSemBoleto(LocalDate dtInicio, LocalDate dtFim);
 
 

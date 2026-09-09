@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
 
+    private boolean enabled = false;
     private String url;
     private String username;
     private String password;
@@ -25,6 +26,14 @@ public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
     private HttpClient httpClient;
     private ExecutorService executor;
     private String authHeader;
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     public void setUrl(String url) {
         this.url = url;
@@ -44,7 +53,12 @@ public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     public void start() {
-        if (url == null) {
+        if (!enabled) {
+            super.start();
+            return;
+        }
+
+        if (url == null || url.trim().isEmpty()) {
             addError("Nenhuma URL configurada para o OpenSearchAppender");
             return;
         }
@@ -99,7 +113,7 @@ public class OpenSearchAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent event) {
-        if (!isStarted()) {
+        if (!enabled || !isStarted()) {
             return;
         }
 

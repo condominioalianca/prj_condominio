@@ -24,10 +24,10 @@ public interface BoletoRepository extends JpaRepository<BoletoNovaAlianca, Long>
     List<BoletoNovaAlianca> findAllByMesEmissao(String mesEmissao);
 
 
-    @Query(value = "select b From BoletoNovaAlianca b where date_trunc('MONTH',b.dtEmissao) BETWEEN to_date(:dataInicial, 'YYYY/MM/DD') AND to_date(:dataFinal, 'YYYY/MM/DD') AND b.ativo=TRUE AND b.emailEnviado = FALSE")
+    @Query(value = "select b From BoletoNovaAlianca b where b.dtEmissao BETWEEN :dataInicial AND :dataFinal AND b.ativo = TRUE AND b.emailEnviado = FALSE")
     List<BoletoNovaAlianca> findAllByMesEmissaoAndNaoEnviadoByEmail(LocalDate dataInicial, LocalDate dataFinal);
 
-    @Query(value = "select b From BoletoNovaAlianca b where date_trunc('MONTH',b.dtEmissao) BETWEEN to_date(:dataInicial, 'YYYY/MM/DD') AND to_date(:dataFinal, 'YYYY/MM/DD')")
+    @Query(value = "select b From BoletoNovaAlianca b where b.dtEmissao BETWEEN :dataInicial AND :dataFinal")
     List<BoletoNovaAlianca> findAllByDateFiltro(LocalDate dataInicial, LocalDate dataFinal);
 
     BoletoNovaAlianca findByTxCodBarras(String codigoBarras);

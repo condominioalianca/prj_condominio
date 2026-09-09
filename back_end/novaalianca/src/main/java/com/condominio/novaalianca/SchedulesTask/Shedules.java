@@ -49,7 +49,7 @@ public class Shedules {
 
     private final BoletoBuilder boletoBuilder;
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 10 1 * *}")
+    @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 21 8 * *}")
     public void validaEnviodDeBoletos() throws ParseException {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();
@@ -72,7 +72,7 @@ public class Shedules {
     }
 
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "${cron.schedule.recupera-boleto:0 */1 10 1 * *}")
+    @Scheduled(cron = "${cron.schedule.recupera-boleto:0 */1 21 8 * *}")
     public void recuperaBoletoDetalhado() throws Exception {
         LocalDate dataCorte = LocalDate.now().minusDays(120);
         List<BoletoNovaAlianca> boletosPendentes = boletoRepository.findBoletosParaEnriquecer(dataCorte);
@@ -126,7 +126,7 @@ public class Shedules {
     }
 
 //    CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-@Scheduled(cron = "${cron.schedule.envia-email:10 */2 10 1 * *}")
+@Scheduled(cron = "${cron.schedule.envia-email:10 */2 21 8 * *}")
     public void enviaEmail() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();

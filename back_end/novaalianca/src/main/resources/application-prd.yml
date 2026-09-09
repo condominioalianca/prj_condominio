@@ -83,3 +83,6 @@ cron:
     recupera-boleto: ${CRON_SCHEDULE_RECUPERA_BOLETO}
     envia-email: ${CRON_SCHEDULE_ENVIA_EMAIL}
     extrato: ${CRON_SCHEDULE_EXTRATO}
+
+opensearch:
+  enabled: ${OPENSEARCH_ENABLED:true}
