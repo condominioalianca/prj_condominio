@@ -18,8 +18,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -44,6 +47,16 @@ public class ResourceServerConfig {
     };
     private static final String[] ADMIN = {"/parametros/**"};
     private static final String[] SINDICO = {"/boleto/**", "/endereco/**", "/unidade/**", "/usuarios/**"};
+    private static final String[] CONCILIACAO_COMPROVANTE_MUTATION = {
+        "/conciliacao/extrato/**",
+        "/conciliacao/*/gerar-pdf",
+        "/comprovante/**"
+    };
+    private static final String[] ROLES_AUTORIZADAS = {
+        "ROLE_ADMINISTRADOR",
+        "ROLE_SINDICO",
+        "ROLE_USUARIO"
+    };
 
     @Bean
     @org.springframework.core.annotation.Order(1)
@@ -62,6 +75,11 @@ public class ResourceServerConfig {
                 .requestMatchers(PUBLICO).permitAll()
                 .requestMatchers(HttpMethod.GET, SINDICO).permitAll()
                 .requestMatchers(ADMIN).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .requestMatchers(HttpMethod.POST, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .requestMatchers(HttpMethod.PATCH, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .requestMatchers(HttpMethod.DELETE, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .requestMatchers("/saldo/**").hasAnyAuthority(ROLES_AUTORIZADAS)
+                .requestMatchers(HttpMethod.GET, "/conciliacao/**", "/comprovante/**").hasAnyAuthority(ROLES_AUTORIZADAS)
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -92,15 +110,27 @@ public class ResourceServerConfig {
         return request -> {
             CorsConfiguration corsConfig = new CorsConfiguration();
             String corsOrigins = parametrosSistemaRepository.findValorParametro("CORS_ORIGINS");
-            corsConfig.setAllowedOriginPatterns(Collections.singletonList(
-//                "http://localhost:3001",
-//                "http://127.0.0.1:3001",
-//                "http://localhost:*",
-//                "http://127.0.0.1:*",
-//                "http://*",
-//                "https://*"
-                    corsOrigins
-            ));
+
+            List<String> origins = new ArrayList<>();
+            if (corsOrigins != null && !corsOrigins.trim().isEmpty()) {
+                origins.addAll(Arrays.stream(corsOrigins.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList()));
+            }
+
+            // Fallback para garantir funcionamento em desenvolvimento local e via DuckDNS
+            if (!origins.contains("https://*.duckdns.org*")) {
+                origins.add("https://*.duckdns.org*");
+            }
+            if (!origins.contains("http://localhost:3001")) {
+                origins.add("http://localhost:3001");
+            }
+            if (!origins.contains("http://192.168.15.10:3001")) {
+                origins.add("http://192.168.15.10:3001");
+            }
+
+            corsConfig.setAllowedOriginPatterns(origins);
             corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH", "OPTIONS"));
             corsConfig.setAllowCredentials(true);
             corsConfig.setAllowedHeaders(Arrays.asList("*"));

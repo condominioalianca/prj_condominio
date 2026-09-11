@@ -86,7 +86,7 @@ const Conciliacao: React.FC = () => {
                       <td className="text-end">
                         <button
                           className="btn btn-sm btn-outline-primary rounded-circle"
-                          onClick={() => navigate(`/admin/conciliacao/${c.id}`)}
+                          onClick={() => navigate(`/conciliacao/${c.id}`)}
                           title="Ver Extratos"
                         >
                           <FaArrowRight />

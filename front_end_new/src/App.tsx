@@ -22,15 +22,17 @@ import CobrancaExtra from './pages/Admin/CobrancaExtra';
 interface RoleRouteProps {
   requiredRole?: string;
   adminOrSindicoRequired?: boolean;
+  requirePerfil?: boolean;
   children: React.ReactElement;
 }
 
 const RoleRoute: React.FC<RoleRouteProps> = ({ 
   requiredRole, 
   adminOrSindicoRequired, 
+  requirePerfil,
   children 
 }) => {
-  const { isAuthenticated, hasRole, isAdminOrSindico, loading } = useAuth();
+  const { isAuthenticated, hasRole, isAdminOrSindico, hasPerfilAtrelado, loading } = useAuth();
 
   if (loading) {
     return (
@@ -44,6 +46,10 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requirePerfil && !hasPerfilAtrelado()) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (adminOrSindicoRequired && !isAdminOrSindico()) {
@@ -98,18 +104,30 @@ const App: React.FC = () => {
                 </RoleRoute>
               } 
             />
+            {/* Rotas de Conciliação (Acesso para usuários autenticados com perfil atrelado) */}
             <Route 
-              path="admin/conciliacao" 
+              path="conciliacao" 
               element={
-                <RoleRoute adminOrSindicoRequired>
+                <RoleRoute requirePerfil>
                   <Conciliacao />
                 </RoleRoute>
               } 
             />
             <Route 
+              path="conciliacao/:id" 
+              element={
+                <RoleRoute requirePerfil>
+                  <ConciliacaoDetalhe />
+                </RoleRoute>
+              } 
+            />
+
+            {/* Redirecionamentos de compatibilidade para rotas antigas de admin */}
+            <Route path="admin/conciliacao" element={<Navigate to="/conciliacao" replace />} />
+            <Route 
               path="admin/conciliacao/:id" 
               element={
-                <RoleRoute adminOrSindicoRequired>
+                <RoleRoute requirePerfil>
                   <ConciliacaoDetalhe />
                 </RoleRoute>
               } 

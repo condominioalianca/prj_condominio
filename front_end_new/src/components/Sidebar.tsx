@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
-  const { hasRole, isAdminOrSindico } = useAuth();
+  const { hasRole, isAdminOrSindico, hasPerfilAtrelado } = useAuth();
 
   const handleLinkClick = (): void => {
     if (window.innerWidth < 992) {
@@ -45,6 +45,18 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
               <span>Dashboard</span>
             </NavLink>
           </li>
+          {!isAdminOrSindico() && hasPerfilAtrelado() && (
+            <li className="sidebar-menu-item">
+              <NavLink 
+                to="/conciliacao" 
+                className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <FaExchangeAlt />
+                <span>Conciliação</span>
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         {isAdminOrSindico() && (
@@ -83,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
               </li>
               <li className="sidebar-menu-item">
                 <NavLink 
-                  to="/admin/conciliacao" 
+                  to="/conciliacao" 
                   className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
                   onClick={handleLinkClick}
                 >

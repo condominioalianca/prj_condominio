@@ -181,34 +181,45 @@ const ConciliacaoDetalhe: React.FC = () => {
           </div>
         </div>
         <div className="d-flex gap-2">
-          {isAdminOrSindico() && (
-            <div className="btn-group">
-              <button 
-                className="btn btn-outline-danger d-flex align-items-center gap-2"
-                onClick={handleGerarPdf}
-                disabled={generatingPdf}
-                title="Gerar e sobrescrever PDF atual"
-              >
-                {generatingPdf ? <FaSpinner className="fa-spin" /> : <FaFilePdf />}
-                Gerar PDF
-              </button>
-              <button 
-                className="btn btn-outline-danger d-flex align-items-center"
-                onClick={handleBaixarPdf}
-                title="Baixar PDF salvo"
-              >
-                <FaDownload />
-              </button>
-            </div>
+          {isAdminOrSindico() ? (
+            <>
+              <div className="btn-group">
+                <button 
+                  className="btn btn-outline-danger d-flex align-items-center gap-2"
+                  onClick={handleGerarPdf}
+                  disabled={generatingPdf}
+                  title="Gerar e sobrescrever PDF atual"
+                >
+                  {generatingPdf ? <FaSpinner className="fa-spin" /> : <FaFilePdf />}
+                  Gerar PDF
+                </button>
+                <button 
+                  className="btn btn-outline-danger d-flex align-items-center"
+                  onClick={handleBaixarPdf}
+                  title="Baixar PDF salvo"
+                >
+                  <FaDownload />
+                </button>
+              </div>
+              <label className="btn btn-outline-primary mb-0" style={{ cursor: 'pointer' }}>
+                {uploadingLote ? (
+                  <><FaSpinner className="fa-spin me-2" /> Anexando...</>
+                ) : (
+                  <>Anexar Comprovante do Mês</>
+                )}
+                <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
+              </label>
+            </>
+          ) : (
+            <button 
+              className="btn btn-outline-danger d-flex align-items-center gap-2"
+              onClick={handleBaixarPdf}
+              title="Baixar PDF da conciliação"
+            >
+              <FaDownload />
+              Baixar Relatório PDF
+            </button>
           )}
-          <label className="btn btn-outline-primary mb-0" style={{ cursor: 'pointer' }}>
-            {uploadingLote ? (
-              <><FaSpinner className="fa-spin me-2" /> Anexando...</>
-            ) : (
-              <>Anexar Comprovante do Mês</>
-            )}
-            <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
-          </label>
         </div>
       </div>
 
@@ -237,7 +248,7 @@ const ConciliacaoDetalhe: React.FC = () => {
                       <th>Categoria</th>
                       <th className="text-center">Status</th>
                       <th className="text-center">Comprovante</th>
-                      <th className="text-end">Ações</th>
+                      {isAdminOrSindico() && <th className="text-end">Ações</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -263,22 +274,24 @@ const ConciliacaoDetalhe: React.FC = () => {
                             <span className="text-muted">-</span>
                           )}
                         </td>
-                        <td className="text-end">
-                          <button
-                            className="btn btn-sm btn-light text-primary me-2"
-                            onClick={() => openEditarModal(e)}
-                            title="Editar"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-light text-success"
-                            onClick={() => openAprovarModal(e)}
-                            title="Aprovar"
-                          >
-                            <FaCheck />
-                          </button>
-                        </td>
+                        {isAdminOrSindico() && (
+                          <td className="text-end">
+                            <button
+                              className="btn btn-sm btn-light text-primary me-2"
+                              onClick={() => openEditarModal(e)}
+                              title="Editar"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              className="btn btn-sm btn-light text-success"
+                              onClick={() => openAprovarModal(e)}
+                              title="Aprovar"
+                            >
+                              <FaCheck />
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -310,7 +323,7 @@ const ConciliacaoDetalhe: React.FC = () => {
         </div>
       </div>
 
-      {showModalAprovar && selectedExtrato && (
+      {isAdminOrSindico() && showModalAprovar && selectedExtrato && (
         <ModalAprovarConciliacao
           extrato={selectedExtrato}
           onClose={() => setShowModalAprovar(false)}
@@ -318,7 +331,7 @@ const ConciliacaoDetalhe: React.FC = () => {
         />
       )}
 
-      {showModalEditar && selectedExtrato && (
+      {isAdminOrSindico() && showModalEditar && selectedExtrato && (
         <ModalEditarExtrato
           extrato={selectedExtrato}
           categorias={categorias}

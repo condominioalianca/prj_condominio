@@ -7,7 +7,7 @@ import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner } from 'react-ic
 import type { ApexOptions } from 'apexcharts';
 
 const Dashboard: React.FC = () => {
-  const { user, isAdminOrSindico } = useAuth();
+  const { user, isAdminOrSindico, hasPerfilAtrelado } = useAuth();
   
   // Estados
   const [extratos, setExtratos] = useState<IExtrato[]>([]);
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
         const promises: [Promise<IExtrato[]>, Promise<IBoleto[]>, Promise<ISaldo | null>, Promise<any>] = [
           backEndService.get<IExtrato[]>('/extratos'),
           backEndService.get<IBoleto[]>('/boletos'),
-          isAdminOrSindico() 
+          (user && hasPerfilAtrelado())
             ? backEndService.get<ISaldo>('/saldo/atual').catch(() => null) 
             : Promise.resolve(null),
           user?.userId ? backEndService.get<any>(`/usuarios/${user.userId}`).catch(() => null) : Promise.resolve(null)
@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, [isAdminOrSindico, user?.userId]);
+  }, [isAdminOrSindico, hasPerfilAtrelado, user]);
 
   // Função auxiliar de baixar PDF a partir de base64
   const handleDownloadPdf = (base64String: string | null, nossoNumero: string): void => {
@@ -109,8 +109,6 @@ const Dashboard: React.FC = () => {
         .filter((item) => item.tipoOperacao === 'D')
         .reduce((sum, item) => sum + item.valorTransacao, 0)
     : 0;
-
-  const balance = hasUnidade ? totalCredits - totalDebits : 0;
 
   // Filtragem de Boletos
   // - Usuário Comum: Seus boletos do último ano (365 dias)
@@ -366,12 +364,12 @@ const Dashboard: React.FC = () => {
           <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">
-                {isAdminOrSindico() ? 'Saldo Conta Corrente' : 'Saldo Consolidado'}
+                Saldo da Conta Corrente
               </p>
-              <h3 className={`card-metric-value ${(isAdminOrSindico() ? (saldoAtual?.disponivel ?? 0) : balance) >= 0 ? 'text-success' : 'text-danger'}`}>
-                R$ {(isAdminOrSindico() ? (saldoAtual?.disponivel ?? 0) : balance).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <h3 className={`card-metric-value ${(saldoAtual?.disponivel ?? 0) >= 0 ? 'text-success' : 'text-danger'}`}>
+                R$ {(saldoAtual?.disponivel ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
-              {isAdminOrSindico() && saldoAtual && (
+              {saldoAtual && (
                 <div className="mt-1">
                   <span className="text-muted d-block" style={{ fontSize: '0.68rem', fontStyle: 'italic' }}>
                     Atualizado  {`${new Date(saldoAtual.createdAt).toLocaleDateString('pt-BR')}, ${new Date(saldoAtual.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
