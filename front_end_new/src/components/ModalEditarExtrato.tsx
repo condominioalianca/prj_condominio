@@ -6,26 +6,16 @@ interface ModalEditarProps {
   extrato: ExtratoResumoDTO;
   categorias: CategoriaGasto[];
   onClose: () => void;
-  onConfirm: (dto: ExtratoConciliacaoPatchDTO, file?: File) => void;
+  onConfirm: (dto: ExtratoConciliacaoPatchDTO) => void;
 }
 
 const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, onClose, onConfirm }) => {
   const [idCategoriaGasto, setIdCategoriaGasto] = useState<number | ''>(extrato.idCategoriaGasto || '');
   const [statusConciliado, setStatusConciliado] = useState<StatusConciliacao>(extrato.statusConciliado);
-  const [fileToUpload, setFileToUpload] = useState<File | undefined>();
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFileToUpload(file);
-    } else {
-      setFileToUpload(undefined);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,7 +34,7 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
       statusConciliado: statusConciliado,
     };
 
-    onConfirm(dto, fileToUpload);
+    onConfirm(dto);
   };
 
   return (
@@ -118,16 +108,6 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                     <option value="PENDENTE">Pendente</option>
                     <option value="BATIDO">Batido</option>
                   </select>
-                </div>
-
-                <div className="col-md-12">
-                  <label className="form-label">Comprovante (Imagem ou PDF)</label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    accept="image/*,application/pdf"
-                    onChange={handleFileChange}
-                  />
                 </div>
               </div>
             </div>

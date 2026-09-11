@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaDownload, FaFileAlt, FaFilePdf } from 'react-icons/fa';
-import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, getComprovanteDownloadUrl, uploadComprovanteIndividual, gerarPdf, baixarPdf } from '../../services/conciliacaoService';
+import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, getComprovanteDownloadUrl, gerarPdf, baixarPdf } from '../../services/conciliacaoService';
 import { getCategoriasAtivas } from '../../services/categoriaService';
 import type { ExtratoResumoDTO, ExtratoConciliacaoPatchDTO, Page } from '../../types/conciliacao';
 import type { CategoriaGasto } from '../../types/categoria';
@@ -88,18 +88,15 @@ const ConciliacaoDetalhe: React.FC = () => {
     }
   };
 
-  const onConfirmEditar = async (dto: ExtratoConciliacaoPatchDTO, file?: File): Promise<void> => {
+  const onConfirmEditar = async (dto: ExtratoConciliacaoPatchDTO): Promise<void> => {
     if (!selectedExtrato) return;
     try {
       await atualizarExtrato(selectedExtrato.id, dto);
-      if (file) {
-        await uploadComprovanteIndividual(selectedExtrato.id, file);
-      }
       setShowModalEditar(false);
       carregarExtratos(Number(id), currentPage);
     } catch (error) {
       console.error('Erro ao editar', error);
-      alert('Erro ao editar extrato ou anexar comprovante.');
+      alert('Erro ao editar extrato.');
     }
   };
 
@@ -165,6 +162,10 @@ const ConciliacaoDetalhe: React.FC = () => {
     }
   };
 
+  const comprovanteConciliacao = extratosPage?.content.find(
+    (e) => e.possuiComprovante && e.idComprovante
+  );
+
   return (
     <div>
       <div className="d-flex align-items-center justify-content-between mb-4">
@@ -181,6 +182,18 @@ const ConciliacaoDetalhe: React.FC = () => {
           </div>
         </div>
         <div className="d-flex gap-2">
+          {comprovanteConciliacao && (
+            <a 
+              href={getComprovanteDownloadUrl(comprovanteConciliacao.idComprovante!)} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="btn btn-outline-success d-flex align-items-center gap-2"
+              title={comprovanteConciliacao.nomeArquivoComprovante || 'Baixar Comprovante Único da Conciliação'}
+            >
+              <FaDownload />
+              Baixar Comprovante
+            </a>
+          )}
           {isAdminOrSindico() ? (
             <>
               <div className="btn-group">
@@ -201,11 +214,11 @@ const ConciliacaoDetalhe: React.FC = () => {
                   <FaDownload />
                 </button>
               </div>
-              <label className="btn btn-outline-primary mb-0" style={{ cursor: 'pointer' }}>
+              <label className="btn btn-outline-primary mb-0 d-flex align-items-center" style={{ cursor: 'pointer' }}>
                 {uploadingLote ? (
                   <><FaSpinner className="fa-spin me-2" /> Anexando...</>
                 ) : (
-                  <>Anexar Comprovante do Mês</>
+                  <>{comprovanteConciliacao ? 'Substituir Comprovante' : 'Anexar Comprovante'}</>
                 )}
                 <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
               </label>
@@ -247,7 +260,6 @@ const ConciliacaoDetalhe: React.FC = () => {
                       <th>Descrição</th>
                       <th>Categoria</th>
                       <th className="text-center">Status</th>
-                      <th className="text-center">Comprovante</th>
                       {isAdminOrSindico() && <th className="text-end">Ações</th>}
                     </tr>
                   </thead>
@@ -265,15 +277,6 @@ const ConciliacaoDetalhe: React.FC = () => {
                         <td>{e.descricao || '-'}</td>
                         <td>{e.descricaoCategoriaGasto || '-'}</td>
                         <td className="text-center">{statusBadge(e.statusConciliado)}</td>
-                        <td className="text-center">
-                          {e.possuiComprovante && e.idComprovante ? (
-                            <a href={getComprovanteDownloadUrl(e.idComprovante)} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary" title={e.nomeArquivoComprovante || 'Download'}>
-                              <FaDownload />
-                            </a>
-                          ) : (
-                            <span className="text-muted">-</span>
-                          )}
-                        </td>
                         {isAdminOrSindico() && (
                           <td className="text-end">
                             <button
