@@ -78,13 +78,21 @@ public class ComprovanteService {
         Path fileTarget = path.resolve(nomeSalvo);
         Files.copy(file.getInputStream(), fileTarget);
 
-        Comprovante comprovante = Comprovante.builder()
-                .nomeArquivo(originalName)
-                .tipoArquivo(file.getContentType())
-                .nomeSalvo(nomeSalvo)
-                .dados(null)
-                .build();
-        return comprovanteRepository.save(comprovante);
+        try {
+            Comprovante comprovante = Comprovante.builder()
+                    .nomeArquivo(originalName)
+                    .tipoArquivo(file.getContentType())
+                    .nomeSalvo(nomeSalvo)
+                    .dados(new byte[0])
+                    .build();
+            return comprovanteRepository.save(comprovante);
+        } catch (Exception e) {
+            try {
+                Files.deleteIfExists(fileTarget);
+            } catch (IOException ignored) {
+            }
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -92,7 +100,8 @@ public class ComprovanteService {
         Comprovante comprovante = comprovanteRepository.findById(idComprovante)
                 .orElseThrow(() -> new RuntimeException("Comprovante não encontrado"));
 
-        if (comprovante.getDados() == null && comprovante.getNomeSalvo() != null) {
+        boolean semDadosNoBanco = comprovante.getDados() == null || comprovante.getDados().length == 0;
+        if (semDadosNoBanco && comprovante.getNomeSalvo() != null) {
             try {
                 Path filePath = Paths.get(uploadDir).resolve(comprovante.getNomeSalvo());
                 if (Files.exists(filePath)) {

@@ -50,3 +50,6 @@ cron:
     recupera-boleto: ${CRON_SCHEDULE_RECUPERA_BOLETO}
     envia-email: ${CRON_SCHEDULE_ENVIA_EMAIL}
     extrato: ${CRON_SCHEDULE_EXTRATO}
+
+app:
+  upload-dir: ${UPLOAD_DIR:C:/ARQUIVOS_SITES/NOVA_ALINCA}
