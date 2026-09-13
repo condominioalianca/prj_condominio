@@ -52,9 +52,37 @@ export const uploadComprovanteLote = async (conciliacaoId: number, file: File): 
   });
 };
 
+export const baixarComprovante = async (idComprovante: number, nomeArquivoOriginal?: string | null): Promise<void> => {
+  const response = await api.get(`/comprovante/${idComprovante}`, {
+    responseType: 'blob',
+  });
+
+  let fileName = nomeArquivoOriginal || `comprovante_${idComprovante}.pdf`;
+  const contentDisposition = response.headers['content-disposition'] as string | undefined;
+  if (contentDisposition) {
+    const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (fileNameMatch && fileNameMatch[1]) {
+      fileName = fileNameMatch[1];
+    }
+  }
+
+  const contentType = (response.headers['content-type'] as string) || 'application/pdf';
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], { type: contentType })
+  );
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
+
 export const getComprovanteDownloadUrl = (idComprovante: number): string => {
-  // Using the base URL from api config
-  return `${api.defaults.baseURL}/comprovante/${idComprovante}`;
+  const token = localStorage.getItem('token');
+  const tokenParam = token ? `?access_token=${encodeURIComponent(token)}` : '';
+  return `${api.defaults.baseURL}/comprovante/${idComprovante}${tokenParam}`;
 };
 
 export const gerarPdf = async (conciliacaoId: number): Promise<void> => {

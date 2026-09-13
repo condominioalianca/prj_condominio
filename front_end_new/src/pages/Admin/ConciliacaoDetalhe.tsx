@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaDownload, FaFileAlt, FaFilePdf } from 'react-icons/fa';
-import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, getComprovanteDownloadUrl, gerarPdf, baixarPdf } from '../../services/conciliacaoService';
+import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, baixarComprovante, gerarPdf, baixarPdf } from '../../services/conciliacaoService';
 import { getCategoriasAtivas } from '../../services/categoriaService';
 import type { ExtratoResumoDTO, ExtratoConciliacaoPatchDTO, Page } from '../../types/conciliacao';
 import type { CategoriaGasto } from '../../types/categoria';
@@ -25,6 +25,7 @@ const ConciliacaoDetalhe: React.FC = () => {
   const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
   const [uploadingLote, setUploadingLote] = useState<boolean>(false);
   const [generatingPdf, setGeneratingPdf] = useState<boolean>(false);
+  const [downloadingComprovante, setDownloadingComprovante] = useState<boolean>(false);
 
   useEffect(() => {
     carregarCategorias();
@@ -162,6 +163,22 @@ const ConciliacaoDetalhe: React.FC = () => {
     }
   };
 
+  const handleBaixarComprovante = async () => {
+    if (!comprovanteConciliacao?.idComprovante) return;
+    try {
+      setDownloadingComprovante(true);
+      await baixarComprovante(
+        comprovanteConciliacao.idComprovante,
+        comprovanteConciliacao.nomeArquivoComprovante
+      );
+    } catch (error) {
+      console.error('Erro ao baixar comprovante', error);
+      alert('Erro ao baixar comprovante. Verifique se o arquivo está disponível.');
+    } finally {
+      setDownloadingComprovante(false);
+    }
+  };
+
   const comprovanteConciliacao = extratosPage?.content.find(
     (e) => e.possuiComprovante && e.idComprovante
   );
@@ -183,16 +200,16 @@ const ConciliacaoDetalhe: React.FC = () => {
         </div>
         <div className="d-flex gap-2">
           {comprovanteConciliacao && (
-            <a 
-              href={getComprovanteDownloadUrl(comprovanteConciliacao.idComprovante!)} 
-              target="_blank" 
-              rel="noreferrer" 
+            <button 
+              type="button"
+              onClick={handleBaixarComprovante}
+              disabled={downloadingComprovante}
               className="btn btn-outline-success d-flex align-items-center gap-2"
               title={comprovanteConciliacao.nomeArquivoComprovante || 'Baixar Comprovante Único da Conciliação'}
             >
-              <FaDownload />
+              {downloadingComprovante ? <FaSpinner className="fa-spin" /> : <FaDownload />}
               Baixar Comprovante
-            </a>
+            </button>
           )}
           {isAdminOrSindico() ? (
             <>

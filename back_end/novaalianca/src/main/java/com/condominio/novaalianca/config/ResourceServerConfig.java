@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import com.condominio.novaalianca.repositories.ParametrosSistemaRepository;
@@ -78,12 +80,13 @@ public class ResourceServerConfig {
                 .requestMatchers(HttpMethod.POST, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
                 .requestMatchers(HttpMethod.PATCH, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
                 .requestMatchers(HttpMethod.DELETE, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
-                .requestMatchers("/saldo/**").hasAnyAuthority(ROLES_AUTORIZADAS)
-                .requestMatchers(HttpMethod.GET, "/conciliacao/**", "/comprovante/**").hasAnyAuthority(ROLES_AUTORIZADAS)
+                .requestMatchers("/saldo/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/conciliacao/**", "/comprovante/**").authenticated()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .bearerTokenResolver(bearerTokenResolver())
             );
 
         return http.build();
@@ -103,6 +106,13 @@ public class ResourceServerConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
+        resolver.setAllowUriQueryParameter(true);
+        return resolver;
     }
 
     @Bean
@@ -134,6 +144,7 @@ public class ResourceServerConfig {
             corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH", "OPTIONS"));
             corsConfig.setAllowCredentials(true);
             corsConfig.setAllowedHeaders(Arrays.asList("*"));
+            corsConfig.setExposedHeaders(Arrays.asList("Content-Disposition", "Authorization"));
             return corsConfig;
         };
     }
