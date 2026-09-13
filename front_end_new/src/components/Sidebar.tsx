@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logoImg from '../assets/logo-vertical.jpg';
 import { 
   FaUsers, 
   FaBuilding, 
@@ -28,8 +29,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <div className={`sidebar-wrapper ${sidebarOpen ? 'mobile-show' : 'collapsed'}`}>
-      <div className="sidebar-brand">
-        <h4>Nova Aliança</h4>
+      <div className="sidebar-brand d-flex align-items-center gap-3">
+        <img 
+          src={logoImg} 
+          alt="Nova Aliança" 
+          style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover' }} 
+        />
+        <h4 className="mb-0">Nova Aliança</h4>
       </div>
       
       <div className="sidebar-menu">

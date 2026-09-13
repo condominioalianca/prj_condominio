@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaEnvelope, FaLock, FaBuilding } from 'react-icons/fa';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
+import logoImg from '../assets/logo-vertical.jpg';
 
 const Login: React.FC = () => {
   const { login, isAuthenticated } = useAuth();
@@ -46,11 +47,13 @@ const Login: React.FC = () => {
       <div className="card shadow border-0" style={{ width: '450px', borderRadius: '12px' }}>
         <div className="card-body p-5">
           <div className="text-center mb-4">
-            <div className="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3" style={{ width: '60px', height: '60px', fontSize: '1.5rem' }}>
-              <FaBuilding />
-            </div>
-            <h3 className="mb-1 fw-bold" style={{ fontFamily: 'var(--font-heading)' }}>Condomínio Nova Aliança</h3>
-            <p className="text-muted small">Insira suas credenciais para acessar o painel</p>
+            <img 
+              src={logoImg} 
+              alt="Condomínio Nova Aliança" 
+              style={{ width: '135px', height: '135px', objectFit: 'contain', borderRadius: '12px' }}
+              className="mb-2"
+            />
+            <p className="text-muted small mt-1">Insira suas credenciais para acessar o painel</p>
           </div>
 
           {error && (
