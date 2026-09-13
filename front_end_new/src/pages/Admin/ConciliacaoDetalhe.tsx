@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaDownload, FaFileAlt, FaFilePdf } from 'react-icons/fa';
-import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, gerarPdf, baixarPdf } from '../../services/conciliacaoService';
+import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaFileAlt, FaFilePdf, FaUpload } from 'react-icons/fa';
+import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, exportarPdf } from '../../services/conciliacaoService';
 import { getCategoriasAtivas } from '../../services/categoriaService';
 import type { ExtratoResumoDTO, ExtratoConciliacaoPatchDTO, Page } from '../../types/conciliacao';
 import type { CategoriaGasto } from '../../types/categoria';
@@ -24,7 +24,7 @@ const ConciliacaoDetalhe: React.FC = () => {
   const [showModalAprovar, setShowModalAprovar] = useState<boolean>(false);
   const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
   const [uploadingLote, setUploadingLote] = useState<boolean>(false);
-  const [generatingPdf, setGeneratingPdf] = useState<boolean>(false);
+  const [exportingPdf, setExportingPdf] = useState<boolean>(false);
 
   useEffect(() => {
     carregarCategorias();
@@ -139,26 +139,15 @@ const ConciliacaoDetalhe: React.FC = () => {
     }
   };
 
-  const handleGerarPdf = async () => {
+  const handleExportarPdf = async () => {
     try {
-      setGeneratingPdf(true);
-      await gerarPdf(Number(id));
-      alert('PDF gerado com sucesso! Iniciando download...');
-      await baixarPdf(Number(id));
+      setExportingPdf(true);
+      await exportarPdf(Number(id));
     } catch (error) {
-      console.error('Erro ao gerar PDF', error);
-      alert('Erro ao gerar PDF. Tente novamente mais tarde.');
+      console.error('Erro ao exportar PDF', error);
+      alert('Erro ao exportar PDF. Tente novamente mais tarde.');
     } finally {
-      setGeneratingPdf(false);
-    }
-  };
-
-  const handleBaixarPdf = async () => {
-    try {
-      await baixarPdf(Number(id));
-    } catch (error) {
-      console.error('Erro ao baixar PDF', error);
-      alert('PDF ainda não foi gerado para esta conciliação.');
+      setExportingPdf(false);
     }
   };
 
@@ -182,44 +171,25 @@ const ConciliacaoDetalhe: React.FC = () => {
           </div>
         </div>
         <div className="d-flex gap-2">
-          {isAdminOrSindico() ? (
-            <>
-              <div className="btn-group">
-                <button 
-                  className="btn btn-outline-danger d-flex align-items-center gap-2"
-                  onClick={handleGerarPdf}
-                  disabled={generatingPdf}
-                  title="Gerar e sobrescrever PDF atual"
-                >
-                  {generatingPdf ? <FaSpinner className="fa-spin" /> : <FaFilePdf />}
-                  Gerar PDF
-                </button>
-                <button 
-                  className="btn btn-outline-danger d-flex align-items-center"
-                  onClick={handleBaixarPdf}
-                  title="Baixar PDF salvo"
-                >
-                  <FaDownload />
-                </button>
-              </div>
-              <label className="btn btn-outline-primary mb-0 d-flex align-items-center" style={{ cursor: 'pointer' }}>
-                {uploadingLote ? (
-                  <><FaSpinner className="fa-spin me-2" /> Anexando...</>
-                ) : (
-                  <>{comprovanteConciliacao ? 'Substituir Comprovante' : 'Anexar Comprovante'}</>
-                )}
-                <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
-              </label>
-            </>
-          ) : (
-            <button 
-              className="btn btn-outline-danger d-flex align-items-center gap-2"
-              onClick={handleBaixarPdf}
-              title="Baixar PDF da conciliação"
-            >
-              <FaDownload />
-              Baixar Relatório PDF
-            </button>
+          <button 
+            type="button"
+            className="btn btn-outline-danger d-flex align-items-center gap-2"
+            onClick={handleExportarPdf}
+            disabled={exportingPdf}
+            title="Exportar relatório da conciliação em PDF"
+          >
+            {exportingPdf ? <FaSpinner className="fa-spin" /> : <FaFilePdf />}
+            {exportingPdf ? 'Exportando...' : 'Exportar'}
+          </button>
+          {isAdminOrSindico() && (
+            <label className="btn btn-outline-primary mb-0 d-flex align-items-center" style={{ cursor: 'pointer' }}>
+              {uploadingLote ? (
+                <><FaSpinner className="fa-spin me-2" /> Anexando...</>
+              ) : (
+                <><FaUpload className="me-2" /> {comprovanteConciliacao ? 'Substituir Comprovante' : 'Anexar Comprovante'}</>
+              )}
+              <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
+            </label>
           )}
         </div>
       </div>

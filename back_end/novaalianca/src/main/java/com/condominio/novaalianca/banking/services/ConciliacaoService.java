@@ -124,23 +124,26 @@ public class ConciliacaoService {
         });
     }
 
-    @Transactional
-    public void gerarESalvarPdfConciliacao(Long conciliacaoId) {
+    @Transactional(readOnly = true)
+    public byte[] exportarPdfDinamico(Long conciliacaoId) {
         Conciliacao conciliacao = conciliacaoRepository.findById(conciliacaoId)
                 .orElseThrow(() -> new RuntimeException("Conciliação não encontrada"));
 
-        String mesReferencia = conciliacao.getDataReferencia().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+        String mesReferencia = conciliacao.getDataReferencia() != null
+                ? conciliacao.getDataReferencia().format(DateTimeFormatter.ofPattern("MM/yyyy"))
+                : "";
         Saldo saldo = saldoRepository.findFirstByDataReferenciaEndingWithOrderByIdDesc(mesReferencia).orElse(null);
 
-        byte[] pdfBytes = relatorioConciliacaoService.gerarPdfConciliacao(conciliacao, saldo);
-        conciliacao.setArquivoPdf(pdfBytes);
-        conciliacaoRepository.save(conciliacao);
+        return relatorioConciliacaoService.gerarPdfConciliacao(conciliacao, saldo);
     }
 
     @Transactional(readOnly = true)
     public byte[] getPdfConciliacao(Long conciliacaoId) {
-        Conciliacao conciliacao = conciliacaoRepository.findById(conciliacaoId)
-                .orElseThrow(() -> new RuntimeException("Conciliação não encontrada"));
-        return conciliacao.getArquivoPdf();
+        return exportarPdfDinamico(conciliacaoId);
+    }
+
+    @Transactional(readOnly = true)
+    public void gerarESalvarPdfConciliacao(Long conciliacaoId) {
+        exportarPdfDinamico(conciliacaoId);
     }
 }

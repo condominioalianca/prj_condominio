@@ -112,21 +112,34 @@ export const getComprovanteDownloadUrl = (idComprovante: number): string => {
   return `${api.defaults.baseURL}/comprovante/${idComprovante}${tokenParam}`;
 };
 
-export const gerarPdf = async (conciliacaoId: number): Promise<void> => {
-  await api.post(`/conciliacao/${conciliacaoId}/gerar-pdf`);
-};
-
-export const baixarPdf = async (conciliacaoId: number): Promise<void> => {
+export const exportarPdf = async (conciliacaoId: number): Promise<void> => {
   const response = await api.get(`/conciliacao/${conciliacaoId}/pdf`, {
     responseType: 'blob',
   });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+
+  let fileName = `conciliacao_${conciliacaoId}.pdf`;
+  const contentDisposition = response.headers['content-disposition'] as string | undefined;
+  if (contentDisposition) {
+    const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (fileNameMatch && fileNameMatch[1]) {
+      fileName = fileNameMatch[1];
+    }
+  }
+
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `conciliacao_${conciliacaoId}.pdf`);
+  link.setAttribute('download', fileName);
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.URL.revokeObjectURL(url);
+};
+
+export const baixarPdf = exportarPdf;
+
+export const gerarPdf = async (conciliacaoId: number): Promise<void> => {
+  // Mantido para compatibilidade, agora chama diretamente exportarPdf
+  await exportarPdf(conciliacaoId);
 };
 

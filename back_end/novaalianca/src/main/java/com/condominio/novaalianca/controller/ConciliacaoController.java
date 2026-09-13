@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ContentDisposition;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
@@ -67,13 +68,12 @@ public class ConciliacaoController {
 
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> getPdf(@PathVariable Long id) {
-        byte[] pdf = conciliacaoService.getPdfConciliacao(id);
-        if (pdf == null) {
-            return ResponseEntity.notFound().build();
-        }
+        byte[] pdf = conciliacaoService.exportarPdfDinamico(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("filename", "conciliacao_" + id + ".pdf");
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename("conciliacao_" + id + ".pdf")
+                .build());
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
 }
