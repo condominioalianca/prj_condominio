@@ -65,7 +65,7 @@
                 <textElement verticalAlignment="Middle">
                     <font size="10" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Saldo Final do Mês (Conta Corrente): " + $P{SALDO_FINAL}]]></textFieldExpression>
+                <textFieldExpression><![CDATA["Saldo Conta Corrente: " + $P{SALDO_FINAL}]]></textFieldExpression>
             </textField>
             <image scaleImage="RetainShape" hAlign="Center" vAlign="Middle">
                 <reportElement x="51" y="90" width="700" height="250" uuid="f2719a9d-5bc9-4b68-ab19-35a96d11f71a"/>

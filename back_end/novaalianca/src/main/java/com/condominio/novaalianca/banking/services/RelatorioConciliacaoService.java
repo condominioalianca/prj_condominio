@@ -82,7 +82,7 @@ public class RelatorioConciliacaoService {
             }
 
             JFreeChart chart = ChartFactory.createBarChart(
-                    "Fluxo de Caixa (Débitos vs Créditos) - Últimos 30 Dias",
+                    "Fluxo de Caixa (Débitos vs Créditos)",
                     "Período",
                     "Valor (R$)",
                     dataset,
