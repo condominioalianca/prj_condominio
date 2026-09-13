@@ -22,6 +22,7 @@
     <parameter name="DATA_GERACAO" class="java.lang.String"/>
     <parameter name="SALDO_FINAL" class="java.lang.String"/>
     <parameter name="CHART_IMAGE" class="java.awt.Image"/>
+    <parameter name="LOGO_IMAGE" class="java.awt.Image"/>
     
     <field name="data" class="java.lang.String"/>
     <field name="titulo" class="java.lang.String"/>
@@ -32,30 +33,36 @@
     
     <title>
         <band height="350" splitType="Stretch">
+            <image scaleImage="RetainShape" hAlign="Left" vAlign="Middle">
+                <reportElement x="0" y="0" width="75" height="75" uuid="b5a32b21-4f81-499b-bf78-1a5c2d3e4f5a">
+                    <printWhenExpression><![CDATA[$P{LOGO_IMAGE} != null]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{LOGO_IMAGE}]]></imageExpression>
+            </image>
             <staticText>
-                <reportElement x="0" y="0" width="802" height="30" uuid="e38ec7eb-5c74-4b5f-a359-5fbeafbbbe93"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="18" isBold="true"/>
+                <reportElement x="85" y="0" width="717" height="28" uuid="e38ec7eb-5c74-4b5f-a359-5fbeafbbbe93"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="16" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Relatório de Conciliação Bancária]]></text>
             </staticText>
             <textField>
-                <reportElement x="0" y="40" width="802" height="15" uuid="cf821b0e-fb3c-4a37-b6f3-ff780dfb5722"/>
-                <textElement>
+                <reportElement x="85" y="30" width="717" height="15" uuid="cf821b0e-fb3c-4a37-b6f3-ff780dfb5722"/>
+                <textElement verticalAlignment="Middle">
                     <font size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Mês Referência: " + $P{MES_REFERENCIA}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="0" y="55" width="802" height="15" uuid="1d6b0520-b0b3-4f9e-8798-245f73d81992"/>
-                <textElement>
+                <reportElement x="85" y="45" width="717" height="15" uuid="1d6b0520-b0b3-4f9e-8798-245f73d81992"/>
+                <textElement verticalAlignment="Middle">
                     <font size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Data de Geração: " + $P{DATA_GERACAO}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="0" y="70" width="802" height="15" uuid="f984a961-bc76-47cb-b461-8f5532ed3b91"/>
-                <textElement>
+                <reportElement x="85" y="60" width="717" height="15" uuid="f984a961-bc76-47cb-b461-8f5532ed3b91"/>
+                <textElement verticalAlignment="Middle">
                     <font size="10" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Saldo Final do Mês (Conta Corrente): " + $P{SALDO_FINAL}]]></textFieldExpression>

@@ -14,6 +14,7 @@ import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
@@ -112,6 +113,20 @@ public class RelatorioConciliacaoService {
             }
             JasperReport jasperReport = JasperCompileManager.compileReport(jasperStream);
 
+            // Carregar Logo do Condomínio
+            BufferedImage logoImage = null;
+            try {
+                InputStream logoStream = getClass().getResourceAsStream("/images/logo.jpg");
+                if (logoStream == null) {
+                    logoStream = getClass().getResourceAsStream("/logo.jpg");
+                }
+                if (logoStream != null) {
+                    logoImage = ImageIO.read(logoStream);
+                }
+            } catch (Exception ex) {
+                // Se falhar o carregamento do logo, segue a geração do relatório sem quebrar
+            }
+
             // Parâmetros
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("MES_REFERENCIA", conciliacao.getDataReferencia() != null ? conciliacao.getDataReferencia().format(DateTimeFormatter.ofPattern("MM/yyyy")) : "");
@@ -124,6 +139,7 @@ public class RelatorioConciliacaoService {
             }
             
             parameters.put("CHART_IMAGE", chartImage);
+            parameters.put("LOGO_IMAGE", logoImage);
 
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(extratosDTO);
 
