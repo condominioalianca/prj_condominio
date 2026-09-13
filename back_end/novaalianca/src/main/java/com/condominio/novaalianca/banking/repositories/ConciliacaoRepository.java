@@ -30,12 +30,14 @@ public interface ConciliacaoRepository extends JpaRepository<Conciliacao, Long> 
     @Query("SELECT new com.condominio.novaalianca.banking.models.dtos.ConciliacaoResponseDTO(" +
            "c.id, c.descricao, " +
            "SUM(CASE WHEN e.statusConciliado = :statusBatido THEN 1L ELSE 0L END), " +
-           "SUM(CASE WHEN e.statusConciliado = :statusPendente THEN 1L ELSE 0L END)) " +
-           "FROM Conciliacao c LEFT JOIN c.extratos e " +
+           "SUM(CASE WHEN e.statusConciliado = :statusPendente THEN 1L ELSE 0L END), " +
+           "MAX(comp.id), " +
+           "MAX(comp.nomeArquivo)) " +
+           "FROM Conciliacao c LEFT JOIN c.extratos e LEFT JOIN e.comprovante comp " +
            "WHERE (:dataInicio IS NULL OR c.dataReferencia >= :dataInicio) AND " +
            "(:dataFim IS NULL OR c.dataReferencia <= :dataFim) AND " +
            "(:status IS NULL OR c.status = :status) " +
-           "GROUP BY c.id, c.descricao, c.dataCriacao " +
+           "GROUP BY c.id, c.descricao, c.dataCriacao, c.dataReferencia " +
            "ORDER BY c.dataReferencia DESC")
     List<ConciliacaoResponseDTO> findResumoWithFilters(@Param("dataInicio") LocalDate dataInicio,
                                                        @Param("dataFim") LocalDate dataFim,

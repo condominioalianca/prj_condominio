@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { FaArrowRight, FaSpinner, FaExchangeAlt } from 'react-icons/fa';
+import { FaArrowRight, FaSpinner, FaExchangeAlt, FaDownload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { getConciliacoes } from '../../services/conciliacaoService';
+import { getConciliacoes, baixarComprovante, baixarComprovantePorConciliacao } from '../../services/conciliacaoService';
 import type { ConciliacaoResponseDTO } from '../../types/conciliacao';
 
 const Conciliacao: React.FC = () => {
   const [conciliacoes, setConciliacoes] = useState<ConciliacaoResponseDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +24,22 @@ const Conciliacao: React.FC = () => {
       // Aqui pode entrar um toast de erro
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBaixarComprovante = async (c: ConciliacaoResponseDTO) => {
+    try {
+      setDownloadingId(c.id);
+      if (c.idComprovante) {
+        await baixarComprovante(c.idComprovante, c.nomeArquivoComprovante);
+      } else {
+        await baixarComprovantePorConciliacao(c.id, c.nomeArquivoComprovante);
+      }
+    } catch (error) {
+      console.error('Erro ao baixar comprovante', error);
+      alert('Erro ao baixar comprovante. Verifique se o arquivo está disponível.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -84,13 +101,26 @@ const Conciliacao: React.FC = () => {
                       <td className="text-center text-success fw-bold">{c.qtdBatido}</td>
                       <td className="text-center">{statusBadge(c.status)}</td>
                       <td className="text-end">
-                        <button
-                          className="btn btn-sm btn-outline-primary rounded-circle"
-                          onClick={() => navigate(`/conciliacao/${c.id}`)}
-                          title="Ver Extratos"
-                        >
-                          <FaArrowRight />
-                        </button>
+                        <div className="d-flex justify-content-end align-items-center gap-2">
+                          {c.possuiComprovante && (
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-success rounded-circle"
+                              onClick={() => handleBaixarComprovante(c)}
+                              disabled={downloadingId === c.id}
+                              title={c.nomeArquivoComprovante ? `Baixar Comprovante: ${c.nomeArquivoComprovante}` : 'Baixar Comprovante da Conciliação'}
+                            >
+                              {downloadingId === c.id ? <FaSpinner className="fa-spin" /> : <FaDownload />}
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-outline-primary rounded-circle"
+                            onClick={() => navigate(`/conciliacao/${c.id}`)}
+                            title="Ver Extratos"
+                          >
+                            <FaArrowRight />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

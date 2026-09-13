@@ -115,4 +115,14 @@ public class ComprovanteService {
         }
         return comprovante;
     }
+
+    @Transactional(readOnly = true)
+    public Comprovante downloadComprovanteConciliacao(Long idConciliacao) {
+        List<Extrato> extratos = conciliacaoService.listarExtratos(idConciliacao);
+        Extrato extratoComComprovante = extratos.stream()
+                .filter(e -> e.getComprovante() != null)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Nenhum comprovante encontrado para esta conciliação."));
+        return downloadComprovante(extratoComComprovante.getComprovante().getId());
+    }
 }

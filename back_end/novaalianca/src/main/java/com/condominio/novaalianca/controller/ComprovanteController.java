@@ -42,4 +42,13 @@ public class ComprovanteController {
                 .contentType(MediaType.parseMediaType(comprovante.getTipoArquivo() != null ? comprovante.getTipoArquivo() : "application/octet-stream"))
                 .body(comprovante.getDados());
     }
+
+    @GetMapping("/conciliacao/{idConciliacao}")
+    public ResponseEntity<byte[]> downloadComprovanteConciliacao(@PathVariable Long idConciliacao) {
+        Comprovante comprovante = comprovanteService.downloadComprovanteConciliacao(idConciliacao);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + comprovante.getNomeArquivo() + "\"")
+                .contentType(MediaType.parseMediaType(comprovante.getTipoArquivo() != null ? comprovante.getTipoArquivo() : "application/octet-stream"))
+                .body(comprovante.getDados());
+    }
 }

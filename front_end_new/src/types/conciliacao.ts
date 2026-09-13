@@ -9,6 +9,9 @@ export interface ConciliacaoResponseDTO {
   qtdBatido: number;
   qtdDivergente: number;
   qtdTotal: number;
+  possuiComprovante?: boolean;
+  idComprovante?: number | null;
+  nomeArquivoComprovante?: string | null;
 }
 
 export interface ExtratoResumoDTO {

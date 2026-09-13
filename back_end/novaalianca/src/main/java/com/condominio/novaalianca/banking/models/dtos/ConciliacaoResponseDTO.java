@@ -17,8 +17,15 @@ public class ConciliacaoResponseDTO {
     private Long qtdBatido;
     private Long qtdDivergente;
     private Long qtdTotal;
+    private Boolean possuiComprovante;
+    private Long idComprovante;
+    private String nomeArquivoComprovante;
 
     public ConciliacaoResponseDTO(Long id, String descricao, Long qtdBatido, Long qtdDivergente) {
+        this(id, descricao, qtdBatido, qtdDivergente, null, null);
+    }
+
+    public ConciliacaoResponseDTO(Long id, String descricao, Long qtdBatido, Long qtdDivergente, Long idComprovante, String nomeArquivoComprovante) {
         this.id = id;
         this.descricao = descricao;
         this.qtdBatido = qtdBatido != null ? qtdBatido : 0L;
@@ -30,5 +37,9 @@ public class ConciliacaoResponseDTO {
         } else {
             this.status = StatusConciliacao.BATIDO;
         }
+
+        this.idComprovante = idComprovante;
+        this.nomeArquivoComprovante = nomeArquivoComprovante;
+        this.possuiComprovante = idComprovante != null;
     }
 }
