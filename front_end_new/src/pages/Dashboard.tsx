@@ -3,7 +3,7 @@ import ReactApexChart from 'react-apexcharts';
 import { useAuth } from '../context/AuthContext';
 import { backEndService } from '../services/api';
 import type { IExtrato, IBoleto, ISaldo } from '../types';
-import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner } from 'react-icons/fa';
+import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner, FaPiggyBank } from 'react-icons/fa';
 import type { ApexOptions } from 'apexcharts';
 
 const Dashboard: React.FC = () => {
@@ -139,6 +139,8 @@ const Dashboard: React.FC = () => {
         .filter((item) => item.tipoOperacao === 'D')
         .reduce((sum, item) => sum + item.valorTransacao, 0)
     : 0;
+
+  const fundoDeCaixa = totalCredits - totalDebits;
 
   // Filtragem de Boletos
   // - Usuário Comum: Seus boletos do último ano (365 dias)
@@ -357,7 +359,7 @@ const Dashboard: React.FC = () => {
 
       {/* Cards de Métricas */}
       <div className="row g-4 mb-4">
-        <div className="col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">Receitas ({currentMonthLabel})</p>
@@ -371,7 +373,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         
-        <div className="col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">Despesas ({currentMonthLabel})</p>
@@ -385,7 +387,21 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="card-metric shadow-sm h-100">
+            <div>
+              <p className="card-metric-title">Fundo de Caixa ({currentMonthLabel})</p>
+              <h3 className={`card-metric-value ${fundoDeCaixa >= 0 ? 'text-success' : 'text-danger'}`}>
+                R$ {fundoDeCaixa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+            </div>
+            <div className="card-metric-icon fund">
+              <FaPiggyBank />
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="card-metric shadow-sm h-100">
             <div>
               <p className="card-metric-title">

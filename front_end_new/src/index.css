@@ -284,6 +284,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-primary);
 }
 
+.card-metric-icon.fund {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
 .card-metric-title {
   font-size: 0.875rem;
   color: var(--color-text-body);
