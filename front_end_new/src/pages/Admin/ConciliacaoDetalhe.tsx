@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaFileAlt, FaFilePdf, FaUpload } from 'react-icons/fa';
-import { getExtratosPaginado, atualizarExtrato, uploadComprovanteLote, exportarPdf } from '../../services/conciliacaoService';
+import { FaArrowLeft, FaSpinner, FaCheck, FaEdit, FaFileAlt, FaFilePdf, FaUpload, FaDownload } from 'react-icons/fa';
+import { 
+  getExtratosPaginado, 
+  atualizarExtrato, 
+  uploadComprovanteLote, 
+  exportarPdf,
+  baixarComprovante,
+  baixarComprovantePorConciliacao,
+  getConciliacoes
+} from '../../services/conciliacaoService';
 import { getCategoriasAtivas } from '../../services/categoriaService';
 import type { ExtratoResumoDTO, ExtratoConciliacaoPatchDTO, Page } from '../../types/conciliacao';
 import type { CategoriaGasto } from '../../types/categoria';
@@ -25,6 +33,8 @@ const ConciliacaoDetalhe: React.FC = () => {
   const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
   const [uploadingLote, setUploadingLote] = useState<boolean>(false);
   const [exportingPdf, setExportingPdf] = useState<boolean>(false);
+  const [comprovanteInfo, setComprovanteInfo] = useState<{ idComprovante?: number | null; nomeArquivo?: string | null } | null>(null);
+  const [downloadingComprovante, setDownloadingComprovante] = useState<boolean>(false);
 
   useEffect(() => {
     carregarCategorias();
@@ -33,8 +43,24 @@ const ConciliacaoDetalhe: React.FC = () => {
   useEffect(() => {
     if (id) {
       carregarExtratos(Number(id), currentPage);
+      carregarDadosConciliacao(Number(id));
     }
   }, [id, currentPage]);
+
+  const carregarDadosConciliacao = async (conciliacaoId: number): Promise<void> => {
+    try {
+      const lista = await getConciliacoes();
+      const concAtual = lista.find((c) => c.id === conciliacaoId);
+      if (concAtual && concAtual.possuiComprovante) {
+        setComprovanteInfo({
+          idComprovante: concAtual.idComprovante,
+          nomeArquivo: concAtual.nomeArquivoComprovante,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados da conciliação', error);
+    }
+  };
 
   const carregarCategorias = async (): Promise<void> => {
     try {
@@ -50,6 +76,13 @@ const ConciliacaoDetalhe: React.FC = () => {
       setLoading(true);
       const data = await getExtratosPaginado(conciliacaoId, page, 20);
       setExtratosPage(data);
+      const comp = data.content.find((e) => e.possuiComprovante && e.idComprovante);
+      if (comp) {
+        setComprovanteInfo((prev) => prev || {
+          idComprovante: comp.idComprovante,
+          nomeArquivo: comp.nomeArquivoComprovante,
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar extratos', error);
     } finally {
@@ -122,6 +155,31 @@ const ConciliacaoDetalhe: React.FC = () => {
     return new Date(d).toLocaleDateString('pt-BR');
   };
 
+  const comprovanteConciliacao = comprovanteInfo || extratosPage?.content.find(
+    (e) => e.possuiComprovante && e.idComprovante
+  );
+
+  const hasComprovante = !!comprovanteConciliacao;
+  const nomeComprovante = comprovanteInfo?.nomeArquivo || (comprovanteConciliacao as ExtratoResumoDTO | undefined)?.nomeArquivoComprovante;
+
+  const handleBaixarComprovanteConciliacao = async () => {
+    if (!id) return;
+    try {
+      setDownloadingComprovante(true);
+      const idComp = comprovanteInfo?.idComprovante || (comprovanteConciliacao as ExtratoResumoDTO | undefined)?.idComprovante;
+      if (idComp) {
+        await baixarComprovante(idComp, nomeComprovante);
+      } else {
+        await baixarComprovantePorConciliacao(Number(id), nomeComprovante);
+      }
+    } catch (error) {
+      console.error('Erro ao baixar comprovante da conciliação', error);
+      alert('Erro ao baixar comprovante da conciliação. Verifique se o arquivo está disponível.');
+    } finally {
+      setDownloadingComprovante(false);
+    }
+  };
+
   const handleUploadLote = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -129,7 +187,13 @@ const ConciliacaoDetalhe: React.FC = () => {
         setUploadingLote(true);
         await uploadComprovanteLote(Number(id), file);
         alert('Comprovante em lote anexado com sucesso!');
-        carregarExtratos(Number(id), currentPage);
+        setComprovanteInfo({
+          nomeArquivo: file.name,
+        });
+        if (id) {
+          await carregarExtratos(Number(id), currentPage);
+          await carregarDadosConciliacao(Number(id));
+        }
       } catch (error) {
         console.error('Erro ao anexar comprovante em lote', error);
         alert('Erro ao anexar comprovante em lote.');
@@ -150,10 +214,6 @@ const ConciliacaoDetalhe: React.FC = () => {
       setExportingPdf(false);
     }
   };
-
-  const comprovanteConciliacao = extratosPage?.content.find(
-    (e) => e.possuiComprovante && e.idComprovante
-  );
 
   const getDescricaoExibicao = (e: ExtratoResumoDTO): string => {
     const isBoletoRecebimento =
@@ -192,12 +252,24 @@ const ConciliacaoDetalhe: React.FC = () => {
             {exportingPdf ? <FaSpinner className="fa-spin" /> : <FaFilePdf />}
             {exportingPdf ? 'Exportando...' : 'Exportar'}
           </button>
+          {hasComprovante && (
+            <button
+              type="button"
+              className="btn btn-outline-success d-flex align-items-center gap-2"
+              onClick={handleBaixarComprovanteConciliacao}
+              disabled={downloadingComprovante}
+              title={nomeComprovante ? `Baixar Comprovante: ${nomeComprovante}` : 'Baixar Comprovante da Conciliação'}
+            >
+              {downloadingComprovante ? <FaSpinner className="fa-spin" /> : <FaDownload />}
+              {downloadingComprovante ? 'Baixando...' : 'Baixar Comprovante'}
+            </button>
+          )}
           {isAdminOrSindico() && (
             <label className="btn btn-outline-primary mb-0 d-flex align-items-center" style={{ cursor: 'pointer' }}>
               {uploadingLote ? (
                 <><FaSpinner className="fa-spin me-2" /> Anexando...</>
               ) : (
-                <><FaUpload className="me-2" /> {comprovanteConciliacao ? 'Substituir Comprovante' : 'Anexar Comprovante'}</>
+                <><FaUpload className="me-2" /> {hasComprovante ? 'Substituir Comprovante' : 'Anexar Comprovante'}</>
               )}
               <input type="file" style={{ display: 'none' }} onChange={handleUploadLote} disabled={uploadingLote} />
             </label>
@@ -248,6 +320,15 @@ const ConciliacaoDetalhe: React.FC = () => {
                         <td className="text-center">{statusBadge(e.statusConciliado)}</td>
                         {isAdminOrSindico() && (
                           <td className="text-end">
+                            {e.possuiComprovante && e.idComprovante && (
+                              <button
+                                className="btn btn-sm btn-light text-success me-2"
+                                onClick={() => baixarComprovante(e.idComprovante!, e.nomeArquivoComprovante)}
+                                title={e.nomeArquivoComprovante ? `Baixar Comprovante: ${e.nomeArquivoComprovante}` : 'Baixar Comprovante'}
+                              >
+                                <FaDownload />
+                              </button>
+                            )}
                             <button
                               className="btn btn-sm btn-light text-primary me-2"
                               onClick={() => openEditarModal(e)}
