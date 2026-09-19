@@ -61,8 +61,12 @@ public class RelatorioConciliacaoService {
                     boolean isCredito = "C".equalsIgnoreCase(e.getTipoOperacao()) || "CREDITO".equalsIgnoreCase(e.getTipoTransacao());
                     dto.setTipoBadge(isCredito ? "C" : "D");
                     
-                    dto.setValor(e.getValorTransacao() != null ? "R$ " + String.format("%.2f", Math.abs(e.getValorTransacao())) : "R$ 0,00");
-                    dto.setDescricao(e.getDescricao() != null ? e.getDescricao() : "");
+                    String descricao = e.getDescricao() != null ? e.getDescricao() : "";
+                    if ("BOLETO_COBRANCA".equalsIgnoreCase(e.getTipoTransacao()) || 
+                        (isCredito && (e.getIdBoleto() != null || (e.getTituloTransacao() != null && e.getTituloTransacao().toLowerCase().contains("boleto"))))) {
+                        descricao = "Credito Boleto Condominial";
+                    }
+                    dto.setDescricao(descricao);
                     
                     String nomeCategoria = "-";
                     if (e.getCategoriaGasto() != null && e.getCategoriaGasto().getDescricao() != null) {

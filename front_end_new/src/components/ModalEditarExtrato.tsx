@@ -18,18 +18,24 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
+  const isBoletoRecebimento =
+    extrato.tipoTransacao === 'BOLETO_COBRANCA' ||
+    (extrato.tipoOperacao === 'C' && (extrato.tituloTransacao?.toLowerCase().includes('boleto') || extrato.idBoleto != null));
+
+  const descricaoExibicao = isBoletoRecebimento ? 'Credito Boleto Condominial' : (extrato.descricao || '');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validação da regra: Só pode aprovar (BATIDO) Débito se tiver descrição
-    const descText = (extrato.descricao || '').trim();
+    const descText = descricaoExibicao.trim();
     if (extrato.tipoOperacao === 'DEBITO' && statusConciliado === 'BATIDO' && !descText) {
       setErrorMsg('Para aprovar um registro de DÉBITO, a descrição é obrigatória.');
       return;
     }
 
     const dto: ExtratoConciliacaoPatchDTO = {
-      descricao: descText || undefined,
+      descricao: isBoletoRecebimento ? undefined : (descText || undefined),
       idCategoriaGasto: idCategoriaGasto !== '' ? Number(idCategoriaGasto) : undefined,
       statusConciliado: statusConciliado,
     };
@@ -76,7 +82,7 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                   <input
                     type="text"
                     className="form-control bg-light"
-                    value={extrato.descricao || ''}
+                    value={descricaoExibicao}
                     disabled
                     placeholder="Descrição do lançamento"
                   />

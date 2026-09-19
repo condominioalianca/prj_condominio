@@ -155,6 +155,17 @@ const ConciliacaoDetalhe: React.FC = () => {
     (e) => e.possuiComprovante && e.idComprovante
   );
 
+  const getDescricaoExibicao = (e: ExtratoResumoDTO): string => {
+    const isBoletoRecebimento =
+      e.tipoTransacao === 'BOLETO_COBRANCA' ||
+      (e.tipoOperacao === 'C' && (e.tituloTransacao?.toLowerCase().includes('boleto') || e.idBoleto != null));
+
+    if (isBoletoRecebimento) {
+      return 'Credito Boleto Condominial';
+    }
+    return e.descricao || '-';
+  };
+
   return (
     <div>
       <div className="d-flex align-items-center justify-content-between mb-4">
@@ -232,7 +243,7 @@ const ConciliacaoDetalhe: React.FC = () => {
                           </span>
                         </td>
                         <td className="fw-bold">{formatCurrency(e.valorTransacao)}</td>
-                        <td>{e.descricao || '-'}</td>
+                        <td>{getDescricaoExibicao(e)}</td>
                         <td>{e.descricaoCategoriaGasto || '-'}</td>
                         <td className="text-center">{statusBadge(e.statusConciliado)}</td>
                         {isAdminOrSindico() && (

@@ -17,8 +17,39 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Obter mês atual no formato YYYY-MM
+  const getCurrentYearMonth = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  };
+
   // Estados dos filtros
-  const [daysFilter, setDaysFilter] = useState<number>(30);
+  const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentYearMonth());
+
+  // Gera os últimos 24 meses em ordem decrescente (do mais recente para o mais antigo)
+  const monthOptions = React.useMemo(() => {
+    const options: { value: string; label: string }[] = [];
+    const now = new Date();
+    for (let i = 0; i < 24; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const monthNumber = String(d.getMonth() + 1).padStart(2, '0');
+      const value = `${year}-${monthNumber}`;
+
+      const monthName = d.toLocaleDateString('pt-BR', { month: 'long' });
+      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      const label = `${capitalizedMonth}/${year}`;
+
+      options.push({ value, label });
+    }
+    return options;
+  }, []);
+
+  const currentMonthLabel = React.useMemo(() => {
+    return monthOptions.find((opt) => opt.value === selectedMonth)?.label || selectedMonth;
+  }, [monthOptions, selectedMonth]);
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -84,18 +115,17 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Filtragem dos Extratos baseada no filtro de dias
-  const filterExtratosByDays = (list: IExtrato[], days: number): IExtrato[] => {
-    const limitDate = new Date();
-    limitDate.setDate(limitDate.getDate() - days);
-    
+  // Filtragem dos Extratos baseada no mês selecionado (do dia 01 ao último dia do mês)
+  const filterExtratosByMonth = (list: IExtrato[], monthKey: string): IExtrato[] => {
     return list.filter((item) => {
-      const itemDate = new Date(item.dtInclusao);
-      return itemDate >= limitDate;
+      const rawDate = item.dtTransacao || item.dtInclusao;
+      if (!rawDate) return false;
+      const cleanDate = rawDate.split('T')[0].split(' ')[0];
+      return cleanDate.slice(0, 7) === monthKey;
     });
   };
 
-  const filteredExtratos = filterExtratosByDays(extratos, daysFilter);
+  const filteredExtratos = filterExtratosByMonth(extratos, selectedMonth);
 
   // Cálculo das Métricas
   const totalCredits = hasUnidade
@@ -147,7 +177,9 @@ const Dashboard: React.FC = () => {
     const grouped: { [key: string]: { credits: number; debits: number } } = {};
     
     filteredExtratos.forEach((item) => {
-      const dateStr = item.dtInclusao; // formato YYYY-MM-DD
+      const rawDate = item.dtTransacao || item.dtInclusao;
+      if (!rawDate) return;
+      const dateStr = rawDate.split('T')[0].split(' ')[0]; // formato YYYY-MM-DD
       if (!grouped[dateStr]) {
         grouped[dateStr] = { credits: 0, debits: 0 };
       }
@@ -227,7 +259,7 @@ const Dashboard: React.FC = () => {
     const grouped: { [key: string]: number } = {};
     
     debitsList.forEach((item) => {
-      const name = item.nomeRecebedor || item.descricao || 'Outros';
+      const name = item.categoriaGasto?.descricao || item.nomeRecebedor || item.descricao || 'Outros';
       grouped[name] = (grouped[name] || 0) + item.valorTransacao;
     });
 
@@ -295,39 +327,32 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Cabeçalho do Dashboard com Filtro de Período */}
+      {/* Cabeçalho do Dashboard com Filtro de Mês */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2 className="mb-1">Dashboard</h2>
           <p className="text-muted mb-0">Olá, {user?.userName}. Veja o resumo do condomínio.</p>
         </div>
 
-        {/* Se for Admin/Síndico, oferece a opção de trocar a visualização de dias */}
-        {isAdminOrSindico() && (
-          <div className="btn-group shadow-sm">
-            <button 
-              type="button" 
-              className={`btn btn-sm ${daysFilter === 30 ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setDaysFilter(30)}
-            >
-              30 Dias
-            </button>
-            <button 
-              type="button" 
-              className={`btn btn-sm ${daysFilter === 60 ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setDaysFilter(60)}
-            >
-              60 Dias
-            </button>
-            <button 
-              type="button" 
-              className={`btn btn-sm ${daysFilter === 90 ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setDaysFilter(90)}
-            >
-              90 Dias
-            </button>
-          </div>
-        )}
+        {/* Dropbox de seleção de Mês/Ano para Síndico e Usuário */}
+        <div className="d-flex align-items-center gap-2">
+          <label htmlFor="selectMesDashboard" className="fw-semibold text-muted small mb-0 d-none d-sm-inline">
+            Mês:
+          </label>
+          <select
+            id="selectMesDashboard"
+            className="form-select form-select-sm shadow-sm"
+            style={{ minWidth: '190px', fontWeight: 500 }}
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            {monthOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Cards de Métricas */}
@@ -335,7 +360,7 @@ const Dashboard: React.FC = () => {
         <div className="col-md-4">
           <div className="card-metric shadow-sm h-100">
             <div>
-              <p className="card-metric-title">Receitas ({daysFilter} dias)</p>
+              <p className="card-metric-title">Receitas ({currentMonthLabel})</p>
               <h3 className="card-metric-value">
                 R$ {totalCredits.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
@@ -349,7 +374,7 @@ const Dashboard: React.FC = () => {
         <div className="col-md-4">
           <div className="card-metric shadow-sm h-100">
             <div>
-              <p className="card-metric-title">Despesas ({daysFilter} dias)</p>
+              <p className="card-metric-title">Despesas ({currentMonthLabel})</p>
               <h3 className="card-metric-value text-danger">
                 R$ {totalDebits.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
@@ -390,7 +415,7 @@ const Dashboard: React.FC = () => {
           <div className={isAdminOrSindico() ? 'col-lg-8' : 'col-12'}>
             <div className="card-content">
               <div className="card-content-header">
-                <h5 className="card-content-title">Fluxo de Caixa (Débitos vs Créditos) - Últimos {daysFilter} Dias</h5>
+                <h5 className="card-content-title">Fluxo de Caixa (Débitos vs Créditos) - {currentMonthLabel}</h5>
               </div>
               <div className="card-content-body">
                 {chart1Info.series[0].data.length > 0 ? (
@@ -411,7 +436,7 @@ const Dashboard: React.FC = () => {
             <div className="col-lg-4">
               <div className="card-content">
                 <div className="card-content-header">
-                  <h5 className="card-content-title">Maiores Ofensores de Débito</h5>
+                  <h5 className="card-content-title">Maiores Ofensores de Débito - {currentMonthLabel}</h5>
                 </div>
                 <div className="card-content-body">
                   {top5Info.series.length > 0 ? (

@@ -1,3 +1,6 @@
+import type { CategoriaGasto } from './categoria';
+export type { CategoriaGasto };
+
 export interface IPerfil {
   id: number;
   nomePerfil: string; // 'ADMINISTRADOR' | 'SINDICO' | 'USUARIO'
@@ -88,6 +91,7 @@ export interface IExtrato {
   nomePagador: string | null;
   documentoPagador?: string | null;
   idBoleto: number | null;
+  categoriaGasto?: CategoriaGasto | null;
   pixDetalhe?: IPixDetalhe | null;
   pagamentoDetalhe?: IPagamentoDetalhe | null;
   compraDebitoDetalhe?: ICompraDebitoDetalhe | null;

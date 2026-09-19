@@ -20,10 +20,18 @@ const ModalAprovarConciliacao: React.FC<ModalAprovarProps> = ({ extrato, onClose
             </div>
             <div className="modal-body p-4 text-center">
               <p className="fs-5 mb-1">Deseja aprovar o registro abaixo?</p>
-              <div className="bg-light p-3 rounded mt-3 text-start">
-                <strong>Título:</strong> {extrato.tituloTransacao} <br />
-                <strong>Descrição:</strong> {extrato.descricao || 'Sem descrição'}
-              </div>
+              {(() => {
+                const isBoletoRecebimento =
+                  extrato.tipoTransacao === 'BOLETO_COBRANCA' ||
+                  (extrato.tipoOperacao === 'C' && (extrato.tituloTransacao?.toLowerCase().includes('boleto') || extrato.idBoleto != null));
+                const descricaoExibicao = isBoletoRecebimento ? 'Credito Boleto Condominial' : (extrato.descricao || 'Sem descrição');
+                return (
+                  <div className="bg-light p-3 rounded mt-3 text-start">
+                    <strong>Título:</strong> {extrato.tituloTransacao} <br />
+                    <strong>Descrição:</strong> {descricaoExibicao}
+                  </div>
+                );
+              })()}
               <p className="mt-4 mb-0 text-muted small">
                 Ao confirmar, o status deste registro será alterado para <strong>BATIDO</strong>.
               </p>
