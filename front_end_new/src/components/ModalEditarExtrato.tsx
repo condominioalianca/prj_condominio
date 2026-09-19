@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ExtratoResumoDTO, ExtratoConciliacaoPatchDTO, StatusConciliacao } from '../types/conciliacao';
-import type { CategoriaGasto } from '../types/categoria';
+import { type CategoriaGasto, getTipoCategoria } from '../types/categoria';
 
 interface ModalEditarProps {
   extrato: ExtratoResumoDTO;
@@ -18,28 +18,26 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
+  const isDebito = extrato.tipoOperacao === 'D' || extrato.tipoOperacao === 'DEBITO';
+  const isCredito = extrato.tipoOperacao === 'C' || extrato.tipoOperacao === 'CREDITO';
+  const targetTipo: 'C' | 'D' = isCredito ? 'C' : 'D';
+
   const isBoletoRecebimento =
     extrato.tipoTransacao === 'BOLETO_COBRANCA' ||
-    (extrato.tipoOperacao === 'C' && (extrato.tituloTransacao?.toLowerCase().includes('boleto') || extrato.idBoleto != null));
+    (isCredito && (extrato.tituloTransacao?.toLowerCase().includes('boleto') || extrato.idBoleto != null));
 
   const descricaoExibicao = isBoletoRecebimento ? 'Credito Boleto Condominial' : (extrato.descricao || '');
 
-  const isCredito = extrato.tipoOperacao === 'C' || extrato.tipoOperacao === 'CREDITO';
-  const targetTipo = isCredito ? 'C' : 'D';
-
-  const categoriasFiltradas = categorias.filter((cat) => {
-    if (!cat.tipo) {
-      return targetTipo === 'D';
-    }
-    return cat.tipo.toUpperCase() === targetTipo;
-  });
+  const categoriasFiltradas = useMemo(() => {
+    return (categorias || []).filter((cat) => getTipoCategoria(cat) === targetTipo);
+  }, [categorias, targetTipo]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validação da regra: Só pode aprovar (BATIDO) Débito se tiver descrição
     const descText = descricaoExibicao.trim();
-    if (extrato.tipoOperacao === 'DEBITO' && statusConciliado === 'BATIDO' && !descText) {
+    if (isDebito && statusConciliado === 'BATIDO' && !descText) {
       setErrorMsg('Para aprovar um registro de DÉBITO, a descrição é obrigatória.');
       return;
     }
@@ -75,8 +73,8 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                 <div className="col-md-4">
                   <label className="text-muted small">Tipo de Operação</label>
                   <div>
-                    <span className={`badge ${extrato.tipoOperacao === 'DEBITO' ? 'bg-danger' : 'bg-success'}`}>
-                      {extrato.tipoOperacao}
+                    <span className={`badge ${isDebito ? 'bg-danger' : 'bg-success'}`}>
+                      {isDebito ? 'DÉBITO' : 'CRÉDITO'} ({extrato.tipoOperacao})
                     </span>
                   </div>
                 </div>

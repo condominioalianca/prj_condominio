@@ -18,7 +18,20 @@ public class CategoriaGastoService {
     private final CategoriaGastoRepository categoriaGastoRepository;
 
     public List<CategoriaGasto> listarAtivas() {
-        return categoriaGastoRepository.findByAtivoTrue();
+        List<CategoriaGasto> lista = categoriaGastoRepository.findByAtivoTrue();
+        for (CategoriaGasto cat : lista) {
+            if (cat.getTipo() == null || cat.getTipo().trim().isEmpty()) {
+                String desc = cat.getDescricao() != null ? cat.getDescricao().toLowerCase() : "";
+                if (desc.contains("condominial") || desc.contains("multa") || desc.contains("juro")
+                        || desc.contains("rendimento") || desc.contains("receita") || desc.contains("fundo de reserva")
+                        || desc.contains("mudan") || desc.contains("espa")) {
+                    cat.setTipo("C");
+                } else {
+                    cat.setTipo("D");
+                }
+            }
+        }
+        return lista;
     }
 
     public CategoriaGasto salvar(CategoriaGasto categoriaGasto) {
