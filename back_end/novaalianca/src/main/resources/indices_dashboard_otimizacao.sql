@@ -81,6 +81,35 @@ WHERE (tp_tranacao = 'PIX' OR titulo_transacao ILIKE '%pix%')
   AND (tp_operacao = 'C' OR tp_operacao = 'CREDITO')
   AND (descricao IS NULL OR TRIM(descricao) = '' OR TRIM(descricao) = TRIM(nome_pagador));
 
+-- 8. Atualização das descrições na tabela tb_conciliacao para o formato padronizado "Conciliação Mês Ano" (ex: "Conciliação Agosto 2026"):
+UPDATE tb_conciliacao
+SET descricao = 'Conciliação Agosto 2026'
+WHERE descricao ILIKE '%08/2026%' OR (data_referencia >= '2026-08-01' AND data_referencia < '2026-09-01');
+
+UPDATE tb_conciliacao
+SET descricao = 'Conciliação Setembro 2026'
+WHERE descricao ILIKE '%09/2026%' OR (data_referencia >= '2026-09-01' AND data_referencia < '2026-10-01');
+
+-- Atualização genérica para quaisquer outras conciliações que contenham '-' ou '/' na descrição:
+UPDATE tb_conciliacao
+SET descricao = 'Conciliação ' || 
+    CASE EXTRACT(MONTH FROM data_referencia)
+        WHEN 1 THEN 'Janeiro'
+        WHEN 2 THEN 'Fevereiro'
+        WHEN 3 THEN 'Março'
+        WHEN 4 THEN 'Abril'
+        WHEN 5 THEN 'Maio'
+        WHEN 6 THEN 'Junho'
+        WHEN 7 THEN 'Julho'
+        WHEN 8 THEN 'Agosto'
+        WHEN 9 THEN 'Setembro'
+        WHEN 10 THEN 'Outubro'
+        WHEN 11 THEN 'Novembro'
+        WHEN 12 THEN 'Dezembro'
+    END || ' ' || EXTRACT(YEAR FROM data_referencia)
+WHERE data_referencia IS NOT NULL
+  AND (descricao ILIKE '%/%' OR descricao ILIKE '%-%');
+
 -- Observação: Como o ambiente de execução não está conectado diretamente ao banco de dados,
 -- este script pode ser executado manualmente via psql, DBeaver, pgAdmin ou em pipeline de migração.
 

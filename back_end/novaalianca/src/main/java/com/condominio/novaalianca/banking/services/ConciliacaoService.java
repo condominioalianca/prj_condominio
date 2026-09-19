@@ -37,10 +37,14 @@ public class ConciliacaoService {
 
     @Transactional(readOnly = true)
     public List<ConciliacaoResponseDTO> listar(LocalDate dataInicio, LocalDate dataFim, StatusConciliacao status) {
-        return conciliacaoRepository.findResumoWithFilters(
+        List<ConciliacaoResponseDTO> lista = conciliacaoRepository.findResumoWithFilters(
                 dataInicio, dataFim, status,
                 StatusConciliacao.BATIDO, StatusConciliacao.PENDENTE
         );
+        for (ConciliacaoResponseDTO dto : lista) {
+            dto.setDescricao(formatarDescricaoSeNecessario(dto.getDescricao()));
+        }
+        return lista;
     }
 
 
@@ -125,15 +129,24 @@ public class ConciliacaoService {
     @Transactional
     public Conciliacao findOrCreateByDataReferencia(LocalDate dataTransacao) {
         LocalDate dataReferencia = dataTransacao.withDayOfMonth(1);
-        return conciliacaoRepository.findByDataReferencia(dataReferencia).orElseGet(() -> {
-            Conciliacao nova = new Conciliacao();
-            nova.setDataReferencia(dataReferencia);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
-            nova.setDescricao("Conciliação - " + dataReferencia.format(formatter));
-            nova.setStatus(StatusConciliacao.PENDENTE);
-            nova.setDataCriacao(LocalDateTime.now());
-            return conciliacaoRepository.save(nova);
-        });
+        String descricaoPadrao = formatarDescricaoConciliacao(dataReferencia);
+
+        java.util.Optional<Conciliacao> existente = conciliacaoRepository.findByDataReferencia(dataReferencia);
+        if (existente.isPresent()) {
+            Conciliacao c = existente.get();
+            if (c.getDescricao() == null || !descricaoPadrao.equals(c.getDescricao())) {
+                c.setDescricao(descricaoPadrao);
+                conciliacaoRepository.save(c);
+            }
+            return c;
+        }
+
+        Conciliacao nova = new Conciliacao();
+        nova.setDataReferencia(dataReferencia);
+        nova.setDescricao(descricaoPadrao);
+        nova.setStatus(StatusConciliacao.PENDENTE);
+        nova.setDataCriacao(LocalDateTime.now());
+        return conciliacaoRepository.save(nova);
     }
 
     @Transactional(readOnly = true)
@@ -157,5 +170,42 @@ public class ConciliacaoService {
     @Transactional(readOnly = true)
     public void gerarESalvarPdfConciliacao(Long conciliacaoId) {
         exportarPdfDinamico(conciliacaoId);
+    }
+
+    /**
+     * Formata a descrição no padrão "Conciliação Mês Ano" (ex: "Conciliação Agosto 2026").
+     */
+    public static String formatarDescricaoConciliacao(LocalDate dataReferencia) {
+        if (dataReferencia == null) return "Conciliação";
+        String[] meses = {
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        };
+        int mesIndex = dataReferencia.getMonthValue() - 1;
+        String nomeMes = (mesIndex >= 0 && mesIndex < 12) ? meses[mesIndex] : dataReferencia.getMonth().name();
+        return "Conciliação " + nomeMes + " " + dataReferencia.getYear();
+    }
+
+    /**
+     * Converte descrições legadas com MM/AAAA (ex: "Conciliação - 08/2026") para o formato nominal ("Conciliação Agosto 2026").
+     */
+    public static String formatarDescricaoSeNecessario(String descricao) {
+        if (descricao == null) return null;
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(\\d{2})/(\\d{4})").matcher(descricao);
+        if (matcher.find()) {
+            int mes = Integer.parseInt(matcher.group(1));
+            String ano = matcher.group(2);
+            String[] meses = {
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            };
+            if (mes >= 1 && mes <= 12) {
+                return "Conciliação " + meses[mes - 1] + " " + ano;
+            }
+        }
+        if (descricao.startsWith("Conciliação - ")) {
+            return descricao.replace("Conciliação - ", "Conciliação ");
+        }
+        return descricao;
     }
 }

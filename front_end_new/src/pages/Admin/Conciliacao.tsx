@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaArrowRight, FaSpinner, FaExchangeAlt, FaDownload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { getConciliacoes, baixarComprovante, baixarComprovantePorConciliacao } from '../../services/conciliacaoService';
+import { getConciliacoes, baixarComprovante, baixarComprovantePorConciliacao, formatarDescricaoConciliacao } from '../../services/conciliacaoService';
 import type { ConciliacaoResponseDTO } from '../../types/conciliacao';
 
 const Conciliacao: React.FC = () => {
@@ -94,7 +94,7 @@ const Conciliacao: React.FC = () => {
                   {conciliacoes.map((c) => (
                     <tr key={c.id}>
                       <td>
-                        <strong>{c.descricao}</strong>
+                        <strong>{formatarDescricaoConciliacao(c.descricao)}</strong>
                       </td>
                       <td className="text-center fw-bold">{c.qtdTotal}</td>
                       <td className="text-center text-danger fw-bold">{c.qtdDivergente}</td>

@@ -35,6 +35,7 @@ const ConciliacaoDetalhe: React.FC = () => {
   const [exportingPdf, setExportingPdf] = useState<boolean>(false);
   const [comprovanteInfo, setComprovanteInfo] = useState<{ idComprovante?: number | null; nomeArquivo?: string | null } | null>(null);
   const [downloadingComprovante, setDownloadingComprovante] = useState<boolean>(false);
+  const [nomeConciliacao, setNomeConciliacao] = useState<string>('');
 
   useEffect(() => {
     carregarCategorias();
@@ -51,11 +52,14 @@ const ConciliacaoDetalhe: React.FC = () => {
     try {
       const lista = await getConciliacoes();
       const concAtual = lista.find((c) => c.id === conciliacaoId);
-      if (concAtual && concAtual.possuiComprovante) {
-        setComprovanteInfo({
-          idComprovante: concAtual.idComprovante,
-          nomeArquivo: concAtual.nomeArquivoComprovante,
-        });
+      if (concAtual) {
+        setNomeConciliacao(concAtual.descricao);
+        if (concAtual.possuiComprovante) {
+          setComprovanteInfo({
+            idComprovante: concAtual.idComprovante,
+            nomeArquivo: concAtual.nomeArquivoComprovante,
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar dados da conciliação', error);
@@ -250,7 +254,10 @@ const ConciliacaoDetalhe: React.FC = () => {
               <FaFileAlt className="text-primary" />
               Detalhes da Conciliação
             </h2>
-            <p className="text-muted small mb-0">Listagem de lançamentos (Extrato).</p>
+            <p className="text-muted small mb-0">
+              {nomeConciliacao ? <strong className="text-dark me-1">{nomeConciliacao} —</strong> : null}
+              Listagem de lançamentos (Extrato).
+            </p>
           </div>
         </div>
         <div className="d-flex gap-2">

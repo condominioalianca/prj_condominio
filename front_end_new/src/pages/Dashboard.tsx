@@ -252,7 +252,7 @@ const Dashboard: React.FC = () => {
     legend: { position: 'top' },
   };
 
-  // Dados do Gráfico 2: Top 5 Ofensores de Débito nos últimos 90 dias (Apenas Admin)
+  // Dados do Gráfico 2: Top 5 Ofensores de Débito no mês selecionado
   const getTop5Debtors = () => {
     // Filtra apenas débitos (D)
     const debitsList = filteredExtratos.filter((item) => item.tipoOperacao === 'D');
@@ -425,10 +425,10 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Gráficos de Fluxo de Caixa */}
+      {/* Gráficos de Fluxo de Caixa e Ofensores */}
       {hasUnidade && (
         <div className="row g-4 mb-4">
-          <div className={isAdminOrSindico() ? 'col-lg-8' : 'col-12'}>
+          <div className="col-lg-8">
             <div className="card-content">
               <div className="card-content-header">
                 <h5 className="card-content-title">Fluxo de Caixa (Débitos vs Créditos) - {currentMonthLabel}</h5>
@@ -448,27 +448,25 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {isAdminOrSindico() && (
-            <div className="col-lg-4">
-              <div className="card-content">
-                <div className="card-content-header">
-                  <h5 className="card-content-title">Maiores Ofensores de Débito - {currentMonthLabel}</h5>
-                </div>
-                <div className="card-content-body">
-                  {top5Info.series.length > 0 ? (
-                    <ReactApexChart 
-                      options={topDebtorsChartOptions} 
-                      series={top5Info.series} 
-                      type="donut" 
-                      height={350} 
-                    />
-                  ) : (
-                    <div className="py-5 text-center text-muted">Sem despesas registradas no período.</div>
-                  )}
-                </div>
+          <div className="col-lg-4">
+            <div className="card-content">
+              <div className="card-content-header">
+                <h5 className="card-content-title">Maiores Ofensores de Débito - {currentMonthLabel}</h5>
+              </div>
+              <div className="card-content-body">
+                {top5Info.series.length > 0 ? (
+                  <ReactApexChart 
+                    options={topDebtorsChartOptions} 
+                    series={top5Info.series} 
+                    type="donut" 
+                    height={350} 
+                  />
+                ) : (
+                  <div className="py-5 text-center text-muted">Sem despesas registradas no período.</div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 

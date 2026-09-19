@@ -6,9 +6,39 @@ import type {
   Page
 } from '../types/conciliacao';
 
+/**
+ * Padroniza a descrição da conciliação no formato "Conciliação Mês Ano" (ex: "Conciliação Agosto 2026").
+ * Se a descrição original estiver no formato "Conciliação - MM/AAAA", "Conciliação MM/AAAA" ou "MM/AAAA", converte.
+ */
+export const formatarDescricaoConciliacao = (descricao: string | null | undefined): string => {
+  if (!descricao) return 'Conciliação';
+  
+  const match = descricao.match(/(\d{2})\/(\d{4})/);
+  if (match) {
+    const mesNum = parseInt(match[1], 10);
+    const ano = match[2];
+    const meses = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    if (mesNum >= 1 && mesNum <= 12) {
+      return `Conciliação ${meses[mesNum - 1]} ${ano}`;
+    }
+  }
+
+  if (descricao.startsWith('Conciliação - ')) {
+    return descricao.replace('Conciliação - ', 'Conciliação ');
+  }
+  
+  return descricao;
+};
+
 export const getConciliacoes = async (): Promise<ConciliacaoResponseDTO[]> => {
   const response = await api.get<ConciliacaoResponseDTO[]>('/conciliacao');
-  return response.data;
+  return (response.data || []).map((c) => ({
+    ...c,
+    descricao: formatarDescricaoConciliacao(c.descricao),
+  }));
 };
 
 export const getExtratosPaginado = async (
