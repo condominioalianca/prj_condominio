@@ -65,6 +65,14 @@ public class ConciliacaoService {
         if (dto.getDescricao() != null) {
             extrato.setDescricao(dto.getDescricao());
         }
+
+        if (ExtratoService.isPixRecebidoCredito(extrato)) {
+            if (extrato.getDescricao() == null 
+                    || extrato.getDescricao().trim().isEmpty() 
+                    || (extrato.getNomePagador() != null && extrato.getDescricao().trim().equalsIgnoreCase(extrato.getNomePagador().trim()))) {
+                extrato.setDescricao("Validar");
+            }
+        }
         
         // A lógica de comprovante agora fica no ComprovanteService (Upload separado)
         

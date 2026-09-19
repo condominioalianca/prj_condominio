@@ -26,7 +26,22 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
     extrato.tipoTransacao === 'BOLETO_COBRANCA' ||
     (isCredito && (extrato.tituloTransacao?.toLowerCase().includes('boleto') || extrato.idBoleto != null));
 
-  const descricaoExibicao = isBoletoRecebimento ? 'Credito Boleto Condominial' : (extrato.descricao || '');
+  const isPixCredito =
+    (extrato.tipoTransacao === 'PIX' || extrato.tituloTransacao?.toLowerCase().includes('pix')) && isCredito;
+
+  const getInitialDescricao = () => {
+    if (isBoletoRecebimento) return 'Credito Boleto Condominial';
+    if (
+      isPixCredito &&
+      (!extrato.descricao ||
+        (extrato.nomePagador && extrato.descricao.trim().toLowerCase() === extrato.nomePagador.trim().toLowerCase()))
+    ) {
+      return 'Validar';
+    }
+    return extrato.descricao || '';
+  };
+
+  const [descricao, setDescricao] = useState<string>(getInitialDescricao());
 
   const categoriasFiltradas = useMemo(() => {
     return (categorias || []).filter((cat) => getTipoCategoria(cat) === targetTipo);
@@ -36,7 +51,7 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
     e.preventDefault();
     
     // Validação da regra: Só pode aprovar (BATIDO) Débito se tiver descrição
-    const descText = descricaoExibicao.trim();
+    const descText = descricao.trim();
     if (isDebito && statusConciliado === 'BATIDO' && !descText) {
       setErrorMsg('Para aprovar um registro de DÉBITO, a descrição é obrigatória.');
       return;
@@ -89,11 +104,22 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                   <label className="form-label">Descrição</label>
                   <input
                     type="text"
-                    className="form-control bg-light"
-                    value={descricaoExibicao}
-                    disabled
+                    className={`form-control ${isBoletoRecebimento ? 'bg-light' : ''}`}
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    disabled={isBoletoRecebimento}
                     placeholder="Descrição do lançamento"
                   />
+                  {isBoletoRecebimento && (
+                    <small className="text-muted d-block mt-1">
+                      Boletos condominiais são padronizados como "Credito Boleto Condominial".
+                    </small>
+                  )}
+                  {isPixCredito && !isBoletoRecebimento && (
+                    <small className="text-muted d-block mt-1">
+                      Pix recebido de crédito possui descrição padrão "Validar" para conferência manual.
+                    </small>
+                  )}
                 </div>
                 
                 <div className="col-md-6">

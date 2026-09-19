@@ -72,6 +72,15 @@ BEGIN
     END IF;
 END $$;
 
+-- 7. Atualização para extratos de Pix Recebido (Crédito):
+-- Regra de negócio: Definir a descrição como 'Validar' como padrão para Pix Recebido de Crédito,
+-- mantendo o nome do pagador preservado na coluna nome_pagador e não na descrição.
+UPDATE tb_extrato
+SET descricao = 'Validar'
+WHERE (tp_tranacao = 'PIX' OR titulo_transacao ILIKE '%pix%')
+  AND (tp_operacao = 'C' OR tp_operacao = 'CREDITO')
+  AND (descricao IS NULL OR TRIM(descricao) = '' OR TRIM(descricao) = TRIM(nome_pagador));
+
 -- Observação: Como o ambiente de execução não está conectado diretamente ao banco de dados,
 -- este script pode ser executado manualmente via psql, DBeaver, pgAdmin ou em pipeline de migração.
 

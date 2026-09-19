@@ -216,13 +216,25 @@ const ConciliacaoDetalhe: React.FC = () => {
   };
 
   const getDescricaoExibicao = (e: ExtratoResumoDTO): string => {
+    const isCredito = e.tipoOperacao === 'C' || e.tipoOperacao === 'CREDITO';
     const isBoletoRecebimento =
       e.tipoTransacao === 'BOLETO_COBRANCA' ||
-      (e.tipoOperacao === 'C' && (e.tituloTransacao?.toLowerCase().includes('boleto') || e.idBoleto != null));
+      (isCredito && (e.tituloTransacao?.toLowerCase().includes('boleto') || e.idBoleto != null));
 
     if (isBoletoRecebimento) {
       return 'Credito Boleto Condominial';
     }
+
+    const isPixCredito =
+      (e.tipoTransacao === 'PIX' || e.tituloTransacao?.toLowerCase().includes('pix')) && isCredito;
+    if (
+      isPixCredito &&
+      (!e.descricao ||
+        (e.nomePagador && e.descricao.trim().toLowerCase() === e.nomePagador.trim().toLowerCase()))
+    ) {
+      return 'Validar';
+    }
+
     return e.descricao || '-';
   };
 

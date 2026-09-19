@@ -65,6 +65,10 @@ public class RelatorioConciliacaoService {
                     if ("BOLETO_COBRANCA".equalsIgnoreCase(e.getTipoTransacao()) || 
                         (isCredito && (e.getIdBoleto() != null || (e.getTituloTransacao() != null && e.getTituloTransacao().toLowerCase().contains("boleto"))))) {
                         descricao = "Credito Boleto Condominial";
+                    } else if (("PIX".equalsIgnoreCase(e.getTipoTransacao()) || (e.getTituloTransacao() != null && e.getTituloTransacao().toLowerCase().contains("pix"))) && isCredito) {
+                        if (descricao.trim().isEmpty() || (e.getNomePagador() != null && descricao.trim().equalsIgnoreCase(e.getNomePagador().trim()))) {
+                            descricao = "Validar";
+                        }
                     }
                     dto.setDescricao(descricao);
                     

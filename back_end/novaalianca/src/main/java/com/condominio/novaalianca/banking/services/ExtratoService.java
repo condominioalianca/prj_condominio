@@ -95,6 +95,7 @@ public class ExtratoService {
 
                 converterParaEntidade(transacaoDTO, extrato);
                 aplicarRegrasBoletoCondominial(extrato);
+                aplicarRegrasPixRecebido(extrato);
 
                 if (extrato.getConciliacao() == null && extrato.getDtTransacao() != null) {
                     Conciliacao c = conciliacaoService.findOrCreateByDataReferencia(extrato.getDtTransacao());
@@ -125,10 +126,13 @@ public class ExtratoService {
         extrato.setIdTransacao(dto.getIdTransacao());
         extrato.setDtInclusao(parseDate(dto.getDataInclusao()));
         extrato.setDtTransacao(parseDate(dto.getDataTransacao()));
-        extrato.setDescricao(dto.getDescricao());
         extrato.setTipoTransacao(dto.getTipoTransacao() != null ? dto.getTipoTransacao().name() : null);
         extrato.setTipoOperacao(dto.getTipoOperacao() != null ? dto.getTipoOperacao().getValue() : null);
         extrato.setTituloTransacao(dto.getTitulo());
+
+        if (extrato.getDescricao() == null) {
+            extrato.setDescricao(dto.getDescricao());
+        }
 
         // Parse do valor de String para Double
         if (dto.getValor() != null) {
@@ -250,6 +254,8 @@ public class ExtratoService {
                 extrato.setDocumentePagador("07890271000109");
             }
         }
+
+        aplicarRegrasPixRecebido(extrato);
     }
 
     private LocalDate parseDate(String dateStr) {
@@ -283,6 +289,7 @@ public class ExtratoService {
     @Transactional
     public Extrato save(Extrato entity) {
         aplicarRegrasBoletoCondominial(entity);
+        aplicarRegrasPixRecebido(entity);
         Extrato saved = extratoRepository.save(entity);
         if (saved.getConciliacao() != null) {
             try {
@@ -300,6 +307,7 @@ public class ExtratoService {
             throw new ResourceNotFoundException("Extrato nao encontrado para o ID: " + entity.getId());
         }
         aplicarRegrasBoletoCondominial(entity);
+        aplicarRegrasPixRecebido(entity);
         Extrato updated = extratoRepository.save(entity);
         if (updated.getConciliacao() != null) {
             try {
@@ -346,6 +354,32 @@ public class ExtratoService {
                 } catch (Exception e) {
                     log.error("Erro ao vincular categoria de Boleto Condominial no extrato: {}", e.getMessage(), e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Identifica se a transação do extrato corresponde a um Pix Recebido de Crédito.
+     */
+    public static boolean isPixRecebidoCredito(Extrato extrato) {
+        if (extrato == null) return false;
+        boolean isPix = "PIX".equalsIgnoreCase(extrato.getTipoTransacao())
+                || (extrato.getTituloTransacao() != null && extrato.getTituloTransacao().toLowerCase().contains("pix"));
+        boolean isCredito = "C".equalsIgnoreCase(extrato.getTipoOperacao())
+                || "CREDITO".equalsIgnoreCase(extrato.getTipoOperacao());
+        return isPix && isCredito;
+    }
+
+    /**
+     * Regra de negócio: Para registros de Pix Recebido do tipo Crédito, colocar como default "Validar"
+     * na descrição da tb_extrato e não o nome do pagador.
+     */
+    private void aplicarRegrasPixRecebido(Extrato extrato) {
+        if (isPixRecebidoCredito(extrato)) {
+            if (extrato.getDescricao() == null 
+                    || extrato.getDescricao().trim().isEmpty() 
+                    || (extrato.getNomePagador() != null && extrato.getDescricao().trim().equalsIgnoreCase(extrato.getNomePagador().trim()))) {
+                extrato.setDescricao("Validar");
             }
         }
     }
