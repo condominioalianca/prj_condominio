@@ -24,6 +24,16 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
 
   const descricaoExibicao = isBoletoRecebimento ? 'Credito Boleto Condominial' : (extrato.descricao || '');
 
+  const isCredito = extrato.tipoOperacao === 'C' || extrato.tipoOperacao === 'CREDITO';
+  const targetTipo = isCredito ? 'C' : 'D';
+
+  const categoriasFiltradas = categorias.filter((cat) => {
+    if (!cat.tipo) {
+      return targetTipo === 'D';
+    }
+    return cat.tipo.toUpperCase() === targetTipo;
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -89,14 +99,14 @@ const ModalEditarExtrato: React.FC<ModalEditarProps> = ({ extrato, categorias, o
                 </div>
                 
                 <div className="col-md-6">
-                  <label className="form-label">Categoria de Gasto</label>
+                  <label className="form-label">Categoria</label>
                   <select
                     className="form-select"
                     value={idCategoriaGasto}
                     onChange={(e) => setIdCategoriaGasto(e.target.value === '' ? '' : Number(e.target.value))}
                   >
                     <option value="">Selecione...</option>
-                    {categorias.map((cat) => (
+                    {categoriasFiltradas.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.descricao}
                       </option>

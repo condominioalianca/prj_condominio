@@ -48,6 +48,8 @@ public class ExtratoService {
 
     private final ConciliacaoService conciliacaoService;
 
+    private final CategoriaGastoService categoriaGastoService;
+
     private final DateUtils dateUtils;
 
     /**
@@ -92,6 +94,7 @@ public class ExtratoService {
                 }
 
                 converterParaEntidade(transacaoDTO, extrato);
+                aplicarRegrasBoletoCondominial(extrato);
 
                 if (extrato.getConciliacao() == null && extrato.getDtTransacao() != null) {
                     Conciliacao c = conciliacaoService.findOrCreateByDataReferencia(extrato.getDtTransacao());
@@ -99,6 +102,15 @@ public class ExtratoService {
                 }
 
                 extratoRepository.save(extrato);
+
+                if (extrato.getConciliacao() != null) {
+                    try {
+                        conciliacaoService.verificarStatusConciliacao(extrato.getConciliacao());
+                    } catch (Exception e) {
+                        log.warn("Erro ao verificar status da conciliação: {}", e.getMessage());
+                    }
+                }
+
                 persistidasCount.set(persistidasCount.get() + 1);
             } catch (Exception e) {
                 log.error("Erro ao persistir transação ID {}: {}", transacaoDTO.getIdTransacao(), e.getMessage(), e);
@@ -270,7 +282,16 @@ public class ExtratoService {
 
     @Transactional
     public Extrato save(Extrato entity) {
-        return extratoRepository.save(entity);
+        aplicarRegrasBoletoCondominial(entity);
+        Extrato saved = extratoRepository.save(entity);
+        if (saved.getConciliacao() != null) {
+            try {
+                conciliacaoService.verificarStatusConciliacao(saved.getConciliacao());
+            } catch (Exception e) {
+                log.warn("Erro ao verificar status da conciliação no save: {}", e.getMessage());
+            }
+        }
+        return saved;
     }
 
     @Transactional
@@ -278,7 +299,16 @@ public class ExtratoService {
         if (!extratoRepository.existsById(entity.getId())) {
             throw new ResourceNotFoundException("Extrato nao encontrado para o ID: " + entity.getId());
         }
-        return extratoRepository.save(entity);
+        aplicarRegrasBoletoCondominial(entity);
+        Extrato updated = extratoRepository.save(entity);
+        if (updated.getConciliacao() != null) {
+            try {
+                conciliacaoService.verificarStatusConciliacao(updated.getConciliacao());
+            } catch (Exception e) {
+                log.warn("Erro ao verificar status da conciliação no update: {}", e.getMessage());
+            }
+        }
+        return updated;
     }
 
     @Transactional
@@ -287,5 +317,36 @@ public class ExtratoService {
             throw new ResourceNotFoundException("Extrato nao encontrado para o ID: " + id);
         }
         extratoRepository.deleteById(id);
+    }
+
+    /**
+     * Identifica se a transação do extrato corresponde a um Boleto Condominial.
+     */
+    private boolean isBoletoCondominial(Extrato extrato) {
+        if (extrato == null) return false;
+        if ("BOLETO_COBRANCA".equalsIgnoreCase(extrato.getTipoTransacao())) {
+            return true;
+        }
+        if (extrato.getIdBoleto() != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Regra de negócio: Todo Boleto Condominial é gravado com Categoria de crédito 'Taxa Condominial'
+     * e com o Status Conciliado 'BATIDO'.
+     */
+    private void aplicarRegrasBoletoCondominial(Extrato extrato) {
+        if (isBoletoCondominial(extrato)) {
+            extrato.setStatusConciliado(StatusConciliacao.BATIDO);
+            if (extrato.getCategoriaGasto() == null) {
+                try {
+                    extrato.setCategoriaGasto(categoriaGastoService.obterOuCriarCategoriaBoletoCondominial());
+                } catch (Exception e) {
+                    log.error("Erro ao vincular categoria de Boleto Condominial no extrato: {}", e.getMessage(), e);
+                }
+            }
+        }
     }
 }

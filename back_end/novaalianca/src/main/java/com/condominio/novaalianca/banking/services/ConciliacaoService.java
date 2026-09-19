@@ -94,19 +94,23 @@ public class ConciliacaoService {
         verificarStatusConciliacao(extrato.getConciliacao());
     }
 
-    private void verificarStatusConciliacao(Conciliacao conciliacao) {
-        if (conciliacao == null || conciliacao.getExtratos() == null || conciliacao.getExtratos().isEmpty()) return;
+    @Transactional
+    public void verificarStatusConciliacao(Conciliacao conciliacao) {
+        if (conciliacao == null || conciliacao.getId() == null) return;
         
-        boolean todosBatidos = conciliacao.getExtratos().stream()
+        Conciliacao c = conciliacaoRepository.findById(conciliacao.getId()).orElse(conciliacao);
+        if (c.getExtratos() == null || c.getExtratos().isEmpty()) return;
+        
+        boolean todosBatidos = c.getExtratos().stream()
                 .filter(e -> e.getStatusGeral() != StatusGeral.INATIVO)
                 .allMatch(e -> StatusConciliacao.BATIDO.equals(e.getStatusConciliado()));
 
         StatusConciliacao novoStatus = todosBatidos ? StatusConciliacao.BATIDO : StatusConciliacao.PENDENTE;
         
-        if (!novoStatus.equals(conciliacao.getStatus())) {
-            conciliacao.setStatus(novoStatus);
-            conciliacao.setDataAtualizacao(LocalDateTime.now());
-            conciliacaoRepository.save(conciliacao);
+        if (!novoStatus.equals(c.getStatus())) {
+            c.setStatus(novoStatus);
+            c.setDataAtualizacao(LocalDateTime.now());
+            conciliacaoRepository.save(c);
         }
     }
 
