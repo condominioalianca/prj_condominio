@@ -6,7 +6,8 @@ import Header from './Header';
 
 const Layout: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  // Em mobile (< 992px) o sidebar começa fechado
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(window.innerWidth >= 992);
 
   if (loading) {
     return (
@@ -25,6 +26,12 @@ const Layout: React.FC = () => {
 
   return (
     <>
+      {/* Overlay escuro — visível apenas no mobile quando o sidebar está aberto */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="main-layout">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />

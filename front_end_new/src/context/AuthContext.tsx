@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { backEndService } from '../services/api';
 import type { IUserSession } from '../types';
+import { useInactivityTimeout } from '../hooks/useInactivityTimeout';
+
+// Sessão expira após 10 minutos de inatividade
+const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000;
+// Aviso aparece 2 minutos antes do logout
+const INACTIVITY_WARNING_MS = 2 * 60 * 1000;
 
 interface AuthContextType {
   user: IUserSession | null;
@@ -19,6 +26,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<IUserSession | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -40,11 +49,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
+  const logout = useCallback((): void => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setShowTimeoutWarning(false);
+    navigate('/login', { replace: true });
+  }, [navigate]);
+
   const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
       const data = await backEndService.login(email, password);
-      
+
       const sessionUser: IUserSession = {
         userId: data.userId,
         userName: data.userName,
@@ -62,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
 
       setUser(sessionUser);
+      setShowTimeoutWarning(false);
     } catch (error) {
       logout();
       throw error;
@@ -70,11 +88,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = (): void => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-  };
+  // Hook de inatividade — só ativo quando autenticado
+  useInactivityTimeout({
+    timeoutMs: INACTIVITY_TIMEOUT_MS,
+    warningMs: INACTIVITY_WARNING_MS,
+    enabled: !!user,
+    onWarning: () => setShowTimeoutWarning(true),
+    onTimeout: () => {
+      setShowTimeoutWarning(false);
+      logout();
+    },
+  });
 
   const hasRole = (role: string): boolean => {
     if (!user) return false;
@@ -112,6 +136,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }}
     >
       {children}
+
+      {/* Toast de aviso de sessão — aparece 2 min antes do logout automático */}
+      {showTimeoutWarning && isAuthenticated && (
+        <div className="session-warning-toast" role="alert">
+          <span>⚠️ Sua sessão expira em <strong>2 minutos</strong> por inatividade.</span>
+          <button
+            onClick={() => setShowTimeoutWarning(false)}
+            aria-label="Manter sessão ativa"
+          >
+            Continuar
+          </button>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

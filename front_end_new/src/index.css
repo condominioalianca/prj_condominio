@@ -453,15 +453,203 @@ h1, h2, h3, h4, h5, h6 {
   outline: 0;
 }
 
-/* Responsive sidebar */
+/* ═══════════════════════════════════════════════════════════
+   OVERLAY DO SIDEBAR (mobile) — oculto por padrão via CSS
+   ═══════════════════════════════════════════════════════════ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVIDADE TABLET — colapsa sidebar automaticamente
+   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 991.98px) {
   .sidebar-wrapper {
     position: fixed;
     left: 0;
-    margin-left: -280px;
-    height: 100vh;
+    top: 0;
+    height: 100dvh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: 0; /* remove o margin-left trick de desktop */
   }
   .sidebar-wrapper.mobile-show {
+    transform: translateX(0);
+  }
+  .sidebar-wrapper.collapsed {
+    transform: translateX(-100%);
     margin-left: 0;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVIDADE MOBILE — 393×852 (iPhone 14 Pro e similares)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 576px) {
+  /* Sidebar mais estreita no mobile */
+  .sidebar-wrapper {
+    width: 260px;
+    min-width: 260px;
+  }
+
+  /* Header compacto */
+  .header-wrapper {
+    height: 58px;
+    padding: 0 12px;
+  }
+
+  /* Oculta nome/cargo no header — economiza espaço horizontal */
+  .header-profile-name,
+  .header-profile-role {
+    display: none;
+  }
+
+  /* Reduz padding lateral da página: 28px → 12px */
+  .page-container {
+    padding: 16px 12px;
+  }
+
+  /* Cards de métrica: força 1 coluna */
+  .row.g-4 > [class*='col-'] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .card-metric {
+    padding: 16px;
+  }
+  .card-metric-value {
+    font-size: 1.3rem;
+  }
+
+  /* Card header: empilha título e ação */
+  .card-content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px;
+  }
+  .card-content-body {
+    padding: 14px 14px;
+  }
+
+  /* Tabelas: scroll horizontal + sem quebra de linha nas células */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-custom th,
+  .table-custom td {
+    font-size: 0.8rem;
+    padding: 11px 12px;
+    white-space: nowrap;
+  }
+
+  /* Botões touch-friendly (área mínima 44×44px — guideline Apple/Google) */
+  .btn,
+  .btn-primary-custom,
+  .btn-sm,
+  .btn-secondary {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+  }
+
+  /* Badges ligeiramente maiores */
+  .badge-custom {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+
+  /* Inputs ≥ 16px evitam auto-zoom no iOS/Safari */
+  .form-control,
+  .form-control-custom,
+  .form-select,
+  select,
+  input,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Modais: tela cheia no mobile */
+  .modal-dialog {
+    margin: 0;
+    max-width: 100%;
+    height: 100%;
+  }
+  .modal-content {
+    height: 100%;
+    border-radius: 0;
+  }
+  .modal-body {
+    overflow-y: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SESSION TIMEOUT WARNING TOAST
+   ═══════════════════════════════════════════════════════════ */
+.session-warning-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c2434;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  border-left: 4px solid var(--color-warning);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 0.875rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  animation: sessionToastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+}
+
+.session-warning-toast span {
+  flex: 1;
+  white-space: normal;
+}
+
+.session-warning-toast button {
+  background: var(--color-warning);
+  color: #1c2434;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-height: 36px;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.session-warning-toast button:hover {
+  opacity: 0.85;
+}
+
+@keyframes sessionToastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+

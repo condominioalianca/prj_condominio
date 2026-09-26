@@ -89,10 +89,12 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <header className="header-wrapper d-flex align-items-center justify-content-between">
       <div className="d-flex align-items-center">
-        <button 
-          className="header-toggle-btn" 
+        <button
+          className="header-toggle-btn"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? 'Fechar menu' : 'Abrir menu'}
           title="Toggle Menu"
+          style={{ minHeight: 44, minWidth: 44 }}
         >
           <FaBars />
         </button>

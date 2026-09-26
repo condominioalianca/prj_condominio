@@ -270,6 +270,7 @@ public class BoletoService{
         }
 
         // 4.5 Buscar PDF do Banco Inter e associar à entidade antes de persistir
+        // PDF é opcional: falha não impede atualização do status
         try {
             LOGGER.info("Buscando PDF para anexar ao boleto de código: {}", codigoSolicitacao);
             BoletoPDFDto pdfDto = interService.obterBoletoPdf(codigoSolicitacao, null, ambiente);
@@ -279,12 +280,15 @@ public class BoletoService{
                 LOGGER.info("PDF anexado com sucesso para persistência conjunta.");
             }
         } catch (Exception e) {
-            LOGGER.error("Falha ao recuperar e anexar o PDF do boleto durante o enriquecimento: {}", e.getMessage(), e);
-            throw new RuntimeException("Erro ao buscar o PDF do boleto para persistência conjunta: " + e.getMessage(), e);
+            // PDF é secundário — status e dados do boleto já foram atualizados acima.
+            // Registramos o aviso e continuamos para não bloquear a atualização do status.
+            LOGGER.warn("Não foi possível obter o PDF do boleto {}. Status será salvo sem PDF. Motivo: {}",
+                    codigoSolicitacao, e.getMessage());
         }
 
         // 5. Persistir e retornar
         return boletoRepository.save(boletoLocal);
+
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)

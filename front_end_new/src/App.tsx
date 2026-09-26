@@ -65,8 +65,8 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           {/* Rota Pública */}
           <Route path="/login" element={<Login />} />
@@ -166,8 +166,8 @@ const App: React.FC = () => {
           {/* Rota de Fallback */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 
