@@ -19,7 +19,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
-  const { hasRole, isAdminOrSindico, hasPerfilAtrelado } = useAuth();
+  const { hasRole, isAdminOrSindico, isCobrancaExtraAuthorized, hasPerfilAtrelado } = useAuth();
 
   const handleLinkClick = (): void => {
     if (window.innerWidth < 992) {
@@ -65,60 +65,66 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
           )}
         </ul>
 
-        {isAdminOrSindico() && (
+        {(isAdminOrSindico() || isCobrancaExtraAuthorized()) && (
           <>
             <div className="sidebar-menu-title">Administração</div>
             <ul className="sidebar-menu-list">
-              <li className="sidebar-menu-item">
-                <NavLink 
-                  to="/admin/usuarios" 
-                  className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
-                  onClick={handleLinkClick}
-                >
-                  <FaUsers />
-                  <span>Usuários</span>
-                </NavLink>
-              </li>
-              <li className="sidebar-menu-item">
-                <NavLink 
-                  to="/admin/unidades" 
-                  className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
-                  onClick={handleLinkClick}
-                >
-                  <FaBuilding />
-                  <span>Unidades</span>
-                </NavLink>
-              </li>
-              <li className="sidebar-menu-item">
-                <NavLink 
-                  to="/admin/empresas" 
-                  className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
-                  onClick={handleLinkClick}
-                >
-                  <FaBuilding />
-                  <span>Empresas</span>
-                </NavLink>
-              </li>
-              <li className="sidebar-menu-item">
-                <NavLink 
-                  to="/conciliacao" 
-                  className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
-                  onClick={handleLinkClick}
-                >
-                  <FaExchangeAlt />
-                  <span>Conciliação</span>
-                </NavLink>
-              </li>
-              <li className="sidebar-menu-item">
-                <NavLink 
-                  to="/admin/cobranca-extra" 
-                  className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
-                  onClick={handleLinkClick}
-                >
-                  <FaFileInvoiceDollar />
-                  <span>Cobrança Extra</span>
-                </NavLink>
-              </li>
+              {isAdminOrSindico() && (
+                <>
+                  <li className="sidebar-menu-item">
+                    <NavLink 
+                      to="/admin/usuarios" 
+                      className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <FaUsers />
+                      <span>Usuários</span>
+                    </NavLink>
+                  </li>
+                  <li className="sidebar-menu-item">
+                    <NavLink 
+                      to="/admin/unidades" 
+                      className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <FaBuilding />
+                      <span>Unidades</span>
+                    </NavLink>
+                  </li>
+                  <li className="sidebar-menu-item">
+                    <NavLink 
+                      to="/admin/empresas" 
+                      className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <FaBuilding />
+                      <span>Empresas</span>
+                    </NavLink>
+                  </li>
+                  <li className="sidebar-menu-item">
+                    <NavLink 
+                      to="/conciliacao" 
+                      className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <FaExchangeAlt />
+                      <span>Conciliação</span>
+                    </NavLink>
+                  </li>
+                </>
+              )}
+              {isCobrancaExtraAuthorized() && (
+                <li className="sidebar-menu-item">
+                  <NavLink 
+                    to="/admin/cobranca-extra" 
+                    className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                    onClick={handleLinkClick}
+                  >
+                    <FaFileInvoiceDollar />
+                    <span>Cobrança Extra</span>
+                  </NavLink>
+                </li>
+              )}
               
               {hasRole('ADMINISTRADOR') && (
                 <>

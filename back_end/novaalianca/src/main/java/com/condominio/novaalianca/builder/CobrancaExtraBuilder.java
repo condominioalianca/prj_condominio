@@ -15,6 +15,7 @@ public class CobrancaExtraBuilder {
                 .valorCobranca(entity.getValorCobranca())
                 .dtInclusao(entity.getDtInclusao())
                 .mesReferencia(entity.getMesReferencia())
+                .anoReferencia(entity.getAnoReferencia())
                 .descricao(entity.getDescricao())
                 .idUnidade(entity.getUnidade() != null ? entity.getUnidade().getIdUnidade() : null)
                 .build();
@@ -27,6 +28,7 @@ public class CobrancaExtraBuilder {
                 .valorCobranca(dto.getValorCobranca())
                 .dtInclusao(dto.getDtInclusao())
                 .mesReferencia(dto.getMesReferencia())
+                .anoReferencia(dto.getAnoReferencia())
                 .descricao(dto.getDescricao())
                 .unidade(unidade)
                 .build();

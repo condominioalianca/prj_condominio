@@ -41,6 +41,9 @@ public class CobrancaExtra {
     @Column(name = "MES_REFERENCIA")
     private Long mesReferencia;
 
+    @Column(name = "ANO_REFERENCIA")
+    private Long anoReferencia;
+
     @Column(name = "DESCRICAO")
     private String descricao;
 

@@ -15,6 +15,7 @@ const CobrancaExtra: React.FC = () => {
   // Campos de Formulário
   const [valorCobranca, setValorCobranca] = useState<number>(0);
   const [mesReferencia, setMesReferencia] = useState<number>(1);
+  const [anoReferencia, setAnoReferencia] = useState<number>(new Date().getFullYear());
   const [descricao, setDescricao] = useState<string>('');
   const [selectedUnidadeId, setSelectedUnidadeId] = useState<number>(-1);
 
@@ -42,6 +43,7 @@ const CobrancaExtra: React.FC = () => {
     setEditingCobranca(null);
     setValorCobranca(0);
     setMesReferencia(new Date().getMonth() + 1);
+    setAnoReferencia(new Date().getFullYear());
     setDescricao('');
     setSelectedUnidadeId(-1);
     setModalOpen(true);
@@ -51,6 +53,7 @@ const CobrancaExtra: React.FC = () => {
     setEditingCobranca(cobranca);
     setValorCobranca(cobranca.valorCobranca);
     setMesReferencia(cobranca.mesReferencia);
+    setAnoReferencia(cobranca.anoReferencia || new Date().getFullYear());
     setDescricao(cobranca.descricao);
     setSelectedUnidadeId(cobranca.idUnidade);
     setModalOpen(true);
@@ -69,6 +72,7 @@ const CobrancaExtra: React.FC = () => {
         valorCobranca,
         dtInclusao: editingCobranca ? editingCobranca.dtInclusao : new Date().toISOString().split('T')[0],
         mesReferencia,
+        anoReferencia,
         descricao,
         idUnidade: selectedUnidadeId,
       };
@@ -134,7 +138,7 @@ const CobrancaExtra: React.FC = () => {
                   <tr>
                     <th>ID</th>
                     <th>Unidade</th>
-                    <th>Mês de Referência</th>
+                    <th>Mês/Ano Ref.</th>
                     <th>Descrição</th>
                     <th>Valor</th>
                     <th>Inclusão</th>
@@ -147,7 +151,7 @@ const CobrancaExtra: React.FC = () => {
                       <tr key={cob.idCobrancaExtra}>
                         <td>{cob.idCobrancaExtra}</td>
                         <td className="fw-semibold">{getNumeroUnidade(cob.idUnidade)}</td>
-                        <td>Mês {cob.mesReferencia}</td>
+                        <td>{String(cob.mesReferencia).padStart(2, '0')}/{cob.anoReferencia || new Date().getFullYear()}</td>
                         <td>{cob.descricao}</td>
                         <td className="fw-bold text-danger">
                           R$ {cob.valorCobranca.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -217,8 +221,8 @@ const CobrancaExtra: React.FC = () => {
                   </div>
                   
                   <div className="row g-2 mb-3">
-                    <div className="col-md-6">
-                      <label className="form-label form-label-custom">Valor da Cobrança (R$)</label>
+                    <div className="col-md-4">
+                      <label className="form-label form-label-custom">Valor (R$)</label>
                       <input 
                         type="number" 
                         step="0.01"
@@ -228,8 +232,8 @@ const CobrancaExtra: React.FC = () => {
                         required 
                       />
                     </div>
-                    <div className="col-md-6">
-                      <label className="form-label form-label-custom">Mês de Referência</label>
+                    <div className="col-md-4">
+                      <label className="form-label form-label-custom">Mês Ref.</label>
                       <select 
                         className="form-select form-control-custom"
                         value={mesReferencia}
@@ -237,10 +241,20 @@ const CobrancaExtra: React.FC = () => {
                       >
                         {Array.from({ length: 12 }, (_, i) => (
                           <option key={i + 1} value={i + 1}>
-                            Mês {i + 1}
+                            {String(i + 1).padStart(2, '0')}
                           </option>
                         ))}
                       </select>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label form-label-custom">Ano Ref.</label>
+                      <input 
+                        type="number" 
+                        className="form-control form-control-custom" 
+                        value={anoReferencia} 
+                        onChange={(e) => setAnoReferencia(Number(e.target.value))} 
+                        required 
+                      />
                     </div>
                   </div>
 

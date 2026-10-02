@@ -74,7 +74,9 @@ public class BoletoBuilder {
 		DateTimeFormatter formatterSeuNumer = DateTimeFormatter.ofPattern("MMyyyy");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-		CobrancaExtra cobrancaExtra = cobrancaExtraService.getCobrancaExtraByIdUnidadeAndMesReferencia(usuario.getUnidade(),LocalDate.now().getMonth().getValue());
+		int mesAtual = LocalDate.now().getMonth().getValue();
+		int anoAtual = LocalDate.now().getYear();
+		CobrancaExtra cobrancaExtra = cobrancaExtraService.getCobrancaExtraByIdUnidadeAndMesReferencia(usuario.getUnidade(), mesAtual, anoAtual);
 
 
 		Mensagem mensagem = new Mensagem();

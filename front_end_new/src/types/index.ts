@@ -140,6 +140,7 @@ export interface ICobrancaExtra {
   valorCobranca: number;
   dtInclusao: string | null;
   mesReferencia: number;
+  anoReferencia: number;
   descricao: string;
   idUnidade: number;
 }

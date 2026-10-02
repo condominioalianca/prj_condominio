@@ -15,6 +15,7 @@ public class CobrancaExtraDTO {
     private Double valorCobranca;
     private LocalDate dtInclusao;
     private Long mesReferencia;
+    private Long anoReferencia;
     private String descricao;
     private Long idUnidade;
 }

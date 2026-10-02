@@ -17,6 +17,7 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (role: string) => boolean;
   isAdminOrSindico: () => boolean;
+  isCobrancaExtraAuthorized: () => boolean;
   hasPerfilAtrelado: () => boolean;
   hasAnyRole: (roles: string[]) => boolean;
 }
@@ -110,6 +111,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return hasRole('ADMINISTRADOR') || hasRole('SINDICO');
   };
 
+  const isCobrancaExtraAuthorized = (): boolean => {
+    return hasAnyRole(['ADMINISTRADOR', 'SINDICO', 'FINANCEIRO']);
+  };
+
   const hasPerfilAtrelado = (): boolean => {
     return !!user && Array.isArray(user.roles) && user.roles.length > 0;
   };
@@ -131,6 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         hasRole,
         isAdminOrSindico,
+        isCobrancaExtraAuthorized,
         hasPerfilAtrelado,
         hasAnyRole,
       }}

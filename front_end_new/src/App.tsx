@@ -22,6 +22,7 @@ import CobrancaExtra from './pages/Admin/CobrancaExtra';
 interface RoleRouteProps {
   requiredRole?: string;
   adminOrSindicoRequired?: boolean;
+  cobrancaExtraRequired?: boolean;
   requirePerfil?: boolean;
   children: React.ReactElement;
 }
@@ -29,10 +30,11 @@ interface RoleRouteProps {
 const RoleRoute: React.FC<RoleRouteProps> = ({ 
   requiredRole, 
   adminOrSindicoRequired, 
+  cobrancaExtraRequired,
   requirePerfil,
   children 
 }) => {
-  const { isAuthenticated, hasRole, isAdminOrSindico, hasPerfilAtrelado, loading } = useAuth();
+  const { isAuthenticated, hasRole, isAdminOrSindico, isCobrancaExtraAuthorized, hasPerfilAtrelado, loading } = useAuth();
 
   if (loading) {
     return (
@@ -53,6 +55,10 @@ const RoleRoute: React.FC<RoleRouteProps> = ({
   }
 
   if (adminOrSindicoRequired && !isAdminOrSindico()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (cobrancaExtraRequired && !isCobrancaExtraAuthorized()) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -135,7 +141,7 @@ const App: React.FC = () => {
             <Route 
               path="admin/cobranca-extra" 
               element={
-                <RoleRoute adminOrSindicoRequired>
+                <RoleRoute cobrancaExtraRequired>
                   <CobrancaExtra />
                 </RoleRoute>
               } 

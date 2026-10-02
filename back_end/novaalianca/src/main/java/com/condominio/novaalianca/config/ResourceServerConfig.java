@@ -48,6 +48,7 @@ public class ResourceServerConfig {
         "/error", "/api/error"
     };
     private static final String[] ADMIN = {"/parametros/**"};
+    private static final String[] COBRANCA_EXTRA = {"/cobrancas-extras/**"};
     private static final String[] SINDICO = {"/boleto/**", "/endereco/**", "/unidade/**", "/usuarios/**"};
     private static final String[] CONCILIACAO_COMPROVANTE_MUTATION = {
         "/conciliacao/extrato/**",
@@ -57,6 +58,7 @@ public class ResourceServerConfig {
     private static final String[] ROLES_AUTORIZADAS = {
         "ROLE_ADMINISTRADOR",
         "ROLE_SINDICO",
+        "ROLE_FINANCEIRO",
         "ROLE_USUARIO"
     };
 
@@ -77,6 +79,7 @@ public class ResourceServerConfig {
                 .requestMatchers(PUBLICO).permitAll()
                 .requestMatchers(HttpMethod.GET, SINDICO).permitAll()
                 .requestMatchers(ADMIN).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
+                .requestMatchers(COBRANCA_EXTRA).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO", "ROLE_FINANCEIRO")
                 .requestMatchers(HttpMethod.POST, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
                 .requestMatchers(HttpMethod.PATCH, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")
                 .requestMatchers(HttpMethod.DELETE, CONCILIACAO_COMPROVANTE_MUTATION).hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_SINDICO")

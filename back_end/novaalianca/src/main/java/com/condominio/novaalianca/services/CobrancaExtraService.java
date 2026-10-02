@@ -27,9 +27,9 @@ public class CobrancaExtraService {
 
     private final CobrancaExtraBuilder builder;
 
-    public CobrancaExtra getCobrancaExtraByIdUnidadeAndMesReferencia (Unidade unidade, int mesReferencia){
-        LOGGER.info("Mes de Referencia Cobranca Extra: {}",mesReferencia);
-        return cobrancaExtraRepository.findByidUnidadeAndMesReferencia(unidade, (long) mesReferencia);
+    public CobrancaExtra getCobrancaExtraByIdUnidadeAndMesReferencia (Unidade unidade, int mesReferencia, int anoReferencia){
+        LOGGER.info("Mes/Ano de Referencia Cobranca Extra: {}/{}", mesReferencia, anoReferencia);
+        return cobrancaExtraRepository.findByidUnidadeAndMesReferenciaAndAnoReferencia(unidade, (long) mesReferencia, (long) anoReferencia);
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +71,7 @@ public class CobrancaExtraService {
         entity.setValorCobranca(dto.getValorCobranca());
         entity.setDtInclusao(dto.getDtInclusao());
         entity.setMesReferencia(dto.getMesReferencia());
+        entity.setAnoReferencia(dto.getAnoReferencia());
         entity.setDescricao(dto.getDescricao());
         entity.setUnidade(unidade);
         
