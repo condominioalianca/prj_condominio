@@ -18,11 +18,15 @@ public class CobrancaExtraBuilder {
                 .anoReferencia(entity.getAnoReferencia())
                 .descricao(entity.getDescricao())
                 .idUnidade(entity.getUnidade() != null ? entity.getUnidade().getIdUnidade() : null)
+                .tipoOperacao(entity.getTipoOperacao() != null ? entity.getTipoOperacao() : "ACRESCIMO")
+                .recorrente(entity.getRecorrente() != null ? entity.getRecorrente() : false)
+                .tipoAbrangencia(entity.getTipoAbrangencia() != null ? entity.getTipoAbrangencia() : (entity.getUnidade() != null ? "UNIDADE" : "GERAL"))
                 .build();
     }
 
     public CobrancaExtra dtoToEntity(CobrancaExtraDTO dto, Unidade unidade) {
         if (dto == null) return null;
+        String tipoAbrangencia = dto.getTipoAbrangencia() != null ? dto.getTipoAbrangencia() : (unidade != null ? "UNIDADE" : "GERAL");
         return CobrancaExtra.builder()
                 .idCobrancaExtra(dto.getIdCobrancaExtra())
                 .valorCobranca(dto.getValorCobranca())
@@ -30,7 +34,10 @@ public class CobrancaExtraBuilder {
                 .mesReferencia(dto.getMesReferencia())
                 .anoReferencia(dto.getAnoReferencia())
                 .descricao(dto.getDescricao())
-                .unidade(unidade)
+                .tipoOperacao(dto.getTipoOperacao() != null ? dto.getTipoOperacao() : "ACRESCIMO")
+                .recorrente(dto.getRecorrente() != null ? dto.getRecorrente() : false)
+                .tipoAbrangencia(tipoAbrangencia)
+                .unidade("GERAL".equals(tipoAbrangencia) ? null : unidade)
                 .build();
     }
 }

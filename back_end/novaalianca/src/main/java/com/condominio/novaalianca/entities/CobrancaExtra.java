@@ -47,7 +47,16 @@ public class CobrancaExtra {
     @Column(name = "DESCRICAO")
     private String descricao;
 
+    @Column(name = "TIPO_OPERACAO", length = 20)
+    private String tipoOperacao; // 'ACRESCIMO' ou 'DESCONTO'
+
+    @Column(name = "RECORRENTE")
+    private Boolean recorrente; // true ou false
+
+    @Column(name = "TIPO_ABRANGENCIA", length = 20)
+    private String tipoAbrangencia; // 'GERAL' ou 'UNIDADE'
+
     @ManyToOne
-    @JoinColumn(name = "ID_UNIDADE")
+    @JoinColumn(name = "ID_UNIDADE", nullable = true)
     private Unidade unidade;
 }

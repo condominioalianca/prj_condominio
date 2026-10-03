@@ -142,7 +142,10 @@ export interface ICobrancaExtra {
   mesReferencia: number;
   anoReferencia: number;
   descricao: string;
-  idUnidade: number;
+  idUnidade: number | null;
+  tipoOperacao?: 'ACRESCIMO' | 'DESCONTO';
+  recorrente?: boolean;
+  tipoAbrangencia?: 'GERAL' | 'UNIDADE';
 }
 
 export interface IParametro {

@@ -18,4 +18,7 @@ public class CobrancaExtraDTO {
     private Long anoReferencia;
     private String descricao;
     private Long idUnidade;
+    private String tipoOperacao;
+    private Boolean recorrente;
+    private String tipoAbrangencia;
 }

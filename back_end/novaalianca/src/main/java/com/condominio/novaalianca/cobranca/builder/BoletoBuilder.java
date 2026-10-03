@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import com.condominio.novaalianca.builder.UnidadeBuilder;
@@ -56,11 +57,11 @@ public class BoletoBuilder {
 
 	private final NovaAliancaProperties properties;
 
-	Locale BRASILLOCALE = Locale.of("pt","BR");
+	Locale BRASILLOCALE = new Locale("pt","BR");
 
 
 	public Boleto boletoInter (Usuario usuario) throws ParseException {
-		Locale ptBr = Locale.of("pt", "BR");
+		Locale ptBr = new Locale("pt", "BR");
 		DateTimeFormatter formatterYear = DateTimeFormatter.ofPattern("yyyy");
 		Double valorCondominio = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_CONDOMINIO.toString() +"_"+ LocalDate.now().format(formatterYear))));
 		Double valorTaxaMinAgua = (Double.valueOf(parametrosSistemaRepository.findValorParametro(ParametrosSistema.VALOR_TAXA_MIN_AGUA.toString())));
@@ -76,18 +77,28 @@ public class BoletoBuilder {
 
 		int mesAtual = LocalDate.now().getMonth().getValue();
 		int anoAtual = LocalDate.now().getYear();
-		CobrancaExtra cobrancaExtra = cobrancaExtraService.getCobrancaExtraByIdUnidadeAndMesReferencia(usuario.getUnidade(), mesAtual, anoAtual);
+		List<CobrancaExtra> cobrancasExtras = cobrancaExtraService.getCobrancasExtrasParaUnidadeEMes(usuario.getUnidade(), mesAtual, anoAtual);
 
 
 		Mensagem mensagem = new Mensagem();
 		mensagem.setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
-		if(cobrancaExtra != null && cobrancaExtra.getValorCobranca()>0){
-			String linha_2 = "TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio);
-			linha_2 = linha_2 + " + "+ cobrancaExtra.getDescricao()+ " " + NumberFormat.getCurrencyInstance(ptBr).format(cobrancaExtra.getValorCobranca());
-			mensagem.setLinha2(linha_2);
-
-			valorCondominioMaisMorador = valorCondominioMaisMorador+cobrancaExtra.getValorCobranca();
-			valorCondominio1Morador = valorCondominio1Morador+cobrancaExtra.getValorCobranca();
+		if(cobrancasExtras != null && !cobrancasExtras.isEmpty()){
+			StringBuilder linha2Builder = new StringBuilder("TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio));
+			for (CobrancaExtra cob : cobrancasExtras) {
+				if (cob.getValorCobranca() != null && cob.getValorCobranca() > 0) {
+					boolean isDesconto = "DESCONTO".equalsIgnoreCase(cob.getTipoOperacao());
+					if (isDesconto) {
+						linha2Builder.append(" - ").append(cob.getDescricao()).append(" ").append(NumberFormat.getCurrencyInstance(ptBr).format(cob.getValorCobranca()));
+						valorCondominioMaisMorador -= cob.getValorCobranca();
+						valorCondominio1Morador -= cob.getValorCobranca();
+					} else {
+						linha2Builder.append(" + ").append(cob.getDescricao()).append(" ").append(NumberFormat.getCurrencyInstance(ptBr).format(cob.getValorCobranca()));
+						valorCondominioMaisMorador += cob.getValorCobranca();
+						valorCondominio1Morador += cob.getValorCobranca();
+					}
+				}
+			}
+			mensagem.setLinha2(linha2Builder.toString());
 
 		}else {
 			mensagem.setLinha2("TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio));

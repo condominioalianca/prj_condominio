@@ -32,6 +32,11 @@ public class CobrancaExtraService {
         return cobrancaExtraRepository.findByidUnidadeAndMesReferenciaAndAnoReferencia(unidade, (long) mesReferencia, (long) anoReferencia);
     }
 
+    public List<CobrancaExtra> getCobrancasExtrasParaUnidadeEMes(Unidade unidade, int mesReferencia, int anoReferencia) {
+        LOGGER.info("Buscando Cobrancas Extras para Unidade: {}, Mes/Ano: {}/{}", unidade != null ? unidade.getIdUnidade() : null, mesReferencia, anoReferencia);
+        return cobrancaExtraRepository.findCobrancasExtrasParaUnidadeEMes(unidade, (long) mesReferencia, (long) anoReferencia);
+    }
+
     @Transactional(readOnly = true)
     public List<CobrancaExtraDTO> findAll() {
         List<CobrancaExtra> list = cobrancaExtraRepository.findAll();
@@ -48,7 +53,8 @@ public class CobrancaExtraService {
     @Transactional
     public CobrancaExtraDTO save(CobrancaExtraDTO dto) {
         Unidade unidade = null;
-        if (dto.getIdUnidade() != null) {
+        String tipoAbrangencia = dto.getTipoAbrangencia() != null ? dto.getTipoAbrangencia() : "UNIDADE";
+        if ("UNIDADE".equals(tipoAbrangencia) && dto.getIdUnidade() != null && dto.getIdUnidade() > 0) {
             unidade = unidadeRepository.findById(dto.getIdUnidade())
                     .orElseThrow(() -> new ResourceNotFoundException("Unidade nao encontrada para o ID: " + dto.getIdUnidade()));
         }
@@ -62,8 +68,9 @@ public class CobrancaExtraService {
         CobrancaExtra entity = cobrancaExtraRepository.findById(dto.getIdCobrancaExtra())
                 .orElseThrow(() -> new ResourceNotFoundException("Cobranca Extra nao encontrada para o ID: " + dto.getIdCobrancaExtra()));
         
+        String tipoAbrangencia = dto.getTipoAbrangencia() != null ? dto.getTipoAbrangencia() : "UNIDADE";
         Unidade unidade = null;
-        if (dto.getIdUnidade() != null) {
+        if ("UNIDADE".equals(tipoAbrangencia) && dto.getIdUnidade() != null && dto.getIdUnidade() > 0) {
             unidade = unidadeRepository.findById(dto.getIdUnidade())
                     .orElseThrow(() -> new ResourceNotFoundException("Unidade nao encontrada para o ID: " + dto.getIdUnidade()));
         }
@@ -73,7 +80,10 @@ public class CobrancaExtraService {
         entity.setMesReferencia(dto.getMesReferencia());
         entity.setAnoReferencia(dto.getAnoReferencia());
         entity.setDescricao(dto.getDescricao());
-        entity.setUnidade(unidade);
+        entity.setTipoOperacao(dto.getTipoOperacao() != null ? dto.getTipoOperacao() : "ACRESCIMO");
+        entity.setRecorrente(dto.getRecorrente() != null ? dto.getRecorrente() : false);
+        entity.setTipoAbrangencia(tipoAbrangencia);
+        entity.setUnidade("GERAL".equals(tipoAbrangencia) ? null : unidade);
         
         entity = cobrancaExtraRepository.save(entity);
         return builder.entityToDto(entity);
