@@ -38,10 +38,10 @@ public class CobrancaExtra {
     @Column(name = "DT_INCLUSAO",columnDefinition = "TIMESTAMP")
     private LocalDate dtInclusao;
 
-    @Column(name = "MES_REFERENCIA")
+    @Column(name = "MES_REFERENCIA", nullable = true)
     private Long mesReferencia;
 
-    @Column(name = "ANO_REFERENCIA")
+    @Column(name = "ANO_REFERENCIA", nullable = true)
     private Long anoReferencia;
 
     @Column(name = "DESCRICAO")

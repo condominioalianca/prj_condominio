@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,18 @@ public class CobrancaExtraService {
     }
 
     public List<CobrancaExtra> getCobrancasExtrasParaUnidadeEMes(Unidade unidade, int mesReferencia, int anoReferencia) {
-        LOGGER.info("Buscando Cobrancas Extras para Unidade: {}, Mes/Ano: {}/{}", unidade != null ? unidade.getIdUnidade() : null, mesReferencia, anoReferencia);
-        return cobrancaExtraRepository.findCobrancasExtrasParaUnidadeEMes(unidade, (long) mesReferencia, (long) anoReferencia);
+        LOGGER.info("Buscando Cobrancas Extras Recorrentes e Pontuais ({}/{}) para Unidade: {}", mesReferencia, anoReferencia, unidade != null ? unidade.getIdUnidade() : null);
+        List<CobrancaExtra> recorrentes = cobrancaExtraRepository.findRecorrentesParaUnidade(unidade);
+        List<CobrancaExtra> pontuais = cobrancaExtraRepository.findPontuaisParaUnidadeEMes(unidade, (long) mesReferencia, (long) anoReferencia);
+        
+        List<CobrancaExtra> result = new ArrayList<>();
+        if (recorrentes != null) {
+            result.addAll(recorrentes);
+        }
+        if (pontuais != null) {
+            result.addAll(pontuais);
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)

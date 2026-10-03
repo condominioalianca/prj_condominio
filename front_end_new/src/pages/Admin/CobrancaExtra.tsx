@@ -17,7 +17,7 @@ const CobrancaExtra: React.FC = () => {
   const [tipoAbrangencia, setTipoAbrangencia] = useState<'GERAL' | 'UNIDADE'>('UNIDADE');
   const [recorrente, setRecorrente] = useState<boolean>(false);
   const [valorCobranca, setValorCobranca] = useState<number>(0);
-  const [mesReferencia, setMesReferencia] = useState<number>(1);
+  const [mesReferencia, setMesReferencia] = useState<number>(new Date().getMonth() + 1);
   const [anoReferencia, setAnoReferencia] = useState<number>(new Date().getFullYear());
   const [descricao, setDescricao] = useState<string>('');
   const [selectedUnidadeId, setSelectedUnidadeId] = useState<number>(-1);
@@ -59,10 +59,11 @@ const CobrancaExtra: React.FC = () => {
     setEditingCobranca(cobranca);
     setTipoOperacao(cobranca.tipoOperacao || 'ACRESCIMO');
     setTipoAbrangencia(cobranca.tipoAbrangencia || (cobranca.idUnidade ? 'UNIDADE' : 'GERAL'));
-    setRecorrente(cobranca.recorrente ?? false);
+    const isRec = cobranca.recorrente ?? false;
+    setRecorrente(isRec);
     setValorCobranca(cobranca.valorCobranca);
-    setMesReferencia(cobranca.mesReferencia);
-    setAnoReferencia(cobranca.anoReferencia || new Date().getFullYear());
+    setMesReferencia(cobranca.mesReferencia ?? (new Date().getMonth() + 1));
+    setAnoReferencia(cobranca.anoReferencia ?? new Date().getFullYear());
     setDescricao(cobranca.descricao);
     setSelectedUnidadeId(cobranca.idUnidade ?? -1);
     setModalOpen(true);
@@ -80,8 +81,8 @@ const CobrancaExtra: React.FC = () => {
         idCobrancaExtra: editingCobranca ? editingCobranca.idCobrancaExtra : null,
         valorCobranca,
         dtInclusao: editingCobranca ? editingCobranca.dtInclusao : new Date().toISOString().split('T')[0],
-        mesReferencia,
-        anoReferencia,
+        mesReferencia: recorrente ? null : mesReferencia,
+        anoReferencia: recorrente ? null : anoReferencia,
         descricao,
         idUnidade: tipoAbrangencia === 'GERAL' ? null : selectedUnidadeId,
         tipoOperacao,
@@ -174,6 +175,7 @@ const CobrancaExtra: React.FC = () => {
                   {cobrancas.length > 0 ? (
                     cobrancas.map((cob) => {
                       const isDesconto = cob.tipoOperacao === 'DESCONTO';
+                      const isRecorrente = cob.recorrente || !cob.mesReferencia;
                       return (
                         <tr key={cob.idCobrancaExtra}>
                           <td>{cob.idCobrancaExtra}</td>
@@ -186,7 +188,7 @@ const CobrancaExtra: React.FC = () => {
                           </td>
                           <td className="fw-semibold">{getAbrangenciaBadge(cob)}</td>
                           <td>
-                            {cob.recorrente ? (
+                            {isRecorrente ? (
                               <span className="badge bg-info text-dark d-inline-flex align-items-center gap-1">
                                 <FaSyncAlt className="small" /> Sim
                               </span>
@@ -194,7 +196,13 @@ const CobrancaExtra: React.FC = () => {
                               <span className="badge bg-light text-muted border">Não</span>
                             )}
                           </td>
-                          <td>{String(cob.mesReferencia).padStart(2, '0')}/{cob.anoReferencia || new Date().getFullYear()}</td>
+                          <td>
+                            {isRecorrente ? (
+                              <span className="text-muted fst-italic">Recorrente (Mensal)</span>
+                            ) : (
+                              `${String(cob.mesReferencia).padStart(2, '0')}/${cob.anoReferencia}`
+                            )}
+                          </td>
                           <td>{cob.descricao}</td>
                           <td className={`fw-bold ${isDesconto ? 'text-success' : 'text-danger'}`}>
                             {isDesconto ? '-' : '+'} R$ {cob.valorCobranca.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -279,6 +287,20 @@ const CobrancaExtra: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Flag Recorrente no topo, logo acima dos campos de valor/data */}
+                  <div className="form-check form-switch mb-3 p-3 bg-light rounded border ms-0">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="recorrenteCheck"
+                      checked={recorrente}
+                      onChange={(e) => setRecorrente(e.target.checked)}
+                    />
+                    <label className="form-check-label fw-semibold cursor-pointer" htmlFor="recorrenteCheck">
+                      Cobrança Recorrente (Aplica-se mensalmente aos boletos sem mês fixo)
+                    </label>
+                  </div>
+
                   {tipoAbrangencia === 'UNIDADE' && (
                     <div className="mb-3">
                       <label className="form-label form-label-custom">Unidade Associada</label>
@@ -311,13 +333,18 @@ const CobrancaExtra: React.FC = () => {
                       />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label form-label-custom">Mês Ref.</label>
+                      <label className="form-label form-label-custom">
+                        Mês Ref. {recorrente && <span className="text-muted small">(Recorrente)</span>}
+                      </label>
                       <select 
                         className="form-select form-control-custom"
-                        value={mesReferencia}
+                        value={recorrente ? '' : mesReferencia}
                         onChange={(e) => setMesReferencia(Number(e.target.value))}
+                        disabled={recorrente}
+                        required={!recorrente}
                       >
-                        {Array.from({ length: 12 }, (_, i) => (
+                        {recorrente && <option value="">Recorrente (Todos os Mêses)</option>}
+                        {!recorrente && Array.from({ length: 12 }, (_, i) => (
                           <option key={i + 1} value={i + 1}>
                             {String(i + 1).padStart(2, '0')}
                           </option>
@@ -325,13 +352,17 @@ const CobrancaExtra: React.FC = () => {
                       </select>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label form-label-custom">Ano Ref.</label>
+                      <label className="form-label form-label-custom">
+                        Ano Ref. {recorrente && <span className="text-muted small">(Recorrente)</span>}
+                      </label>
                       <input 
                         type="number" 
                         className="form-control form-control-custom" 
-                        value={anoReferencia} 
+                        value={recorrente ? '' : anoReferencia} 
                         onChange={(e) => setAnoReferencia(Number(e.target.value))} 
-                        required 
+                        disabled={recorrente}
+                        required={!recorrente}
+                        placeholder={recorrente ? 'Recorrente' : ''}
                       />
                     </div>
                   </div>
@@ -346,19 +377,6 @@ const CobrancaExtra: React.FC = () => {
                       onChange={(e) => setDescricao(e.target.value)} 
                       required 
                     />
-                  </div>
-
-                  <div className="form-check form-switch mt-3">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="recorrenteCheck"
-                      checked={recorrente}
-                      onChange={(e) => setRecorrente(e.target.checked)}
-                    />
-                    <label className="form-check-label fw-semibold" htmlFor="recorrenteCheck">
-                      Cobrança Recorrente (Aplica-se mensalmente aos boletos)
-                    </label>
                   </div>
                 </div>
                 <div className="modal-footer modal-footer-custom justify-content-end gap-2">

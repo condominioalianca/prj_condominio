@@ -15,10 +15,14 @@ public interface CobrancaExtraRepository extends JpaRepository<CobrancaExtra,Lon
     @Query(value = "Select ce FROM CobrancaExtra ce where ce.unidade = :uni AND ce.mesReferencia = :mesReferencia AND ce.anoReferencia = :anoReferencia")
     CobrancaExtra findByidUnidadeAndMesReferenciaAndAnoReferencia(Unidade uni, Long mesReferencia, Long anoReferencia);
 
-    @Query(value = "SELECT ce FROM CobrancaExtra ce WHERE " +
+    @Query(value = "SELECT ce FROM CobrancaExtra ce WHERE ce.recorrente = true AND " +
+           "(ce.unidade = :uni OR ce.tipoAbrangencia = 'GERAL' OR ce.unidade IS NULL)")
+    List<CobrancaExtra> findRecorrentesParaUnidade(@Param("uni") Unidade uni);
+
+    @Query(value = "SELECT ce FROM CobrancaExtra ce WHERE (ce.recorrente = false OR ce.recorrente IS NULL) AND " +
            "(ce.unidade = :uni OR ce.tipoAbrangencia = 'GERAL' OR ce.unidade IS NULL) AND " +
-           "((ce.mesReferencia = :mesReferencia AND ce.anoReferencia = :anoReferencia) OR ce.recorrente = true)")
-    List<CobrancaExtra> findCobrancasExtrasParaUnidadeEMes(
+           "ce.mesReferencia = :mesReferencia AND ce.anoReferencia = :anoReferencia")
+    List<CobrancaExtra> findPontuaisParaUnidadeEMes(
             @Param("uni") Unidade uni,
             @Param("mesReferencia") Long mesReferencia,
             @Param("anoReferencia") Long anoReferencia);

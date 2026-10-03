@@ -139,8 +139,8 @@ export interface ICobrancaExtra {
   idCobrancaExtra: number | null;
   valorCobranca: number;
   dtInclusao: string | null;
-  mesReferencia: number;
-  anoReferencia: number;
+  mesReferencia: number | null;
+  anoReferencia: number | null;
   descricao: string;
   idUnidade: number | null;
   tipoOperacao?: 'ACRESCIMO' | 'DESCONTO';
