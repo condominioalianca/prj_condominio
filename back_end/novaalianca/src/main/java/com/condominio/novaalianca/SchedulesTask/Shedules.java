@@ -126,7 +126,7 @@ public class Shedules {
     }
 
 //    CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-@Scheduled(cron = "${cron.schedule.envia-email:10 */2 21 8 * *}")
+    @Scheduled(cron = "${cron.schedule.envia-email:10 */2 21 8 * *}")
     public void enviaEmail() throws Exception {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();

@@ -10,7 +10,8 @@ import {
   FaFileInvoiceDollar, 
   FaExchangeAlt, 
   FaCogs, 
-  FaHome 
+  FaHome,
+  FaRedo
 } from 'react-icons/fa';
 
 interface SidebarProps {
@@ -109,6 +110,16 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                       <FaExchangeAlt />
                       <span>Conciliação</span>
+                    </NavLink>
+                  </li>
+                  <li className="sidebar-menu-item">
+                    <NavLink 
+                      to="/admin/reprocessamento" 
+                      className={({ isActive }) => `sidebar-menu-link ${isActive ? 'active' : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <FaRedo />
+                      <span>Reprocessamento</span>
                     </NavLink>
                   </li>
                 </>

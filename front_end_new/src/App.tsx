@@ -17,6 +17,7 @@ import ConciliacaoDetalhe from './pages/Admin/ConciliacaoDetalhe';
 import ParametrosSistema from './pages/Admin/ParametrosSistema';
 import ParametrosPerfis from './pages/Admin/ParametrosPerfis';
 import CobrancaExtra from './pages/Admin/CobrancaExtra';
+import Reprocessamento from './pages/Admin/Reprocessamento';
 
 // Componente para proteger rotas baseadas em Papel/Role
 interface RoleRouteProps {
@@ -107,6 +108,14 @@ const App: React.FC = () => {
               element={
                 <RoleRoute adminOrSindicoRequired>
                   <Empresas />
+                </RoleRoute>
+              } 
+            />
+            <Route 
+              path="admin/reprocessamento" 
+              element={
+                <RoleRoute adminOrSindicoRequired>
+                  <Reprocessamento />
                 </RoleRoute>
               } 
             />
