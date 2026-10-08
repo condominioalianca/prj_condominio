@@ -46,6 +46,7 @@ public class BoletoPdfComposerService {
 
     private final ConciliacaoRepository conciliacaoRepository;
     private final RelatorioConciliacaoService relatorioConciliacaoService;
+    private final com.condominio.novaalianca.banking.services.ConciliacaoService conciliacaoService;
     private final ParametrosSistemaRepository parametrosSistemaRepository;
     private final CobrancaExtraService cobrancaExtraService;
 
@@ -84,10 +85,13 @@ public class BoletoPdfComposerService {
         // 2. Gerar PDF da Folha de Descritivo de Taxas (Página 2)
         byte[] descritivoBytes = gerarDescritivoTaxasPdf(usuario, dataReferencia);
 
-        // 3. Obter PDF da Conciliação (Páginas 3+)
-        byte[] pdfConciliacaoBytes = conciliacaoBatida.getArquivoPdf();
-        if (pdfConciliacaoBytes == null || pdfConciliacaoBytes.length == 0) {
-            pdfConciliacaoBytes = relatorioConciliacaoService.gerarPdfConciliacao(conciliacaoBatida, null);
+        // 3. Obter PDF Dinâmico e Completo da Conciliação com todas as transações (Páginas 3+)
+        byte[] pdfConciliacaoBytes = null;
+        try {
+            pdfConciliacaoBytes = conciliacaoService.exportarPdfDinamico(conciliacaoBatida.getId());
+        } catch (Exception e) {
+            log.warn("Erro ao gerar PDF dinâmico da conciliação ID {}, utilizando fallback salvo: {}", conciliacaoBatida.getId(), e.getMessage());
+            pdfConciliacaoBytes = conciliacaoBatida.getArquivoPdf();
         }
 
         // 4. Juntar os 3 PDFs em um único arquivo
@@ -192,7 +196,7 @@ public class BoletoPdfComposerService {
                 for (CobrancaExtra cob : cobrancasExtras) {
                     if (cob.getValorCobranca() != null && cob.getValorCobranca() > 0) {
                         boolean isDesconto = "DESCONTO".equalsIgnoreCase(cob.getTipoOperacao());
-                        String desc = (isDesconto ? "[Desconto] " : "[Cobrança Extra] ") + cob.getDescricao();
+                        String desc = isDesconto ? "[Desconto] " + cob.getDescricao() : cob.getDescricao();
                         double v = cob.getValorCobranca();
                         if (isDesconto) {
                             valorTotal -= v;
