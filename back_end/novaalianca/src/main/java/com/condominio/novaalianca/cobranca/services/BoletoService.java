@@ -69,6 +69,8 @@ public class BoletoService{
 
     private final InterService interService;
 
+    private final BoletoPdfComposerService boletoPdfComposerService;
+
     public TokenResponseDTO devolvetoken (RequestBoleto requestBoleto) throws IOException {
         return tokenService.getToken(requestBoleto);
     }
@@ -147,33 +149,53 @@ public class BoletoService{
         return boletoBuilder.boletoInter(usuario);
     }
     public void enviaBoletosPorEmail(LocalDate dtInicio, LocalDate dtFim) throws Exception {
-
         LOGGER.info("MES ATUAL {}", dateUtils.mesAtual());
-        List<BoletoNovaAlianca> list = boletoRepository.findAllByMesEmissaoAndNaoEnviadoByEmail(dtInicio,dtFim);
+        List<BoletoNovaAlianca> list = boletoRepository.findAllByMesEmissaoAndNaoEnviadoByEmail(dtInicio, dtFim);
 
-        if(list.size()>0){
-            EmailDTO emailDTO = new EmailDTO();
-            LOGGER.info("Enviando Boleto Para {}" , list.get(0).getUsuario().getNomeUsuario());
-            emailDTO.setNossoNumero(list.get(0).getNossoNumero());
-            byte[] decoder = list.get(0).getArquivopdf();
-            if (decoder == null || decoder.length == 0) {
-                LOGGER.info("PDF não encontrado localmente. Buscando no Banco Inter para o código: {}", list.get(0).getCodSolicitacao());
-                decoder = Base64.getDecoder().decode(this.downloadPDF(list.get(0).getCodSolicitacao(), "PRODUCAO"));
-            } else {
-                LOGGER.info("PDF do boleto carregado diretamente da base local.");
+        if (list != null && !list.isEmpty()) {
+            for (BoletoNovaAlianca boleto : list) {
+                Usuario usuario = boleto.getUsuario();
+                LOGGER.info("Processando envio de boleto para {}", usuario != null ? usuario.getNomeUsuario() : "N/A");
+
+                byte[] pdfBoletoInterBytes = boleto.getArquivopdf();
+                if (pdfBoletoInterBytes == null || pdfBoletoInterBytes.length == 0) {
+                    LOGGER.info("PDF do boleto não encontrado localmente. Buscando no Banco Inter para o código: {}", boleto.getCodSolicitacao());
+                    try {
+                        pdfBoletoInterBytes = Base64.getDecoder().decode(this.downloadPDF(boleto.getCodSolicitacao(), "PRODUCAO"));
+                    } catch (Exception e) {
+                        LOGGER.error("Não foi possível baixar o PDF do boleto Inter {}: {}", boleto.getCodSolicitacao(), e.getMessage());
+                    }
+                } else {
+                    LOGGER.info("PDF do boleto carregado da base local.");
+                }
+
+                try {
+                    // Mescla o PDF: Boleto + Descritivo de Taxas + Conciliação (Somente se status BATIDO)
+                    byte[] pdfMesclado = boletoPdfComposerService.comporPdfCompleto(
+                            usuario,
+                            boleto,
+                            pdfBoletoInterBytes,
+                            dtFim != null ? dtFim : LocalDate.now()
+                    );
+
+                    EmailDTO emailDTO = new EmailDTO();
+                    emailDTO.setNossoNumero(boleto.getNossoNumero());
+                    emailDTO.setAnexo(pdfMesclado);
+                    emailDTO.setNumeroUnidade(usuario != null && usuario.getUnidade() != null ? usuario.getUnidade().getNumeroUnidade() : "");
+                    emailDTO.setTo(usuario != null ? usuario.getTxEmail() : "");
+
+                    emailService.sendMail(emailDTO);
+
+                    boleto.setEmailEnviado(Boolean.TRUE);
+                    boletoRepository.save(boleto);
+                    LOGGER.info("Boleto com PDF mesclado enviado com sucesso para {}", usuario != null ? usuario.getNomeUsuario() : "N/A");
+                } catch (com.condominio.novaalianca.services.exceptions.ConciliacaoPendenteException e) {
+                    LOGGER.warn("ENVIO DE E-MAIL CANCELADO/BLOQUEADO: {}", e.getMessage());
+                } catch (Exception e) {
+                    LOGGER.error("Erro ao enviar e-mail de boleto para {}: {}", usuario != null ? usuario.getNomeUsuario() : "N/A", e.getMessage(), e);
+                }
             }
-
-            emailDTO.setAnexo(decoder);
-
-            emailDTO.setNumeroUnidade(list.get(0).getUsuario().getUnidade().getNumeroUnidade());
-            emailDTO.setTo(list.get(0).getUsuario().getTxEmail());
-            emailService.sendMail(emailDTO);
-
-            list.get(0).setEmailEnviado(Boolean.TRUE);
-            boletoRepository.save(list.get(0));
-            LOGGER.info("Boleto enviado Para {}" , list.get(0).getUsuario().getNomeUsuario());
-
-        }else {
+        } else {
             LOGGER.info("Sem Emails para Enviar");
         }
     }

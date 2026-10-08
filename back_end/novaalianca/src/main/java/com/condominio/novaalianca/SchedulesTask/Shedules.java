@@ -49,7 +49,7 @@ public class Shedules {
 
     private final BoletoBuilder boletoBuilder;
     //CRON = (SEGUNDO MINUTO HORA DIA MES DIAS_DA_SEMANA
-    @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 21 8 * *}")
+    @Scheduled(cron = "${cron.schedule.valida-envio:0 */4 21 6 * *}")
     public void validaEnviodDeBoletos() throws ParseException {
         LocalDate dtInicio = LocalDate.now().withDayOfMonth(1);
         LocalDate dtfim = LocalDate.now();

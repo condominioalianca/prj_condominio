@@ -81,43 +81,32 @@ public class BoletoBuilder {
 
 
 		Mensagem mensagem = new Mensagem();
-		mensagem.setLinha1("TAXA CONDOMINAL REFERENTE AO MÊS " + LocalDate.now().format(formatterSeuNumer));
+		mensagem.setLinha1("TAXA CONDOMINIAL REF. " + LocalDate.now().format(formatterSeuNumer));
+		mensagem.setLinha2("UNIDADE " + (usuario.getUnidade() != null ? usuario.getUnidade().getNumeroUnidade() : "") + " - VER DETALHAMENTO NO ANEXO");
+
 		if(cobrancasExtras != null && !cobrancasExtras.isEmpty()){
-			StringBuilder linha2Builder = new StringBuilder("TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio));
 			for (CobrancaExtra cob : cobrancasExtras) {
 				if (cob.getValorCobranca() != null && cob.getValorCobranca() > 0) {
 					boolean isDesconto = "DESCONTO".equalsIgnoreCase(cob.getTipoOperacao());
 					if (isDesconto) {
-						linha2Builder.append(" - ").append(cob.getDescricao()).append(" ").append(NumberFormat.getCurrencyInstance(ptBr).format(cob.getValorCobranca()));
 						valorCondominioMaisMorador -= cob.getValorCobranca();
 						valorCondominio1Morador -= cob.getValorCobranca();
 					} else {
-						linha2Builder.append(" + ").append(cob.getDescricao()).append(" ").append(NumberFormat.getCurrencyInstance(ptBr).format(cob.getValorCobranca()));
 						valorCondominioMaisMorador += cob.getValorCobranca();
 						valorCondominio1Morador += cob.getValorCobranca();
 					}
 				}
 			}
-			mensagem.setLinha2(linha2Builder.toString());
-
-		}else {
-			mensagem.setLinha2("TAXA CONDOMINNIO = " + NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio));
 		}
-		mensagem.setLinha3("TAXA MIN AGUA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaMinAgua));
-
 
 		Boleto boletoInter = new Boleto();
 		boletoInter.setSeuNumero(LocalDate.now().format(formatterSeuNumer) + usuario.getUnidade().getNumeroUnidade());
 		boletoInter.setDataVencimento(this.verificaFeriado(diaVencimento).toString());
 		boletoInter.setNumDiasAgenda(30);
 
-		if(usuario.getUnidade().getQtMorador()>1){
-			mensagem.setLinha4("ACRESCIMO 70% DA TAXA MIN (UNIDADE COM MAIS DE 1 MORADOR) = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorTaxaAguaAcrescimoSetentaPorCento));
-			mensagem.setLinha5("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominioMaisMorador));
+		if(usuario.getUnidade().getQtMorador() > 1){
 			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominioMaisMorador).setScale(2, java.math.RoundingMode.HALF_EVEN));
-
 		}else{
-			mensagem.setLinha4("VALOR TOTAL DA COBRANÇA = "+ NumberFormat.getCurrencyInstance(ptBr).format(valorCondominio1Morador));
 			boletoInter.setValorNominal(BigDecimal.valueOf(valorCondominio1Morador).setScale(2, java.math.RoundingMode.HALF_EVEN));
 		}
 

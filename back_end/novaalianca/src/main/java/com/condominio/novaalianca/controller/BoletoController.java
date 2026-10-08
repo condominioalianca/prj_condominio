@@ -22,6 +22,8 @@ import java.util.List;
 public class BoletoController {
 
     private final BoletoService service;
+    private final com.condominio.novaalianca.cobranca.services.BoletoPdfComposerService pdfComposerService;
+    private final com.condominio.novaalianca.services.UsuarioService usuarioService;
 
     @GetMapping
     public ResponseEntity<List<BoletoNovaAlianca>> findAll() {
@@ -31,6 +33,29 @@ public class BoletoController {
     @GetMapping("/{id}")
     public ResponseEntity<BoletoNovaAlianca> findById(@PathVariable Long id) {
         return ResponseEntity.ok().body(service.findById(id));
+    }
+
+    @GetMapping("/exemplo-pdf/{usuarioId}")
+    public ResponseEntity<byte[]> gerarPdfExemplo(@PathVariable Long usuarioId) throws Exception {
+        com.condominio.novaalianca.entities.Usuario usuario = usuarioService.findByIDEntity(usuarioId);
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+
+        // Gera folha de descritivo
+        byte[] descritivoPdf = pdfComposerService.gerarDescritivoTaxasPdf(usuario, hoje);
+
+        // Tenta buscar a conciliação do mês anterior se houver (mas sem bloquear visualização de exemplo se não houver)
+        byte[] pdfFinal = descritivoPdf;
+        try {
+            pdfFinal = pdfComposerService.comporPdfCompleto(usuario, null, null, hoje);
+        } catch (Exception e) {
+            // Caso ocorra o bloqueio no teste de exemplo, geramos apenas o descritivo para visualização
+            pdfFinal = descritivoPdf;
+        }
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=boleto_exemplo_unidade_" + (usuario.getUnidade() != null ? usuario.getUnidade().getNumeroUnidade() : "0") + ".pdf")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(pdfFinal);
     }
 
     @PostMapping("/save")
