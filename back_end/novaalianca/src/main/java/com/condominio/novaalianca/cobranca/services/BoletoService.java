@@ -199,6 +199,44 @@ public class BoletoService{
             LOGGER.info("Sem Emails para Enviar");
         }
     }
+
+    public void reenviarEmailBoleto(Long boletoId) throws Exception {
+        BoletoNovaAlianca boleto = boletoRepository.findById(boletoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Boleto não encontrado para o ID: " + boletoId));
+
+        Usuario usuario = boleto.getUsuario();
+        if (usuario == null) {
+            throw new IllegalArgumentException("O boleto não possui usuário associado.");
+        }
+
+        byte[] pdfBoletoInterBytes = boleto.getArquivopdf();
+        if (pdfBoletoInterBytes == null || pdfBoletoInterBytes.length == 0) {
+            if (boleto.getCodSolicitacao() != null) {
+                try {
+                    pdfBoletoInterBytes = Base64.getDecoder().decode(this.downloadPDF(boleto.getCodSolicitacao(), "PRODUCAO"));
+                } catch (Exception e) {
+                    LOGGER.error("Não foi possível baixar o PDF do boleto Inter {}: {}", boleto.getCodSolicitacao(), e.getMessage());
+                }
+            }
+        }
+
+        LocalDate dataRef = boleto.getDtEmissao() != null ? boleto.getDtEmissao() : LocalDate.now();
+        byte[] pdfMesclado = boletoPdfComposerService.comporPdfCompleto(usuario, boleto, pdfBoletoInterBytes, dataRef);
+
+        EmailDTO emailDTO = new EmailDTO();
+        emailDTO.setNossoNumero(boleto.getNossoNumero());
+        emailDTO.setAnexo(pdfMesclado);
+        emailDTO.setNumeroUnidade(usuario.getUnidade() != null ? usuario.getUnidade().getNumeroUnidade() : "");
+        emailDTO.setTo(usuario.getTxEmail());
+
+        emailService.sendMail(emailDTO);
+
+        boleto.setEmailEnviado(Boolean.TRUE);
+        boletoRepository.save(boleto);
+        LOGGER.info("E-mail de boleto reenviado com sucesso para a unidade {} ({})",
+                usuario.getUnidade() != null ? usuario.getUnidade().getNumeroUnidade() : "N/A",
+                usuario.getNomeUsuario());
+    }
     public BoletoNovaAlianca enriquecerBoleto(String codigoSolicitacao, String ambiente) {
         if (codigoSolicitacao == null || codigoSolicitacao.trim().isEmpty()) {
             throw new IllegalArgumentException("Código de solicitação inválido.");

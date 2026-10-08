@@ -3,7 +3,7 @@ import ReactApexChart from 'react-apexcharts';
 import { useAuth } from '../context/AuthContext';
 import { backEndService } from '../services/api';
 import type { IExtrato, IBoleto, ISaldo } from '../types';
-import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner, FaPiggyBank } from 'react-icons/fa';
+import { FaFilePdf, FaArrowUp, FaArrowDown, FaWallet, FaSpinner, FaPiggyBank, FaPaperPlane, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import type { ApexOptions } from 'apexcharts';
 
 const Dashboard: React.FC = () => {
@@ -16,6 +16,9 @@ const Dashboard: React.FC = () => {
   const [hasUnidade, setHasUnidade] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [loadingReenvio, setLoadingReenvio] = useState<{ [key: number]: boolean }>({});
+  const [alertMessage, setAlertMessage] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
 
   // Obter mês atual no formato YYYY-MM
   const getCurrentYearMonth = (): string => {
@@ -137,6 +140,26 @@ const Dashboard: React.FC = () => {
         console.error(err);
         alert('Erro ao tentar baixar o arquivo PDF.');
       }
+    }
+  };
+
+  const handleReenviarEmail = async (boleto: IBoleto): Promise<void> => {
+    try {
+      setLoadingReenvio((prev) => ({ ...prev, [boleto.id]: true }));
+      setAlertMessage(null);
+      const res = await backEndService.post<string>(`/boletos/${boleto.id}/reenviar-email`);
+
+      setAlertMessage({ type: 'success', text: res || `E-mail do boleto ${boleto.nossoNumero || ''} enviado com sucesso!` });
+
+      setBoletos((prev) =>
+        prev.map((b) => (b.id === boleto.id ? { ...b, emailEnviado: true } : b))
+      );
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = typeof err.response?.data === 'string' ? err.response.data : 'Erro ao reenviar e-mail do boleto.';
+      setAlertMessage({ type: 'danger', text: errMsg });
+    } finally {
+      setLoadingReenvio((prev) => ({ ...prev, [boleto.id]: false }));
     }
   };
 
@@ -354,6 +377,14 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
+      {alertMessage && (
+        <div className={`alert alert-${alertMessage.type} alert-dismissible fade show d-flex align-items-center gap-2 mb-4`} role="alert">
+          {alertMessage.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
+          <div>{alertMessage.text}</div>
+          <button type="button" className="btn-close" onClick={() => setAlertMessage(null)} aria-label="Close"></button>
+        </div>
+      )}
+
       {/* Cabeçalho do Dashboard com Filtro de Mês */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
@@ -517,6 +548,7 @@ const Dashboard: React.FC = () => {
                   <th>Emissão</th>
                   <th>Valor</th>
                   <th>Situação</th>
+                  {isAdminOrSindico() && <th>E-mail Enviado</th>}
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -543,22 +575,48 @@ const Dashboard: React.FC = () => {
                           {boleto.txSituacao || 'ABERTO'}
                         </span>
                       </td>
+                      {isAdminOrSindico() && (
+                        <td>
+                          {boleto.emailEnviado ? (
+                            <span className="badge bg-success">SIM</span>
+                          ) : (
+                            <span className="badge bg-warning text-dark">NÃO</span>
+                          )}
+                        </td>
+                      )}
                       <td>
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1"
-                          onClick={() => handleDownloadPdf(boleto)}
-                          title="Download PDF"
-                        >
-                          <FaFilePdf />
-                          <span className="d-none d-sm-inline">PDF</span>
-                        </button>
+                        <div className="d-flex align-items-center gap-1">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1"
+                            onClick={() => handleDownloadPdf(boleto)}
+                            title="Download PDF"
+                          >
+                            <FaFilePdf />
+                            <span className="d-none d-sm-inline">PDF</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
+                            onClick={() => handleReenviarEmail(boleto)}
+                            disabled={loadingReenvio[boleto.id]}
+                            title="Reenviar Boleto por E-mail"
+                          >
+                            {loadingReenvio[boleto.id] ? (
+                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            ) : (
+                              <FaPaperPlane />
+                            )}
+                            <span className="d-none d-sm-inline">Reenviar</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={isAdminOrSindico() ? 8 : 6} className="text-center py-4 text-muted">
+                    <td colSpan={isAdminOrSindico() ? 9 : 6} className="text-center py-4 text-muted">
                       Nenhum boleto encontrado no período correspondente.
                     </td>
                   </tr>

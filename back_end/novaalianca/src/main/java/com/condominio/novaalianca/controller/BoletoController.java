@@ -99,6 +99,18 @@ public class BoletoController {
                 .body(pdfFinal);
     }
 
+    @PostMapping("/{id}/reenviar-email")
+    public ResponseEntity<String> reenviarEmailBoleto(@PathVariable Long id) {
+        try {
+            service.reenviarEmailBoleto(id);
+            return ResponseEntity.ok("E-mail do boleto reenviado com sucesso!");
+        } catch (com.condominio.novaalianca.services.exceptions.ConciliacaoPendenteException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro ao reenviar e-mail: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/save")
     public ResponseEntity<BoletoNovaAlianca> save(@RequestBody BoletoNovaAlianca entity) {
         return new ResponseEntity<>(service.save(entity), HttpStatus.CREATED);
