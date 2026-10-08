@@ -94,24 +94,49 @@ const Dashboard: React.FC = () => {
     fetchData();
   }, [isAdminOrSindico, hasPerfilAtrelado, user]);
 
-  // Função auxiliar de baixar PDF a partir de base64
-  const handleDownloadPdf = (base64String: string | null, nossoNumero: string): void => {
-    if (!base64String) {
-      alert('Arquivo PDF não disponível para este boleto.');
-      return;
-    }
-
-    try {
-      const linkSource = `data:application/pdf;base64,${base64String}`;
-      const downloadLink = document.createElement('a');
-      const fileName = `Boleto_${nossoNumero}.pdf`;
-      
-      downloadLink.href = linkSource;
-      downloadLink.download = fileName;
-      downloadLink.click();
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao tentar baixar o arquivo PDF.');
+  // Função auxiliar de baixar PDF:
+  // - Para Admin/Síndico: obtém o PDF completo mesclado (Boleto + Descritivo + Conciliação)
+  // - Para Morador comum: baixa o PDF do boleto
+  const handleDownloadPdf = async (boleto: IBoleto): Promise<void> => {
+    if (isAdminOrSindico()) {
+      try {
+        const response = await backEndService.get<ArrayBuffer>(`/boletos/${boleto.id}/pdf-completo`, {
+          responseType: 'arraybuffer',
+        });
+        const blob = new Blob([response], { type: 'application/pdf' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = `Boleto_Completo_${boleto.nossoNumero || boleto.id}.pdf`;
+        downloadLink.click();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (err) {
+        console.error('Erro ao baixar PDF completo:', err);
+        if (boleto.arquivopdf) {
+          const linkSource = `data:application/pdf;base64,${boleto.arquivopdf}`;
+          const downloadLink = document.createElement('a');
+          downloadLink.href = linkSource;
+          downloadLink.download = `Boleto_${boleto.nossoNumero}.pdf`;
+          downloadLink.click();
+        } else {
+          alert('Erro ao tentar baixar o arquivo PDF completo.');
+        }
+      }
+    } else {
+      if (!boleto.arquivopdf) {
+        alert('Arquivo PDF não disponível para este boleto.');
+        return;
+      }
+      try {
+        const linkSource = `data:application/pdf;base64,${boleto.arquivopdf}`;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = linkSource;
+        downloadLink.download = `Boleto_${boleto.nossoNumero}.pdf`;
+        downloadLink.click();
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao tentar baixar o arquivo PDF.');
+      }
     }
   };
 
@@ -522,7 +547,7 @@ const Dashboard: React.FC = () => {
                         <button
                           type="button"
                           className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1"
-                          onClick={() => handleDownloadPdf(boleto.arquivopdf, boleto.nossoNumero)}
+                          onClick={() => handleDownloadPdf(boleto)}
                           title="Download PDF"
                         >
                           <FaFilePdf />

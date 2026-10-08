@@ -58,6 +58,47 @@ public class BoletoController {
                 .body(pdfFinal);
     }
 
+    @GetMapping("/{id}/pdf-completo")
+    public ResponseEntity<byte[]> baixarPdfCompleto(@PathVariable Long id) {
+        BoletoNovaAlianca boleto = service.findById(id);
+        com.condominio.novaalianca.entities.Usuario usuario = boleto.getUsuario();
+        java.time.LocalDate dataRef = boleto.getDtEmissao() != null ? boleto.getDtEmissao() : java.time.LocalDate.now();
+
+        byte[] pdfBoletoInterBytes = boleto.getArquivopdf();
+        if (pdfBoletoInterBytes == null || pdfBoletoInterBytes.length == 0) {
+            try {
+                if (boleto.getCodSolicitacao() != null) {
+                    pdfBoletoInterBytes = java.util.Base64.getDecoder().decode(service.downloadPDF(boleto.getCodSolicitacao(), "PRODUCAO"));
+                }
+            } catch (Exception e) {
+                // Ignore download failure
+            }
+        }
+
+        byte[] pdfFinal;
+        try {
+            pdfFinal = pdfComposerService.comporPdfCompleto(usuario, boleto, pdfBoletoInterBytes, dataRef);
+        } catch (Exception e) {
+            // Se a conciliação do mês anterior não estiver BATIDA, gera o Boleto Inter + Descritivo de Taxas
+            byte[] descritivoBytes = pdfComposerService.gerarDescritivoTaxasPdf(usuario, dataRef);
+            java.util.List<byte[]> listaPdfs = new java.util.ArrayList<>();
+            if (pdfBoletoInterBytes != null && pdfBoletoInterBytes.length > 0) {
+                listaPdfs.add(pdfBoletoInterBytes);
+            }
+            if (descritivoBytes != null && descritivoBytes.length > 0) {
+                listaPdfs.add(descritivoBytes);
+            }
+            pdfFinal = pdfComposerService.juntarPdfs(listaPdfs);
+        }
+
+        String fileName = "Boleto_Completo_" + (boleto.getNossoNumero() != null ? boleto.getNossoNumero() : id) + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + fileName)
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(pdfFinal);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<BoletoNovaAlianca> save(@RequestBody BoletoNovaAlianca entity) {
         return new ResponseEntity<>(service.save(entity), HttpStatus.CREATED);

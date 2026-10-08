@@ -454,25 +454,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   OVERLAY DO SIDEBAR (mobile) — oculto por padrão via CSS
+   OVERLAY DO SIDEBAR (mobile) — oculto por padrão no desktop
    ═══════════════════════════════════════════════════════════ */
 .sidebar-overlay {
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 999;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-}
-.sidebar-overlay.active {
-  display: block;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVIDADE TABLET — colapsa sidebar automaticamente
+   RESPONSIVIDADE TABLET E MOBILE — overlay e sidebar colapsável
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 991.98px) {
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.active {
+    display: block;
+  }
+
   .sidebar-wrapper {
     position: fixed;
     left: 0;
